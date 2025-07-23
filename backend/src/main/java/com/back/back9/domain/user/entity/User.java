@@ -1,32 +1,37 @@
 package com.back.back9.domain.user.entity;
 
+import com.back.back9.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_users_username", columnList = "username")
+})
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class User {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+public class User extends BaseEntity {
 
     @Column(name = "user_login_id", nullable = false, unique = true)
     private String userLoginId;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String username;
 
-    @Column(name = "user_role", nullable = false)
-    private String role = "MEMBER";
-
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private UserRole role;
 
     @Column(nullable = false)
     private String password;
+
+    public enum UserRole {
+        MEMBER, ADMIN
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
 }
