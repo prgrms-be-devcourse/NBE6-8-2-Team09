@@ -6,10 +6,12 @@
 </head>
 <body>
 <h1>회원가입</h1>
+
 <div th:if="${error}" style="color:red;">
     <p th:text="${error}"></p>
 </div>
-<form th:action="@{/user/register}" method="post">
+
+<form th:action="@{/api/users/signup}" method="post">
     <div>
         <label>로그인 아이디:</label>
         <input type="text" name="userLoginId" required />
@@ -28,7 +30,6 @@
     </div>
     <button type="submit">회원가입</button>
 </form>
-
 
 <div style="margin-top: 15px;">
     <a th:href="@{/user/login}">
