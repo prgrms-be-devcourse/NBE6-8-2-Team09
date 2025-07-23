@@ -1,8 +1,9 @@
 name: CI‑Test
 
 on:
-  pull_request:           # PR 열리거나 커밋될 때
-  push:                   # main‧develop 직푸시도 검사
+  push:                      # 브랜치에 푸시될 때마다
+    branches: [ "*" ]        # → 모든 브랜치, 또는 'feature/**' 등 패턴 지정
+  pull_request:              # PR 올라오면 한 번 더 보증
     branches: [ main, develop ]
 
 jobs:
