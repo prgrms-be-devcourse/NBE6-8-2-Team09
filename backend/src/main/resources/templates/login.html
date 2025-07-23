@@ -1,22 +1,60 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
     <meta charset="UTF-8" />
     <title>로그인</title>
 </head>
 <body>
 <h1>로그인</h1>
-<form th:action="@{/user/login}" method="post">
+<form id="loginForm">
     <div>
         <label>아이디:</label>
-        <input type="text" name="userLoginId" />
+        <input type="text" id="userLoginId" name="userLoginId" required />
     </div>
     <div>
         <label>비밀번호:</label>
-        <input type="password" name="password" />
+        <input type="password" id="password" name="password" required />
     </div>
     <button type="submit">로그인</button>
 </form>
-<button onclick="location.href='/user/register'">회원가입</button>
+
+<script>
+    const form = document.getElementById('loginForm');
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const userLoginId = document.getElementById('userLoginId').value;
+        const password = document.getElementById('password').value;
+
+        try {
+            const response = await fetch('/api/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ userLoginId, password }),
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                alert('로그인 실패: ' + (errorData.msg || '알 수 없는 오류'));
+                return;
+            }
+
+            const result = await response.json();
+            const token = result.data.token;
+
+            // 토큰을 로컬 스토리지나 쿠키에 저장 (로컬스토리지 예)
+            localStorage.setItem('jwtToken', token);
+
+            alert('로그인 성공!');
+            // 로그인 성공 후, 메인 페이지로 이동
+            window.location.href = '/main';
+
+        } catch (err) {
+            alert('서버 오류가 발생했습니다.');
+        }
+    });
+</script>
 </body>
 </html>
