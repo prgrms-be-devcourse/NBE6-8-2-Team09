@@ -15,13 +15,11 @@ jobs:
         include:
           # ────────────────────── Ubuntu
           - os: ubuntu-latest
-            shell: bash
             gradle_cmd: "./gradlew"
             report_path: "backend/build/reports/tests"
             domain_tasks: "testUser testExchange testTrade_log testWallet testCoin"
           # ────────────────────── Windows
           - os: windows-latest
-            shell: pwsh
             gradle_cmd: ".\\gradlew.bat"
             report_path: "backend\\build\\reports\\tests"
             domain_tasks: "testUser testExchange testTrade_log testWallet testCoin"
@@ -47,12 +45,9 @@ jobs:
 
     # 3) **단위 + 통합 + 도메인별 테스트** 한 번에 실행
     - name: Run unit, integration, and domain tests
-      run: |
-        ${{ matrix.gradle_cmd }} clean \
-          test integrationTest \
-          ${{ matrix.domain_tasks }}
+      run: ${{ matrix.gradle_cmd }} clean test integrationTest ${{ matrix.domain_tasks }}
       working-directory: backend
-      shell: ${{ matrix.shell }}
+      
 
     # 4) 리포트 업로드 (도메인·통합 포함 전체)
     - name: Upload Test Reports
