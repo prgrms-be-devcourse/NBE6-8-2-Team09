@@ -63,7 +63,7 @@ domains.forEach { d ->
 // ─────────────────────────────────────────────────────────────
 // 통합 테스트(integrationTest) 소스세트 & 태스크
 sourceSets.create("integrationTest") {
-    java.srcDir("src/integrationTest/kotlin")
+    java.srcDir("src/integrationTest/java")
     resources.srcDir("src/integrationTest/resources")
     compileClasspath += sourceSets["main"].output + configurations["testRuntimeClasspath"]
     runtimeClasspath += output + compileClasspath
