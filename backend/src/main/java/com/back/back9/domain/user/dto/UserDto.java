@@ -1,12 +1,21 @@
 package com.back.back9.domain.user.dto;
 
-import lombok.Data;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 public class UserDto {
-    private Integer id;
+
+    @NotBlank
     private String userLoginId;
+    @NotBlank
     private String username;
+    @NotBlank
     private String password;
+    @NotBlank
     private String confirmPassword;
+
+    private String token;
 }
