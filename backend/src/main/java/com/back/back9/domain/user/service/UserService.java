@@ -3,50 +3,50 @@ package com.back.back9.domain.user.service;
 import com.back.back9.domain.user.dto.UserDto;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.back.back9.global.rsData.RsData;
+import com.back.back9.global.security.SecurityUser;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class UserService implements UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    public boolean register(UserDto dto) {
-        if (userRepository.existsByUsername(dto.getUsername()) ||
-                userRepository.existsByUserLoginId(dto.getUserLoginId())) return false;
-        if (!dto.getPassword().equals(dto.getConfirmPassword())) return false;
+    public RsData<User> register(UserDto userDto) {
+        if (!userDto.getPassword().equals(userDto.getConfirmPassword())) {
+            return RsData.of("400", "비밀번호 확인이 일치하지 않습니다.");
+        }
+        if (userRepository.findByUserLoginId(userDto.getUserLoginId()).isPresent()) {
+            return new RsData<>("400-1", "이미 존재하는 아이디입니다.");
+        }
 
         User user = User.builder()
-                .userLoginId(dto.getUserLoginId())
-                .username(dto.getUsername())
-                .password(passwordEncoder.encode(dto.getPassword()))
-                .role("MEMBER")
-                .createdAt(LocalDateTime.now())
+                .userLoginId(userDto.getUserLoginId())
+                .username(userDto.getUsername())
+                .password(passwordEncoder.encode(userDto.getPassword()))
+                .role(User.UserRole.MEMBER)
                 .build();
 
         userRepository.save(user);
-        return true;
+        return new RsData<>("200-1", "회원가입이 완료되었습니다.", user);
     }
 
     @Override
     public UserDetails loadUserByUsername(String userLoginId) throws UsernameNotFoundException {
         User user = userRepository.findByUserLoginId(userLoginId)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + userLoginId));
+                .orElseThrow(() -> new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다: " + userLoginId));
 
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getUserLoginId())
-                .password(user.getPassword())
-                .authorities("ROLE_" + user.getRole())
-                .build();
+        return new SecurityUser(user);
+    }
+
+    public Optional<User> findByUserLoginId(String userLoginId) {
+        return userRepository.findByUserLoginId(userLoginId);
     }
 }
