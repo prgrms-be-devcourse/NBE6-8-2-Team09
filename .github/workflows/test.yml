@@ -5,6 +5,7 @@ on:
     branches: [ "*" ]        # → 모든 브랜치, 또는 'feature/**' 등 패턴 지정
   pull_request:              # PR 올라오면 한 번 더 보증
     branches: [ main, develop ]
+  workflow_dispatch:         # 수동으로 실행 가능
 
 jobs:
   test:
