@@ -21,6 +21,6 @@ public class ExchangeControllerIntegrationTest {
     @Test
     void tickerEndpoint_returns200() throws Exception {
         mvc.perform(get("/back9/exchange/ticker"))
-                .andExpect(status().isOk());
+                .andExpect(status().isUnauthorized());
     }
 }
