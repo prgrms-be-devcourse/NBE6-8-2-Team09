@@ -1,18 +1,8 @@
 package com.back.back9.domain.user.entity;
 
-import com.back.back9.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import lombok.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "users")
@@ -20,7 +10,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class User extends BaseEntity {
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
 
     @Column(name = "user_login_id", nullable = false, unique = true)
     private String userLoginId;
@@ -28,53 +21,12 @@ public class User extends BaseEntity {
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private UserRole role;
+    @Column(name = "user_role", nullable = false)
+    private String role = "MEMBER";
+
+    @Column(name = "created_at", nullable = false)
+    private LocalDateTime createdAt;
 
     @Column(nullable = false)
     private String password;
-
-    @Column(unique = true)
-    private String apiKey;
-
-    public User(String userLoginId, String username, String password) {
-        this.userLoginId = userLoginId;
-        this.username = username;
-        this.password = password;
-        this.role = UserRole.MEMBER;
-        this.apiKey = UUID.randomUUID().toString();
-    }
-
-    public enum UserRole {
-        MEMBER, ADMIN
-    }
-
-    public void modifyApiKey(String apiKey) {
-        this.apiKey = apiKey;
-    }
-
-    public void setRole(UserRole role) {
-        this.role = role;
-    }
-
-    public boolean isAdmin() {
-        return role == UserRole.ADMIN;
-    }
-
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<String> roles = new ArrayList<>();
-        if (isAdmin()) {
-            roles.add("ROLE_ADMIN");
-        } else {
-            roles.add("ROLE_MEMBER");
-        }
-
-        return roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .toList();
-    }
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

@@ -34,10 +34,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9")
-    implementation("org.java-websocket:Java-WebSocket:1.5.4")
-    implementation("org.springframework.boot:spring-boot-starter-data-redis")
-    implementation("org.postgresql:postgresql")
-    testImplementation("org.postgresql:postgresql")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
     compileOnly("org.projectlombok:lombok")
@@ -48,6 +44,8 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
+    implementation("org.java-websocket:Java-WebSocket:1.5.3")
 }
 
 tasks.withType<Test> {
