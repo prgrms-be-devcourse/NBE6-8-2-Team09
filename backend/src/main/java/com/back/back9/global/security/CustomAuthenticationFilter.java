@@ -10,9 +10,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.annotation.Lazy;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,27 +23,18 @@ import java.util.List;
 import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
-    @Lazy
-    @Autowired
-    private UserService userService;
-
-    @Autowired
-    private ApplicationContext applicationContext;
-
-    private Rq getRq(HttpServletRequest request, HttpServletResponse response) {
-        return applicationContext.getBean(Rq.class, request, response);
-    }
+    private final UserService userService;
+    private final Rq rq;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         logger.debug("Processing request for " + request.getRequestURI());
 
-        Rq rq = getRq(request, response);
-
         try {
-            doFilterLogic(request, response, filterChain, rq);
+            doFilterLogic(request, response, filterChain);
         } catch (ServiceException e) {
             RsData<Void> rsData = e.getRsData();
             response.setContentType("application/json");
@@ -58,18 +47,13 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         }
     }
 
-    private void doFilterLogic(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain, Rq rq) throws ServletException, IOException {
+    private void doFilterLogic(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         if (!request.getRequestURI().startsWith("/api/")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        List<String> openApiUris = List.of(
-                "/api/v1/users/login",
-                "/api/v1/users/register",
-                "/api/v1/users/logout",
-                "/api/v1/users/register-admin"
-        );
+        List<String> openApiUris = List.of("/api/v1/users/login", "/api/v1/users/register");
         if (openApiUris.contains(request.getRequestURI())) {
             filterChain.doFilter(request, response);
             return;
@@ -127,6 +111,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             user = userService.findByApiKey(apiKey)
                     .orElseThrow(() -> new ServiceException("401-3", "API 키가 유효하지 않습니다."));
         }
+
 
         if (hasAccessToken && !isAccessTokenValid) {
             String newAccessToken = userService.genAccessToken(user);

@@ -20,7 +20,6 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        // 유저 권한을 ROLE_ 접두사와 함께 반환
         return List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 

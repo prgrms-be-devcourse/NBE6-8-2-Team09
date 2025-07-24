@@ -1,21 +1,28 @@
 package com.back.back9.domain.user.dto;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
+import com.back.back9.domain.user.entity.User;
 
-@Getter
-@Setter
-public class UserDto {
+import java.time.LocalDateTime;
 
-    @NotBlank
-    private String userLoginId;
-    @NotBlank
-    private String username;
-    @NotBlank
-    private String password;
-    @NotBlank
-    private String confirmPassword;
+public record UserDto(
+        Long id,
+        String userLoginId,
+        LocalDateTime createdAt,
+        LocalDateTime modifiedAt
+) {
+    public UserDto(Long id, String userLoginId, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+        this.id = id;
+        this.userLoginId = userLoginId;
+        this.createdAt = createdAt;
+        this.modifiedAt = modifiedAt;
+    }
 
-    private String token;
+    public UserDto(User user) {
+        this(
+                user.getId(),
+                user.getUserLoginId(),
+                user.getCreatedAt(),
+                user.getModifiedAt()
+        );
+    }
 }

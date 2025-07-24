@@ -2,62 +2,120 @@ package com.back.back9.domain.user.controller;
 
 import com.back.back9.domain.user.dto.UserDto;
 import com.back.back9.domain.user.entity.User;
-import com.back.back9.domain.user.service.AuthTokenService;
 import com.back.back9.domain.user.service.UserService;
+import com.back.back9.global.exception.ServiceException;
+import com.back.back9.global.rq.Rq;
 import com.back.back9.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
 
-@Tag(name = "User API", description = "사용자 회원가입 및 로그인 API")
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
+@Tag(name = "UserController", description = "API 사용자 컨트롤러")
+@SecurityRequirement(name = "bearerAuth")
 public class UserController {
 
     private final UserService userService;
-    private final AuthenticationManager authenticationManager;
-    private final AuthTokenService authTokenService;
+    private final Rq rq;
 
-    @Operation(summary = "회원가입", description = "신규 사용자를 등록합니다.")
+    public record UserRegisterReqBody(
+            @NotBlank @Size(min = 2, max = 30) String userLoginId,
+            @NotBlank @Size(min = 2, max = 30) String username,
+            @NotBlank @Size(min = 8, max = 30) String password,
+            @NotBlank @Size(min = 8, max = 30) String confirmPassword
+    ) {}
+
     @PostMapping("/register")
-    public ResponseEntity<RsData<User>> register(@RequestBody @Valid UserDto userDto) {
-        RsData<User> result = userService.register(userDto);
-        return ResponseEntity.status(result.statusCode()).body(result);
+    @Transactional
+    @Operation(summary = "회원가입")
+    public RsData<UserDto> register(@Valid @RequestBody UserRegisterReqBody reqBody) {
+        if (!reqBody.password().equals(reqBody.confirmPassword())) {
+            return new RsData<>("400", "비밀번호 확인이 일치하지 않습니다.");
+        }
+
+        RsData<User> registerResult = userService.register(
+                new com.back.back9.domain.user.dto.UserRegisterDto(
+                        reqBody.userLoginId(),
+                        reqBody.username(),
+                        reqBody.password(),
+                        reqBody.confirmPassword()
+                )
+        );
+
+        if (!registerResult.resultCode().startsWith("200")) {
+            return new RsData<>(registerResult.resultCode(), registerResult.msg());
+        }
+
+        User user = registerResult.data();
+
+        return new RsData<>(
+                "201",
+                "회원가입이 완료되었습니다.",
+                new UserDto(user)
+        );
     }
 
-    @Operation(summary = "로그인", description = "사용자 로그인 후 JWT 토큰을 발급합니다.")
+
+    public record UserLoginReqBody(
+            @NotBlank
+            @Size(min = 2, max = 30)
+            String userLoginId,
+            @NotBlank
+            @Size(min = 8, max = 30)
+            String password
+    ) {}
+
+    public record UserLoginResBody(
+            UserDto item,
+            String apiKey,
+            String accessToken
+    ) {}
+
     @PostMapping("/login")
-    public ResponseEntity<RsData<UserDto>> login(@RequestBody @Valid UserDto userDto) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(userDto.getUserLoginId(), userDto.getPassword())
-            );
+    @Transactional(readOnly = true)
+    @Operation(summary = "로그인")
+    public RsData<UserLoginResBody> login(@Valid @RequestBody UserLoginReqBody reqBody) {
+        User user = userService.findByUserLoginId(reqBody.userLoginId())
+                .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 아이디입니다."));
 
-            User user = userService.findByUserLoginId(userDto.getUserLoginId()).get();
-            String token = authTokenService.createToken(user.getUserLoginId(), user.getUsername());
+        userService.checkPassword(user, reqBody.password());
 
-            UserDto response = new UserDto();
-            response.setUserLoginId(user.getUserLoginId());
-            response.setUsername(user.getUsername());
-            response.setToken(token);
+        String accessToken = userService.genAccessToken(user);
 
-            RsData<UserDto> rs = new RsData<>("200-2", "로그인 성공", response);
-            return ResponseEntity.status(rs.statusCode()).body(rs);
+        rq.setCookie("apiKey", user.getApiKey());
+        rq.setCookie("accessToken", accessToken);
 
-        } catch (AuthenticationException e) {
-            RsData<UserDto> rs = new RsData<>("400-2", "로그인에 실패했습니다.");
-            return ResponseEntity.status(rs.statusCode()).body(rs);
+        return new RsData<>(
+                "200-1",
+                "%s님 환영합니다.".formatted(user.getUsername()),
+                new UserLoginResBody(new UserDto(user), user.getApiKey(), accessToken)
+        );
+    }
+
+    @DeleteMapping("/logout")
+    @Operation(summary = "로그아웃")
+    public RsData<Void> logout() {
+        rq.deleteCookie("apiKey");
+        rq.deleteCookie("accessToken");
+        return new RsData<>("200-1", "로그아웃 되었습니다.");
+    }
+
+    @GetMapping("/me")
+    @Transactional(readOnly = true)
+    @Operation(summary = "내 정보 조회")
+    public RsData<UserDto> me() {
+        User actor = rq.getActor();
+        if (actor == null) {
+            return new RsData<>("401", "로그인이 필요합니다.");
         }
+        return new RsData<>("200", "현재 사용자 정보입니다.", new UserDto(actor));
     }
 }
