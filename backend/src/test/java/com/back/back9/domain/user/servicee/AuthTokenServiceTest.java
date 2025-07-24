@@ -1,7 +1,9 @@
 package com.back.back9.domain.user.service;
 
+import com.back.back9.domain.user.dto.UserRegisterDto;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.standard.util.Ut;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +30,22 @@ public class AuthTokenServiceTest {
     @Value("${custom.jwt.secretKey}")
     private String jwtSecretKey;
 
-    @Value("${custom.accessToken.expirationSeconds}")
+    @Value("${custom.jwt.accessToken.expirationSeconds}")
     private int accessTokenExpirationSeconds;
+
+    @BeforeEach
+    void setUp() {
+        // 이미 있으면 삭제 또는 생략 (테스트 DB라면 덮어써도 됨)
+        if (userService.findByUserLoginId("user1").isEmpty()) {
+            // UserRegisterDto 사용해서 회원가입 처리
+            userService.register(new UserRegisterDto(
+                    "user1",
+                    "테스트유저",
+                    "123456789",
+                    "123456789"
+            ));
+        }
+    }
 
     @Test
     @DisplayName("authTokenService 빈이 존재한다.")

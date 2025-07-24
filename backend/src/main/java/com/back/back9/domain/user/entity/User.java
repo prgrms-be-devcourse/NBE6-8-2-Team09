@@ -1,10 +1,7 @@
 package com.back.back9.domain.user.entity;
 
 import com.back.back9.global.jpa.entity.BaseEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -18,6 +15,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
+@Table(name = "users")
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
@@ -27,7 +25,7 @@ public class User extends BaseEntity {
     @Column(name = "user_login_id", nullable = false, unique = true)
     private String userLoginId;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Enumerated(EnumType.STRING)
@@ -54,6 +52,10 @@ public class User extends BaseEntity {
 
     public void modifyApiKey(String apiKey) {
         this.apiKey = apiKey;
+    }
+
+    public void setRole(UserRole role) {
+        this.role = role;
     }
 
     public boolean isAdmin() {

@@ -3,15 +3,19 @@ package com.back.back9.domain.user.controller;
 import com.back.back9.domain.user.dto.UserWithUsernameDto;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.service.UserService;
+import com.back.back9.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 
+@PreAuthorize("hasRole('ADMIN')")
 @RestController
 @RequestMapping("/api/v1/adm/users")
 @RequiredArgsConstructor
@@ -24,11 +28,16 @@ public class AdUserController {
     @GetMapping
     @Transactional(readOnly = true)
     @Operation(summary = "전체 사용자 조회")
-    public List<UserWithUsernameDto> getUsers() {
+    public RsData<List<UserWithUsernameDto>> getUsers() {
         List<User> users = userService.findAll();
-        return users.stream()
+        List<UserWithUsernameDto> dtos = users.stream()
                 .map(UserWithUsernameDto::new)
                 .toList();
+        return new RsData<>(
+                "200",
+                "사용자 정보를 성공적으로 조회했습니다.",
+                dtos
+        );
     }
 
     @GetMapping("/{id}")

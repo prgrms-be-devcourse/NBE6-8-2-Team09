@@ -5,12 +5,14 @@ import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Getter
-public class SecurityUser implements UserDetails {
+public class SecurityUser implements UserDetails, OAuth2User {
 
     private final User user;
 
@@ -30,7 +32,7 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return user.getUserLoginId(); // username은 loginId로 매핑
+        return user.getUserLoginId();
     }
 
     @Override
@@ -44,4 +46,20 @@ public class SecurityUser implements UserDetails {
 
     @Override
     public boolean isEnabled() { return true; }
+
+    // OAuth2User 구현
+    @Override
+    public Map<String, Object> getAttributes() {
+        return Map.of(
+                "id", user.getId(),
+                "userLoginId", user.getUserLoginId(),
+                "username", user.getUsername(),
+                "role", user.getRole().name()
+        );
+    }
+
+    @Override
+    public String getName() {
+        return user.getUserLoginId();
+    }
 }
