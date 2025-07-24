@@ -69,11 +69,12 @@ public class Rq {
         cookie.setPath("/");
         cookie.setHttpOnly(true);
         cookie.setDomain("localhost");
+        //********개발환경에선 false로 설정, 실제 서비스에서는 true로 설정 필요***********
         cookie.setSecure(false);
         cookie.setAttribute("SameSite", "Strict");
 
         if (value.isBlank()) cookie.setMaxAge(0);
-        else cookie.setMaxAge(60 * 60 * 24 * 365); // 1년
+        else cookie.setMaxAge(60 * 60 * 24 * 365);
 
         resp.addCookie(cookie);
     }
