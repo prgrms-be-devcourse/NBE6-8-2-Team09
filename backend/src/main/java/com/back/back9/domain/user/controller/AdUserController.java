@@ -1,0 +1,52 @@
+package com.back.back9.domain.user.controller;
+
+import com.back.back9.domain.user.dto.UserWithUsernameDto;
+import com.back.back9.domain.user.entity.User;
+import com.back.back9.domain.user.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/v1/adm/users")
+@RequiredArgsConstructor
+@Tag(name = "AdUserController", description = "관리자용 사용자 API")
+@SecurityRequirement(name = "bearerAuth")
+public class AdUserController {
+
+    private final UserService userService;
+
+    @GetMapping
+    @Transactional(readOnly = true)
+    @Operation(summary = "전체 사용자 조회")
+    public List<UserWithUsernameDto> getUsers() {
+        List<User> users = userService.findAll();
+        return users.stream()
+                .map(UserWithUsernameDto::new)
+                .toList();
+    }
+
+    @GetMapping("/{id}")
+    @Transactional(readOnly = true)
+    @Operation(summary = "사용자 단건 조회")
+    public UserWithUsernameDto getUser(@PathVariable Long id) {
+        User user = userService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 사용자입니다."));
+        return new UserWithUsernameDto(user);
+    }
+
+    @GetMapping("/search")
+    @Transactional(readOnly = true)
+    @Operation(summary = "username으로 사용자 검색")
+    public List<UserWithUsernameDto> searchUsersByUsername(@RequestParam String keyword) {
+        List<User> users = userService.searchByUsername(keyword);
+        return users.stream()
+                .map(UserWithUsernameDto::new)
+                .toList();
+    }
+}
