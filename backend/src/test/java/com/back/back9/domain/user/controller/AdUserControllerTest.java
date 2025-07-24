@@ -2,8 +2,7 @@ package com.back.back9.domain.user.controller;
 
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.service.UserService;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,6 +11,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
+import com.back.back9.domain.user.dto.UserRegisterDto;
+import org.junit.jupiter.api.BeforeAll;
 
 import java.util.List;
 
@@ -24,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AdUserControllerTest {
 
     @Autowired
@@ -32,9 +34,24 @@ public class AdUserControllerTest {
     @Autowired
     private UserService userService;
 
+    @BeforeAll
+    void setUpAdmin() {
+        if (userService.findByUserLoginId("admin").isEmpty()) {
+            userService.register(new UserRegisterDto(
+                    "admin",
+                    "관리자",
+                    "admin1234",
+                    "admin1234"
+            ));
+            User admin = userService.findByUserLoginId("admin").get();
+            admin.setRole(User.UserRole.ADMIN);
+            userService.save(admin);
+        }
+    }
+
     @Test
     @DisplayName("전체 사용자 조회 - ADMIN 권한")
-    @WithUserDetails("admin") // admin 계정이 실제 DB에 있어야 함
+    @WithUserDetails("admin")
     void getAllUsers_withAdmin() throws Exception {
         List<User> users = userService.findAll();
 

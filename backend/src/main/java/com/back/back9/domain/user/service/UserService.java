@@ -5,11 +5,7 @@ import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.repository.UserRepository;
 import com.back.back9.global.exception.ServiceException;
 import com.back.back9.global.rsData.RsData;
-import com.back.back9.global.security.SecurityUser;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -20,11 +16,12 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-public class UserService implements UserDetailsService {
+public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthTokenService authTokenService;
+
     public long count() {
         return userRepository.count();
     }
@@ -51,11 +48,26 @@ public class UserService implements UserDetailsService {
         return new RsData<>("200-1", "회원가입이 완료되었습니다.", user);
     }
 
-    @Override
-    public UserDetails loadUserByUsername(String userLoginId) throws UsernameNotFoundException {
-        User user = userRepository.findByUserLoginId(userLoginId)
-                .orElseThrow(() -> new UsernameNotFoundException("해당 사용자를 찾을 수 없습니다: " + userLoginId));
-        return new SecurityUser(user);
+    public RsData<User> registerAdmin(UserRegisterDto dto) {
+        if (!dto.password().equals(dto.confirmPassword())) {
+            return new RsData<>("400", "비밀번호 확인이 일치하지 않습니다.");
+        }
+        if (userRepository.findByUserLoginId(dto.userLoginId()).isPresent()) {
+            return new RsData<>("400-1", "이미 존재하는 아이디입니다.");
+        }
+
+        String apiKey = UUID.randomUUID().toString();
+
+        User user = User.builder()
+                .userLoginId(dto.userLoginId())
+                .username(dto.username())
+                .password(passwordEncoder.encode(dto.password()))
+                .role(User.UserRole.ADMIN)
+                .apiKey(apiKey)
+                .build();
+
+        userRepository.save(user);
+        return new RsData<>("200-1", "관리자 회원가입이 완료되었습니다.", user);
     }
 
     public Optional<User> findByUserLoginId(String userLoginId) {
@@ -84,6 +96,10 @@ public class UserService implements UserDetailsService {
 
     public String genAccessToken(User user) {
         return authTokenService.genAccessToken(user);
+    }
+
+    public User save(User user) {
+        return userRepository.save(user);
     }
 
     public void checkPassword(User user, String rawPassword) {

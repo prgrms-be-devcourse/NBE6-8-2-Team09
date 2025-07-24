@@ -29,8 +29,8 @@ public class UserController {
     public record UserRegisterReqBody(
             @NotBlank @Size(min = 2, max = 30) String userLoginId,
             @NotBlank @Size(min = 2, max = 30) String username,
-            @NotBlank @Size(min = 8, max = 30) String password,
-            @NotBlank @Size(min = 8, max = 30) String confirmPassword
+            @NotBlank @Size(min = 2, max = 30) String password,
+            @NotBlank @Size(min = 2, max = 30) String confirmPassword
     ) {}
 
     @PostMapping("/register")
@@ -63,13 +63,38 @@ public class UserController {
         );
     }
 
+    @PostMapping("/register-admin")
+    @Transactional
+    @Operation(summary = "관리자 회원가입")
+    public RsData<UserDto> registerAdmin(@Valid @RequestBody UserRegisterReqBody reqBody) {
+        RsData<User> registerResult = userService.registerAdmin(
+                new com.back.back9.domain.user.dto.UserRegisterDto(
+                        reqBody.userLoginId(),
+                        reqBody.username(),
+                        reqBody.password(),
+                        reqBody.confirmPassword()
+                )
+        );
+
+        if (!registerResult.resultCode().startsWith("200")) {
+            return new RsData<>(registerResult.resultCode(), registerResult.msg());
+        }
+
+        User user = registerResult.data();
+        return new RsData<>(
+                "201",
+                "관리자 회원가입이 완료되었습니다.",
+                new UserDto(user)
+        );
+    }
+
 
     public record UserLoginReqBody(
             @NotBlank
             @Size(min = 2, max = 30)
             String userLoginId,
             @NotBlank
-            @Size(min = 8, max = 30)
+            @Size(min = 2, max = 30)
             String password
     ) {}
 
