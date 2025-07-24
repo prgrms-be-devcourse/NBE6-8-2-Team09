@@ -8,15 +8,13 @@ public record UserWithUsernameDto(
         Long id,
         String username,
         String userLoginId,
-        String role,
         LocalDateTime createdAt,
         LocalDateTime modifiedAt
 ) {
-    public UserWithUsernameDto(Long id, String username, String userLoginId, String role, LocalDateTime createdAt, LocalDateTime modifiedAt) {
+    public UserWithUsernameDto(Long id, String username, String userLoginId, LocalDateTime createdAt, LocalDateTime modifiedAt) {
         this.id = id;
         this.username = username;
         this.userLoginId = userLoginId;
-        this.role = role;
         this.createdAt = createdAt;
         this.modifiedAt = modifiedAt;
     }
@@ -25,7 +23,6 @@ public record UserWithUsernameDto(
                 user.getId(),
                 user.getUsername(),
                 user.getUserLoginId(),
-                user.getRole().name(),
                 user.getCreatedAt(),
                 user.getModifiedAt()
         );
