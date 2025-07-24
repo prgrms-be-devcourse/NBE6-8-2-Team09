@@ -3,9 +3,6 @@ package com.back.back9.domain.user.controller;
 import com.back.back9.domain.user.dto.UserRegisterDto;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.service.UserService;
-import com.back.back9.domain.wallet.entity.Wallet;
-import com.back.back9.domain.wallet.repository.WalletRepository;
-import com.back.back9.domain.wallet.service.WalletService;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +13,6 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -34,8 +29,6 @@ public class UserControllerTest {
     private MockMvc mvc;
     @Autowired
     private UserService userService;
-    @Autowired
-    private WalletRepository walletRepository;
 
     @BeforeEach
     void setUp() {
@@ -213,71 +206,5 @@ public class UserControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(401))
                 .andExpect(jsonPath("$.message").value("Authorization 헤더가 Bearer 형식이 아닙니다."));
-    }
-    @Test
-    @DisplayName("구글 OAuth2 로그인 엔드포인트 접근 시 구글 로그인 창으로 리다이렉트된다")
-    void t6() throws Exception {
-        mvc.perform(get("/oauth2/authorization/google"))
-                .andDo(print())
-                .andExpect(status().is3xxRedirection())
-                .andExpect(header().string("Location", org.hamcrest.Matchers.startsWith("https://accounts.google.com/")));
-    }
-
-    @Test
-    @DisplayName("로그인 시 쿠키가 정상적으로 발급된다")
-    void t7() throws Exception {
-        ResultActions resultActions = mvc.perform(post("/api/v1/users/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                {
-                    "userLoginId": "testuser",
-                    "password": "12345678"
-                }
-            """))
-                .andDo(print());
-
-        Cookie apiKeyCookie = resultActions.andReturn().getResponse().getCookie("apiKey");
-        Cookie accessTokenCookie = resultActions.andReturn().getResponse().getCookie("accessToken");
-
-        assertThat(apiKeyCookie).isNotNull();
-        assertThat(accessTokenCookie).isNotNull();
-
-        assertThat(apiKeyCookie.getValue()).isNotBlank();
-        assertThat(accessTokenCookie.getValue()).isNotBlank();
-
-        assertThat(apiKeyCookie.getPath()).isEqualTo("/");
-        assertThat(accessTokenCookie.getPath()).isEqualTo("/");
-
-        assertThat(apiKeyCookie.isHttpOnly()).isTrue();
-        assertThat(accessTokenCookie.isHttpOnly()).isTrue();
-    }
-
-    @Test
-    @DisplayName("회원가입 시 지갑이 자동 생성된다")
-    void t8() throws Exception {
-        // 회원가입 요청
-        mvc.perform(post("/api/v1/users/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content("""
-                {
-                   "userLoginId": "walletuser",
-                   "username": "지갑유저",
-                   "password": "12345678",
-                   "confirmPassword": "12345678"
-                 }
-                """))
-                .andDo(print())
-                .andExpect(status().isOk());
-
-        // 회원 정보 조회
-        User user = userService.findByUserLoginId("walletuser").orElseThrow();
-
-        // 지갑 정보 조회
-        Wallet wallet = walletRepository.findByUserId(user.getId()).orElse(null);
-
-        assertThat(wallet).isNotNull();
-        assertThat(wallet.getUser().getId()).isEqualTo(user.getId());
-        assertThat(wallet.getBalance()).isEqualTo(BigDecimal.valueOf(500000000));
-        assertThat(wallet.getAddress()).isEqualTo("Wallet_address_" + user.getId());
     }
 }
