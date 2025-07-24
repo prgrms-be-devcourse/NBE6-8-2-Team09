@@ -1,0 +1,155 @@
+package com.back.back9.domain.coin.controller;
+
+import com.back.back9.domain.coin.entity.Coin;
+import com.back.back9.domain.coin.repository.CoinRepository;
+import com.back.back9.domain.coin.service.CoinService;
+import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@SpringBootTest
+@ActiveProfiles("test")
+@AutoConfigureMockMvc
+@Transactional
+@Tag("coin")
+public class CoinControllerTest {
+    @Autowired
+    private MockMvc mvc;
+
+    @Autowired
+    private CoinService coinService;
+
+    @Test
+    @DisplayName("Coin 전체 조회")
+    void getCoins() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/coins")
+                )
+                .andDo(print());
+
+        List<Coin> testCoin = coinService.findAll();
+
+        resultActions
+                .andExpect(handler().handlerType(CoinController.class))
+                .andExpect(handler().methodName("getCoins"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(3));
+
+        for (int i = 0; i < testCoin.size(); i++) {
+            Coin coin = testCoin.get(i);
+            resultActions
+                    .andExpect(jsonPath("$[%d].id".formatted(i)).value(coin.getId()))
+                    .andExpect(jsonPath("$[%d].symbol".formatted(i)).value(coin.getSymbol()))
+                    .andExpect(jsonPath("$[%d].koreanName".formatted(i)).value(coin.getKoreanName()))
+                    .andExpect(jsonPath("$[%d].englishName".formatted(i)).value(coin.getEnglishName()));
+//                    .andExpect(jsonPath("$[%d].createDate".formatted(i)).value(Matchers.startsWith(coin.getCreated_at().toString().substring(0, 20))));
+        }
+
+    }
+
+    @Test
+    @DisplayName("Coin 단건 조회")
+    void getCoin() throws Exception {
+        int id = 1;
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/coins/" + id)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CoinController.class))
+                .andExpect(handler().methodName("getCoin"))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("Coin 삭제")
+    void deleteCoin() throws Exception {
+        int id = 1;
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/coins/" + id)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CoinController.class))
+                .andExpect(handler().methodName("deleteCoin"))
+                .andExpect(status().isOk());
+
+        assertTrue(coinService.findById(id).isEmpty());
+    }
+
+    @Test
+    @DisplayName("Coin 추가")
+    void addCoin() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        post("/coins")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                        "symbol" : "BTC new",
+                                        "koreanName" : "비트코인 new",
+                                        "englishName" : "Bitcoint new"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        Coin coin = coinService.findLastest().get();
+
+
+        resultActions
+                .andExpect(handler().handlerType(CoinController.class))
+                .andExpect(handler().methodName("addCoin"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(coin.getId()))
+                .andExpect(jsonPath("$.symbol").value(coin.getSymbol()))
+                .andExpect(jsonPath("$.koreanName").value(coin.getKoreanName()))
+                .andExpect(jsonPath("$.englishName").value(coin.getEnglishName()));
+    }
+
+    @Test
+    @DisplayName("Coin 수정")
+    void modifyCoin() throws Exception {
+        int id = 1;
+        ResultActions resultActions = mvc
+                .perform(
+                        put("/coins/" + id)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                        "symbol" : "BTC 수정",
+                                        "koreanName" : "비트코인 수정",
+                                        "englishName" : "Bitcoint 수정"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        Coin coin = coinService.findById(id).get();
+
+        resultActions
+                .andExpect(handler().handlerType(CoinController.class))
+                .andExpect(handler().methodName("modifyCoin"))
+                .andExpect(status().isOk());
+    }
+}
