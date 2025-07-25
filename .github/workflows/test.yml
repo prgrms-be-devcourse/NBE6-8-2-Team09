@@ -18,13 +18,11 @@ jobs:
             gradle_cmd: "./gradlew"
             report_path: "backend/build/reports/tests"
             domain_tasks: "testUser testExchange testTrade_log testWallet testCoin"
-            needs_redis: true
 
           - os: windows-latest
             gradle_cmd: ".\\gradlew.bat"
             report_path: "backend\\build\\reports\\tests"
             domain_tasks: "testUser testExchange testTrade_log testWallet testCoin"
-            needs_redis: true
 
     runs-on: ${{ matrix.os }}
 
@@ -33,7 +31,7 @@ jobs:
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
       REDIS_PORT: 6379
-      REDIS_HOST: localhost
+      REDIS_HOST: 127.0.0.1
 
     steps:
       - uses: actions/checkout@v4
@@ -45,23 +43,24 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      # ✅ Windows용 Redis 설치 및 백그라운드 실행
-      - name: Install and run Redis on Windows
-        if: matrix.os == 'windows-latest' && matrix.needs_redis
+      # Ubuntu에서는 services.redis로 자동 실행
+      - name: Set up Redis on Ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        uses: supercharge/redis-github-action@1.2.0
+
+      # Windows는 수동으로 redis 다운로드 후 실행
+      - name: Install Redis on Windows
+        if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          choco install redis-64 -y
-          Start-Process "redis-server"
-
-      # ✅ Linux용 Redis 서비스 (기존처럼 유지)
-      - name: Set up Redis on Ubuntu
-        if: matrix.os == 'ubuntu-latest' && matrix.needs_redis
-        uses: docker://redis:7.0
+          Invoke-WebRequest -Uri https://github.com/tporadowski/redis/releases/download/v7.0.11.0/redis-7.0.11.0.zip -OutFile redis.zip
+          Expand-Archive redis.zip -DestinationPath redis
+          Start-Process -FilePath redis\\redis-server.exe
 
       - name: Grant execute permission to gradlew.bat
         if: matrix.os == 'windows-latest'
-        run: icacls backend\\gradlew.bat /grant Everyone:RX
         shell: pwsh
+        run: icacls backend\\gradlew.bat /grant Everyone:RX
 
       - name: Run unit, integration, and domain tests
         run: ${{ matrix.gradle_cmd }} clean test integrationTest ${{ matrix.domain_tasks }}
