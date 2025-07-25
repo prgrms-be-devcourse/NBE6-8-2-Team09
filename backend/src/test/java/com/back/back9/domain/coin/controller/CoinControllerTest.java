@@ -4,7 +4,6 @@ import com.back.back9.domain.coin.entity.Coin;
 import com.back.back9.domain.coin.repository.CoinRepository;
 import com.back.back9.domain.coin.service.CoinService;
 import com.back.back9.global.error.ErrorException;
-import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -29,7 +28,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
-@JsonPOJOBuilder
 @Tag("coin")
 public class CoinControllerTest {
     @Autowired
@@ -62,7 +60,7 @@ public class CoinControllerTest {
     void getCoins() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        get("/coins")
+                        get("/api/v1/coins")
                 )
                 .andDo(print());
 
@@ -88,10 +86,9 @@ public class CoinControllerTest {
     @Test
     @DisplayName("Coin 단건 조회")
     void getCoin() throws Exception {
-
         ResultActions resultActions = mvc
                 .perform(
-                        get("/coins/" + coin1.getId())
+                        get("/api/v1/coins/" + coin1.getId())
                 )
                 .andDo(print());
 
@@ -109,7 +106,7 @@ public class CoinControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        get("/coins/" + id)
+                        get("/api/v1/coins/" + id)
                 )
                 .andDo(print());
 
@@ -125,7 +122,7 @@ public class CoinControllerTest {
     void addCoin() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        post("/coins")
+                        post("/api/v1/coins")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -154,7 +151,7 @@ public class CoinControllerTest {
     void addCoin2() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        post("/coins")
+                        post("/api/v1/coins")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -177,7 +174,7 @@ public class CoinControllerTest {
     void deleteCoin() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        delete("/coins/" + coin1.getId())
+                        delete("/api/v1/coins/" + coin1.getId())
                 )
                 .andDo(print());
 
@@ -196,7 +193,7 @@ public class CoinControllerTest {
     void modifyCoin() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        put("/coins/" + coin1.getId())
+                        put("/api/v1/coins/" + coin1.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
