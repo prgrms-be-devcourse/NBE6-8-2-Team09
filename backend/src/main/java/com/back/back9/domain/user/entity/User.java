@@ -74,4 +74,7 @@ public class User extends BaseEntity {
                 .map(SimpleGrantedAuthority::new)
                 .toList();
     }
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }
