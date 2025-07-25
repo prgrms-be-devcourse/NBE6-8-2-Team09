@@ -30,10 +30,16 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
     compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("com.h2database:h2")
-    annotationProcessor("org.projectlombok:lombok")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -43,27 +49,22 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
-
-//   태그 도메인 별 실행
-// 추가 필요할 시 list 안에 도메인 이름 추가
+// 도메인별 태그 테스트 태스크
 val domains = listOf("user", "exchange", "trade_log", "wallet", "coin")
-
 domains.forEach { d ->
     tasks.register<Test>("test${d.replaceFirstChar { it.uppercase() }}") {
         group = "verification"
         description = "Runs $d domain tests"
         useJUnitPlatform {
-            includeTags(d)        // 해당 태그만 실행
+            includeTags(d)
         }
-        // 기존 test 소스세트와 클래스패스 공유
         testClassesDirs = sourceSets["test"].output.classesDirs
-        classpath       = sourceSets["test"].runtimeClasspath
-        shouldRunAfter(tasks["test"])   // 필요 없다면 제거
+        classpath = sourceSets["test"].runtimeClasspath
+        shouldRunAfter(tasks["test"])
     }
 }
 
-// ─────────────────────────────────────────────────────────────
-// 통합 테스트(integrationTest) 소스세트 & 태스크
+// 통합 테스트 소스세트 & 태스크
 sourceSets.create("integrationTest") {
     java.srcDir("src/integrationTest/java")
     resources.srcDir("src/integrationTest/resources")
@@ -75,7 +76,7 @@ tasks.register<Test>("integrationTest") {
     group = "verification"
     description = "Runs integration tests (실제 API 호출 등)"
     testClassesDirs = sourceSets["integrationTest"].output.classesDirs
-    classpath       = sourceSets["integrationTest"].runtimeClasspath
+    classpath = sourceSets["integrationTest"].runtimeClasspath
     useJUnitPlatform()
     shouldRunAfter(tasks["test"])
 }
