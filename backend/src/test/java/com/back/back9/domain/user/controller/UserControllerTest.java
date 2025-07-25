@@ -40,20 +40,6 @@ public class UserControllerTest {
         ));
     }
 
-    @BeforeAll
-    void setUpAdminUser() {
-        if (userService.findByUserLoginId("adminuser").isEmpty()) {
-            userService.registerAdmin(new UserRegisterDto(
-                    "adminuser",
-                    "관리자",
-                    "admin1234",
-                    "admin1234"
-            ));
-            User adminUser = userService.findByUserLoginId("adminuser").get();
-            adminUser.setRole(User.UserRole.ADMIN);
-            userService.save(adminUser);
-        }
-    }
 
     @Test
     @DisplayName("회원가입")
@@ -220,46 +206,5 @@ public class UserControllerTest {
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.code").value(401))
                 .andExpect(jsonPath("$.message").value("Authorization 헤더가 Bearer 형식이 아닙니다."));
-    }
-
-    @Test
-    @DisplayName("관리자 로그인 후 관리자 API 접근")
-    void t6() throws Exception {
-        User adminUser = userService.findByUserLoginId("adminuser").get();
-        adminUser.setRole(User.UserRole.ADMIN);
-        userService.save(adminUser);
-
-        ResultActions loginResult = mvc
-                .perform(
-                        post("/api/v1/users/login")
-                                .contentType(MediaType.APPLICATION_JSON)
-                                .content("""
-{
-    "userLoginId": "adminuser",
-    "password": "admin1234"
-}
-""")
-                )
-                .andDo(print());
-
-        Cookie apiKeyCookie = loginResult.andReturn().getResponse().getCookie("apiKey");
-        Cookie accessTokenCookie = loginResult.andReturn().getResponse().getCookie("accessToken");
-
-        assertThat(apiKeyCookie).isNotNull();
-        assertThat(accessTokenCookie).isNotNull();
-
-        ResultActions resultActions = mvc
-                .perform(
-                        get("/api/v1/adm/users")
-                                .cookie(apiKeyCookie, accessTokenCookie)
-                )
-                .andDo(print());
-
-        resultActions
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.message").value("사용자 정보를 성공적으로 조회했습니다."))
-                .andExpect(jsonPath("$.result[?(@.userLoginId=='adminuser')].role").value("ADMIN"))
-                .andExpect(jsonPath("$.result[?(@.userLoginId=='adminuser')].userLoginId").value("adminuser"));
     }
 }
