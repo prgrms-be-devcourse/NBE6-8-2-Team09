@@ -223,18 +223,18 @@ public class UserControllerTest {
                         post("/api/v1/users/login")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
-                            {
-                                "userLoginId": "adminuser",
-                                "password": "adminpass"
-                            }
-                            """)
+        {
+            "userLoginId": "adminuser",
+            "password": "adminpass"
+        }
+        """)
                 )
                 .andDo(print());
 
         Cookie apiKeyCookie = loginResult.andReturn().getResponse().getCookie("apiKey");
         Cookie accessTokenCookie = loginResult.andReturn().getResponse().getCookie("accessToken");
 
-        assertThat(apiKeyCookie).isNotNull(); // Null 체크
+        assertThat(apiKeyCookie).isNotNull();
         assertThat(accessTokenCookie).isNotNull();
 
         ResultActions resultActions = mvc
@@ -249,6 +249,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.message").value("사용자 정보를 성공적으로 조회했습니다."))
                 .andExpect(jsonPath("$.result[?(@.userLoginId=='adminuser')].role").value("ADMIN"))
-                .andExpect(jsonPath("$.result[0].role").isNotEmpty());
+                .andExpect(jsonPath("$.result[?(@.userLoginId=='adminuser')].userLoginId").value("adminuser"));
     }
 }
