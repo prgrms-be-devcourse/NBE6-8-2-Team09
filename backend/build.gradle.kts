@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.testing.logging.TestExceptionFormat
+
 plugins {
     java
     id("org.springframework.boot") version "3.5.3"
@@ -87,27 +89,64 @@ tasks.register<Test>("integrationTest") {
 }
 
 tasks.withType<Test>().configureEach {
+
     useJUnitPlatform()
+
+    val failed = mutableListOf<Pair<TestDescriptor, TestResult>>()
+    val taskName = name
+
     testLogging {
-        events("PASSED", "FAILED", "SKIPPED")
-        exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+        events("PASSED", "FAILED", "SKIPPED", "STANDARD_OUT", "STANDARD_ERROR")
+        exceptionFormat = TestExceptionFormat.FULL
         showCauses = true
         showStackTraces = true
+        showStandardStreams = true
     }
 
-    afterSuite(KotlinClosure2({ desc: TestDescriptor, result: TestResult ->
-        if (desc.parent == null) {
-            println(
-                """
-                ── $name summary ───────────────────────────
-                Result  : ${result.resultType}
-                Tests   : ${result.testCount}
-                Passed  : ${result.successfulTestCount}
-                Failed  : ${result.failedTestCount}
-                Skipped : ${result.skippedTestCount}
-                ──────────────────────────────────────────────
-                """.trimIndent()
-            )
+    addTestListener(object : TestListener {
+        override fun beforeSuite(suite: TestDescriptor) {}
+        override fun beforeTest(testDescriptor: TestDescriptor) {}
+
+        override fun afterTest(testDescriptor: TestDescriptor, result: TestResult) {
+            if (result.resultType == TestResult.ResultType.FAILURE) {
+                failed += testDescriptor to result
+            }
         }
-    }))
+
+        override fun afterSuite(suite: TestDescriptor, result: TestResult) {
+            // suite.parent == null == 최상위 스위트(태스크) 요약
+            if (suite.parent == null) {
+                println(
+                    """
+                    ── $taskName summary ───────────────────────────
+                    Result  : ${result.resultType}
+                    Tests   : ${result.testCount}
+                    Passed  : ${result.successfulTestCount}
+                    Failed  : ${result.failedTestCount}
+                    Skipped : ${result.skippedTestCount}
+                    ──────────────────────────────────────────────
+                    """.trimIndent()
+                )
+
+                if (failed.isNotEmpty()) {
+                    println("❌ Failed tests detail (${failed.size}):")
+                    failed.forEach { (d, r) ->
+                        val ex = r.exceptions.firstOrNull()
+                        println(" - ${d.className}.${d.name}")
+                        if (ex != null) {
+                            println("   message : ${ex.message}")
+                            println("   cause   : ${ex.cause}")
+                            ex.stackTrace.take(20).forEach { ste ->
+                                println("     at $ste")
+                            }
+                            if (ex.stackTrace.size > 20) {
+                                println("     ... (${ex.stackTrace.size - 20} more)")
+                            }
+                        }
+                    }
+                    println("──────────────────────────────────────────────")
+                }
+            }
+        }
+    })
 }
