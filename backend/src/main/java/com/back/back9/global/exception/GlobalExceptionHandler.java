@@ -8,14 +8,12 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.bind.BindException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Map;
 
@@ -62,13 +60,6 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(ErrorCode.INVALID_REQUEST.getStatus()).body(pd);
     }
 
-    // 경로 파라미터 타입 오류를 400으로 반환
-    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<String> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body("잘못된 경로 파라미터 형식입니다.");
-    }
-
     // 그 외 모든 예외
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ProblemDetail> handleGeneralException(Exception ex) {
@@ -76,7 +67,6 @@ public class GlobalExceptionHandler {
         ProblemDetail pd = ProblemDetails.of(ErrorCode.INTERNAL_ERROR, ex.getMessage());
         return ResponseEntity.status(ErrorCode.INTERNAL_ERROR.getStatus()).body(pd);
     }
-
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ProblemDetail> handleIllegalArgumentException(IllegalArgumentException ex) {
         ProblemDetail pd = ProblemDetails.of(ErrorCode.INVALID_REQUEST, ex.getMessage());

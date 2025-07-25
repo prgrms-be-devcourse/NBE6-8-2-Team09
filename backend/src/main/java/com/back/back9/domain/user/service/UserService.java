@@ -50,7 +50,7 @@ public class UserService {
 
     public RsData<User> registerAdmin(UserRegisterDto dto) {
         if (!dto.password().equals(dto.confirmPassword())) {
-            return new RsData<>("400", "비밀번호 확인이 일치하지 않습니다.");
+            return new RsData<>("400-0", "비밀번호 확인이 일치하지 않습니다.");
         }
         if (userRepository.findByUserLoginId(dto.userLoginId()).isPresent()) {
             return new RsData<>("400-1", "이미 존재하는 아이디입니다.");

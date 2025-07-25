@@ -2,24 +2,23 @@ package com.back.back9.domain.user.controller;
 
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.service.UserService;
+import com.back.back9.domain.user.dto.UserRegisterDto;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
-import com.back.back9.domain.user.dto.UserRegisterDto;
-import org.junit.jupiter.api.BeforeAll;
 
 import java.util.List;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
@@ -34,8 +33,11 @@ public class AdUserControllerTest {
     @Autowired
     private UserService userService;
 
+    private Cookie apiKeyCookie;
+    private Cookie accessTokenCookie;
+
     @BeforeAll
-    void setUpAdmin() {
+    void setUpAdmin() throws Exception {
         if (userService.findByUserLoginId("admin").isEmpty()) {
             userService.register(new UserRegisterDto(
                     "admin",
@@ -47,15 +49,29 @@ public class AdUserControllerTest {
             admin.setRole(User.UserRole.ADMIN);
             userService.save(admin);
         }
+
+        // 로그인하여 인증 쿠키 획득
+        ResultActions loginResult = mvc.perform(post("/api/v1/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                {
+                    "userLoginId": "admin",
+                    "password": "admin1234"
+                }
+            """))
+                .andDo(print());
+
+        apiKeyCookie = loginResult.andReturn().getResponse().getCookie("apiKey");
+        accessTokenCookie = loginResult.andReturn().getResponse().getCookie("accessToken");
     }
 
     @Test
     @DisplayName("전체 사용자 조회 - ADMIN 권한")
-    @WithUserDetails("admin")
     void getAllUsers_withAdmin() throws Exception {
         List<User> users = userService.findAll();
 
-        ResultActions resultActions = mvc.perform(get("/api/v1/adm/users"))
+        ResultActions resultActions = mvc.perform(get("/api/v1/adm/users")
+                        .cookie(apiKeyCookie, accessTokenCookie))
                 .andDo(print());
 
         resultActions
@@ -70,46 +86,44 @@ public class AdUserControllerTest {
         }
     }
 
-
     @Test
     @DisplayName("단일 사용자 조회 - ADMIN 권한")
-    @WithUserDetails("admin")
     void getUserById_withAdmin() throws Exception {
         UserRegisterDto dto = new UserRegisterDto("user1", "유저1", "password", "password");
         userService.register(dto);
         User user = userService.findByUserLoginId("user1").orElseThrow();
         Long id = user.getId();
 
-        ResultActions resultActions = mvc.perform(get("/api/v1/adm/users/{id}", id))
+        ResultActions resultActions = mvc.perform(get("/api/v1/adm/users/{id}", id)
+                        .cookie(apiKeyCookie, accessTokenCookie))
                 .andDo(print());
 
         resultActions
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(user.getId()))
-                .andExpect(jsonPath("$.username").value(user.getUsername()));
+                .andExpect(jsonPath("$.result.id").value(user.getId()))
+                .andExpect(jsonPath("$.result.username").value(user.getUsername()));
     }
 
     @Test
     @DisplayName("username으로 검색 - ADMIN 권한")
-    @WithUserDetails("admin")
     void searchUserByUsername_withAdmin() throws Exception {
         String keyword = "user";
-
         List<User> users = userService.searchByUsername(keyword);
 
         ResultActions resultActions = mvc.perform(get("/api/v1/adm/users/search")
-                        .param("keyword", keyword))
+                        .param("keyword", keyword)
+                        .cookie(apiKeyCookie, accessTokenCookie))
                 .andDo(print());
 
         resultActions
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(users.size()));
+                .andExpect(jsonPath("$.result.length()").value(users.size()));
 
         for (int i = 0; i < users.size(); i++) {
             User user = users.get(i);
             resultActions
-                    .andExpect(jsonPath("$[%d].id".formatted(i)).value(user.getId()))
-                    .andExpect(jsonPath("$[%d].username".formatted(i)).value(user.getUsername()));
+                    .andExpect(jsonPath("$.result[%d].id".formatted(i)).value(user.getId()))
+                    .andExpect(jsonPath("$.result[%d].username".formatted(i)).value(user.getUsername()));
         }
     }
 }
