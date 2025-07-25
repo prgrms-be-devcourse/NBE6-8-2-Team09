@@ -24,17 +24,25 @@ repositories {
 }
 
 dependencies {
+    // 스프링 부트 스타터 의존성
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("org.springframework.boot:spring-boot-starter-web")
     compileOnly("org.projectlombok:lombok")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
+    
+    // 데이터베이스 연동
     runtimeOnly("com.h2database:h2")
+    
+    // 롬복
     annotationProcessor("org.projectlombok:lombok")
+    
+    // 테스트 관련 의존성
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.springframework.boot:spring-boot-test-autoconfigure")
 }
 
 tasks.withType<Test> {

@@ -3,6 +3,9 @@ spring:
     name: back
   profiles:
     active: test
+  mvc:
+    problem_details:
+      enabled: true
   output:
     ansi:
       enabled: always
