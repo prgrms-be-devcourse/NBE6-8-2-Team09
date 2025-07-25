@@ -1,8 +1,10 @@
 package com.back.back9.domain.user.controller;
 
+import com.back.back9.domain.user.dto.UserRegisterDto;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.service.UserService;
 import jakarta.servlet.http.Cookie;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,12 +26,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @Transactional
 public class UserControllerTest {
-
     @Autowired
     private MockMvc mvc;
-
     @Autowired
     private UserService userService;
+
+    @BeforeEach
+    void setUp() {
+        userService.register(new UserRegisterDto(
+                "testuser",
+                "테스트 사용자",
+                "12345678",
+                "12345678"
+        ));
+    }
 
     @Test
     @DisplayName("회원가입")
@@ -40,25 +50,25 @@ public class UserControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
-                                            "userLoginId": "newuser",
-                                            "username": "신규유저",
-                                            "password": "password123",
-                                            "confirmPassword": "password123"
-                                        }
-                                        """)
+                                           "userLoginId": "testuser1",
+                                           "username": "테스트 사용자1",
+                                           "password": "12345678",
+                                           "confirmPassword": "12345678"
+                                         }
+                                        """.stripIndent())
                 )
                 .andDo(print());
 
-        User user = userService.findByUserLoginId("newuser").get();
+        User user = userService.findByUserLoginId("testuser1").get();
 
         resultActions
                 .andExpect(handler().handlerType(UserController.class))
                 .andExpect(handler().methodName("register"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.resultCode").value("201"))
-                .andExpect(jsonPath("$.msg").value("회원가입이 완료되었습니다."))
-                .andExpect(jsonPath("$.data.id").value(user.getId()))
-                .andExpect(jsonPath("$.data.username").value(user.getUsername()));
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(201))
+                .andExpect(jsonPath("$.message").value("회원가입이 완료되었습니다."))
+                .andExpect(jsonPath("$.result.id").value(user.getId()))
+                .andExpect(jsonPath("$.result.userLoginId").value(user.getUserLoginId()));
     }
 
     @Test
@@ -70,34 +80,37 @@ public class UserControllerTest {
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
-                                            "userLoginId": "user1",
-                                            "password": "12341234"
+                                            "userLoginId": "testuser",
+                                            "password": "12345678"
                                         }
                                         """)
                 )
                 .andDo(print());
 
-        User user = userService.findByUserLoginId("user1").get();
+        User user = userService.findByUserLoginId("testuser").get();
 
         resultActions
                 .andExpect(handler().handlerType(UserController.class))
                 .andExpect(handler().methodName("login"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200-1"))
-                .andExpect(jsonPath("$.msg").value(user.getUsername() + "님 환영합니다."))
-                .andExpect(jsonPath("$.data").exists())
-                .andExpect(jsonPath("$.data.item.id").value(user.getId()))
-                .andExpect(jsonPath("$.data.apiKey").value(user.getApiKey()))
-                .andExpect(jsonPath("$.data.accessToken").isNotEmpty());
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value(user.getUsername() + "님 환영합니다."))
+                .andExpect(jsonPath("$.result").exists())
+                .andExpect(jsonPath("$.result.item.id").value(user.getId()))
+                .andExpect(jsonPath("$.result.apiKey").value(user.getApiKey()))
+                .andExpect(jsonPath("$.result.accessToken").isNotEmpty());
 
         resultActions.andExpect(
                 result -> {
                     Cookie apiKeyCookie = result.getResponse().getCookie("apiKey");
+                    Cookie accessTokenCookie = result.getResponse().getCookie("accessToken");
+                    assertThat(apiKeyCookie).isNotNull(); // Null 체크
+                    assertThat(accessTokenCookie).isNotNull();
+
                     assertThat(apiKeyCookie.getValue()).isEqualTo(user.getApiKey());
                     assertThat(apiKeyCookie.getPath()).isEqualTo("/");
                     assertThat(apiKeyCookie.isHttpOnly()).isTrue();
 
-                    Cookie accessTokenCookie = result.getResponse().getCookie("accessToken");
                     assertThat(accessTokenCookie.getValue()).isNotBlank();
                     assertThat(accessTokenCookie.getPath()).isEqualTo("/");
                     assertThat(accessTokenCookie.isHttpOnly()).isTrue();
@@ -108,12 +121,31 @@ public class UserControllerTest {
     @Test
     @DisplayName("내 정보 조회")
     void t3() throws Exception {
-        User actor = userService.findByUserLoginId("user1").get();
+        ResultActions loginResult = mvc
+                .perform(
+                        post("/api/v1/users/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                    {
+                                        "userLoginId": "testuser",
+                                        "password": "12345678"
+                                    }
+                                    """)
+                )
+                .andDo(print());
+
+        Cookie apiKeyCookie = loginResult.andReturn().getResponse().getCookie("apiKey");
+        Cookie accessTokenCookie = loginResult.andReturn().getResponse().getCookie("accessToken");
+
+        assertThat(apiKeyCookie).isNotNull(); // Null 체크
+        assertThat(accessTokenCookie).isNotNull();
+
+        User actor = userService.findByUserLoginId("testuser").get();
 
         ResultActions resultActions = mvc
                 .perform(
                         get("/api/v1/users/me")
-                                .cookie(new Cookie("apiKey", actor.getApiKey()))
+                                .cookie(apiKeyCookie, accessTokenCookie)
                 )
                 .andDo(print());
 
@@ -121,11 +153,10 @@ public class UserControllerTest {
                 .andExpect(handler().handlerType(UserController.class))
                 .andExpect(handler().methodName("me"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200"))
-                .andExpect(jsonPath("$.msg").value("현재 사용자 정보입니다."))
-                .andExpect(jsonPath("$.data.id").value(actor.getId()))
-                .andExpect(jsonPath("$.data.username").value(actor.getUsername()))
-                .andExpect(jsonPath("$.data.userLoginId").value(actor.getUserLoginId()));
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("현재 사용자 정보입니다."))
+                .andExpect(jsonPath("$.result.id").value(actor.getId()))
+                .andExpect(jsonPath("$.result.userLoginId").value(actor.getUserLoginId()));
     }
 
     @Test
@@ -141,11 +172,13 @@ public class UserControllerTest {
                 .andExpect(handler().handlerType(UserController.class))
                 .andExpect(handler().methodName("logout"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.resultCode").value("200-1"))
-                .andExpect(jsonPath("$.msg").value("로그아웃 되었습니다."))
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("로그아웃 되었습니다."))
                 .andExpect(result -> {
                     Cookie apiKey = result.getResponse().getCookie("apiKey");
                     Cookie accessToken = result.getResponse().getCookie("accessToken");
+                    assertThat(apiKey).isNotNull(); // Null 체크
+                    assertThat(accessToken).isNotNull();
 
                     assertThat(apiKey.getValue()).isEmpty();
                     assertThat(apiKey.getMaxAge()).isEqualTo(0);
@@ -171,7 +204,51 @@ public class UserControllerTest {
 
         resultActions
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.resultCode").value("401-2"))
-                .andExpect(jsonPath("$.msg").value("Authorization 헤더가 Bearer 형식이 아닙니다."));
+                .andExpect(jsonPath("$.code").value(401))
+                .andExpect(jsonPath("$.message").value("Authorization 헤더가 Bearer 형식이 아닙니다."));
+    }
+
+    @Test
+    @DisplayName("관리자 로그인 후 관리자 API 접근")
+    void t6() throws Exception {
+        userService.registerAdmin(new UserRegisterDto(
+                "adminuser",
+                "관리자",
+                "adminpass",
+                "adminpass"
+        ));
+
+        ResultActions loginResult = mvc
+                .perform(
+                        post("/api/v1/users/login")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                            {
+                                "userLoginId": "adminuser",
+                                "password": "adminpass"
+                            }
+                            """)
+                )
+                .andDo(print());
+
+        Cookie apiKeyCookie = loginResult.andReturn().getResponse().getCookie("apiKey");
+        Cookie accessTokenCookie = loginResult.andReturn().getResponse().getCookie("accessToken");
+
+        assertThat(apiKeyCookie).isNotNull(); // Null 체크
+        assertThat(accessTokenCookie).isNotNull();
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/api/v1/adm/users")
+                                .cookie(apiKeyCookie, accessTokenCookie)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.message").value("사용자 정보를 성공적으로 조회했습니다."))
+                .andExpect(jsonPath("$.result[?(@.userLoginId=='adminuser')].role").value("ADMIN"))
+                .andExpect(jsonPath("$.result[0].role").isNotEmpty());
     }
 }
