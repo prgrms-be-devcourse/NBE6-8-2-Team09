@@ -17,6 +17,7 @@ spring:
     hikari:
       auto-commit: false
 
+  # Redis
   data:
     redis:
       host: ${REDIS_HOST}
