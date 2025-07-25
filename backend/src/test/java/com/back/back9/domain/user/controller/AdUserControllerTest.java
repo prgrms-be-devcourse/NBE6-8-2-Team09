@@ -60,15 +60,16 @@ public class AdUserControllerTest {
 
         resultActions
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(users.size()));
+                .andExpect(jsonPath("$.result.length()").value(users.size()));
 
         for (int i = 0; i < users.size(); i++) {
             User user = users.get(i);
             resultActions
-                    .andExpect(jsonPath("$[%d].id".formatted(i)).value(user.getId()))
-                    .andExpect(jsonPath("$[%d].username".formatted(i)).value(user.getUsername()));
+                    .andExpect(jsonPath("$.result[%d].id".formatted(i)).value(user.getId()))
+                    .andExpect(jsonPath("$.result[%d].username".formatted(i)).value(user.getUsername()));
         }
     }
+
 
     @Test
     @DisplayName("단일 사용자 조회 - ADMIN 권한")
@@ -90,7 +91,7 @@ public class AdUserControllerTest {
     @DisplayName("username으로 검색 - ADMIN 권한")
     @WithUserDetails("admin")
     void searchUserByUsername_withAdmin() throws Exception {
-        String keyword = "user"; // 테스트에 맞게 유효한 키워드로 수정
+        String keyword = "user";
 
         List<User> users = userService.searchByUsername(keyword);
 
