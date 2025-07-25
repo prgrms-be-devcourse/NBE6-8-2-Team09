@@ -30,6 +30,9 @@ public class UserService {
         if (userRepository.findByUserLoginId(dto.userLoginId()).isPresent()) {
             return new RsData<>("400-1", "이미 존재하는 아이디입니다.");
         }
+        if (userRepository.findByUsername(dto.username()).isPresent()) {
+            return new RsData<>("400-2", "이미 존재하는 닉네임입니다.");
+        }
 
         String apiKey = UUID.randomUUID().toString();
 
@@ -51,6 +54,10 @@ public class UserService {
         }
         if (userRepository.findByUserLoginId(dto.userLoginId()).isPresent()) {
             return new RsData<>("400-1", "이미 존재하는 아이디입니다.");
+        }
+
+        if (userRepository.findByUsername(dto.username()).isPresent()) {
+            return new RsData<>("400-2", "이미 존재하는 닉네임입니다.");
         }
 
         String apiKey = UUID.randomUUID().toString();
