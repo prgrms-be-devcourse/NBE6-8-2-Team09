@@ -25,6 +25,13 @@ jobs:
             report_path: "backend\\build\\reports\\tests"
             domain_tasks: "testUser testExchange testTrade_log testWallet testCoin"
     runs-on: ${{ matrix.os }}
+
+    services:
+      redis:
+        image: redis:7.0
+        ports:
+          - 6379:6379
+
     env:
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
