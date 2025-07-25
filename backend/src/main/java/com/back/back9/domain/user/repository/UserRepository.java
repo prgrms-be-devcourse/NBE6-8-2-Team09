@@ -9,5 +9,6 @@ import java.util.List;
 public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByApiKey(String apiKey);
     Optional<User> findByUserLoginId(String userLoginId);
+    Optional<User> findByUsername(String username);
     List<User> findByUsernameContaining(String keyword);
 }
