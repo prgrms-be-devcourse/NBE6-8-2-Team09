@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 public enum ErrorCode {
     // 400
     INVALID_REQUEST(HttpStatus.BAD_REQUEST, "400-INVALID-REQUEST", "잘못된 요청입니다."),
-
     // 401
     UNAUTHORIZED(HttpStatus.UNAUTHORIZED, "401-UNAUTHORIZED", "인증이 필요합니다."),
     // 403
