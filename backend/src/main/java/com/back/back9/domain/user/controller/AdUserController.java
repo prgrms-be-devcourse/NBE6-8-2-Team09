@@ -47,6 +47,7 @@ public class AdUserController {
     public RsData<UserWithUsernameDto> getUser(@PathVariable Long id) {
         User user = userService.findById(id)
                 .orElseThrow(() -> new ErrorException(ErrorCode.USER_NOT_FOUND, id));
+
         return new RsData<>(
                 "200",
                 "사용자 정보를 성공적으로 조회했습니다.",
