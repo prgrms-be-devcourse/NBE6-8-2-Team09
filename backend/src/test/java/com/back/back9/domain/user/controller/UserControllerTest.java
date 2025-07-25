@@ -103,11 +103,14 @@ public class UserControllerTest {
         resultActions.andExpect(
                 result -> {
                     Cookie apiKeyCookie = result.getResponse().getCookie("apiKey");
+                    Cookie accessTokenCookie = result.getResponse().getCookie("accessToken");
+                    assertThat(apiKeyCookie).isNotNull(); // Null 체크
+                    assertThat(accessTokenCookie).isNotNull();
+
                     assertThat(apiKeyCookie.getValue()).isEqualTo(user.getApiKey());
                     assertThat(apiKeyCookie.getPath()).isEqualTo("/");
                     assertThat(apiKeyCookie.isHttpOnly()).isTrue();
 
-                    Cookie accessTokenCookie = result.getResponse().getCookie("accessToken");
                     assertThat(accessTokenCookie.getValue()).isNotBlank();
                     assertThat(accessTokenCookie.getPath()).isEqualTo("/");
                     assertThat(accessTokenCookie.isHttpOnly()).isTrue();
@@ -133,6 +136,9 @@ public class UserControllerTest {
 
         Cookie apiKeyCookie = loginResult.andReturn().getResponse().getCookie("apiKey");
         Cookie accessTokenCookie = loginResult.andReturn().getResponse().getCookie("accessToken");
+
+        assertThat(apiKeyCookie).isNotNull(); // Null 체크
+        assertThat(accessTokenCookie).isNotNull();
 
         User actor = userService.findByUserLoginId("testuser").get();
 
@@ -171,6 +177,8 @@ public class UserControllerTest {
                 .andExpect(result -> {
                     Cookie apiKey = result.getResponse().getCookie("apiKey");
                     Cookie accessToken = result.getResponse().getCookie("accessToken");
+                    assertThat(apiKey).isNotNull(); // Null 체크
+                    assertThat(accessToken).isNotNull();
 
                     assertThat(apiKey.getValue()).isEmpty();
                     assertThat(apiKey.getMaxAge()).isEqualTo(0);
@@ -225,6 +233,9 @@ public class UserControllerTest {
 
         Cookie apiKeyCookie = loginResult.andReturn().getResponse().getCookie("apiKey");
         Cookie accessTokenCookie = loginResult.andReturn().getResponse().getCookie("accessToken");
+
+        assertThat(apiKeyCookie).isNotNull(); // Null 체크
+        assertThat(accessTokenCookie).isNotNull();
 
         ResultActions resultActions = mvc
                 .perform(
