@@ -43,7 +43,7 @@ public class UserControllerTest {
     @BeforeAll
     void setUpAdminUser() {
         if (userService.findByUserLoginId("adminuser").isEmpty()) {
-            userService.register(new UserRegisterDto(
+            userService.registerAdmin(new UserRegisterDto(
                     "adminuser",
                     "관리자",
                     "admin1234",
