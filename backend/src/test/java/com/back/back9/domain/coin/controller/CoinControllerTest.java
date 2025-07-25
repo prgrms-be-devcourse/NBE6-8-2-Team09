@@ -4,7 +4,7 @@ import com.back.back9.domain.coin.entity.Coin;
 import com.back.back9.domain.coin.repository.CoinRepository;
 import com.back.back9.domain.coin.service.CoinService;
 import com.back.back9.global.error.ErrorException;
-import org.hamcrest.Matchers;
+import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -21,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -30,6 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Transactional
+@JsonPOJOBuilder
 @Tag("coin")
 public class CoinControllerTest {
     @Autowired
@@ -37,6 +37,25 @@ public class CoinControllerTest {
 
     @Autowired
     private CoinService coinService;
+
+    @Autowired
+    private CoinRepository coinRepository;
+
+    private Coin coin1;
+    private Coin coin2;
+    private Coin coin3;
+    private Coin coin4;
+
+    @BeforeEach
+    void setUp() {
+        coinRepository.deleteAll();
+
+        coin1 = coinRepository.save(new Coin("BTC","비트코안","Bitcoin"));
+        coin2 = coinRepository.save(new Coin("ETH", "이더리움", "Ethereum"));
+        coin3 = coinRepository.save(new Coin("XRP","리플","Ripple"));
+        coin4 = coinRepository.save(new Coin("DOGE","도지코인","Dogecoin"));
+    }
+
 
     @Test
     @DisplayName("Coin 전체 조회")
@@ -53,7 +72,7 @@ public class CoinControllerTest {
                 .andExpect(handler().handlerType(CoinController.class))
                 .andExpect(handler().methodName("getCoins"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(3));
+                .andExpect(jsonPath("$.length()").value(4));
 
         for (int i = 0; i < testCoin.size(); i++) {
             Coin coin = testCoin.get(i);
@@ -62,7 +81,6 @@ public class CoinControllerTest {
                     .andExpect(jsonPath("$[%d].symbol".formatted(i)).value(coin.getSymbol()))
                     .andExpect(jsonPath("$[%d].koreanName".formatted(i)).value(coin.getKoreanName()))
                     .andExpect(jsonPath("$[%d].englishName".formatted(i)).value(coin.getEnglishName()));
-//                    .andExpect(jsonPath("$[%d].createDate".formatted(i)).value(Matchers.startsWith(coin.getCreated_at().toString().substring(0, 20))));
         }
 
     }
@@ -70,7 +88,25 @@ public class CoinControllerTest {
     @Test
     @DisplayName("Coin 단건 조회")
     void getCoin() throws Exception {
-        int id = 1;
+
+        ResultActions resultActions = mvc
+                .perform(
+                        get("/coins/" + coin1.getId())
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CoinController.class))
+                .andExpect(handler().methodName("getCoin"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.symbol").value(coin1.getSymbol()));
+    }
+
+    @Test
+    @DisplayName("Coin 단건 조회, 404")
+    void getCoin2() throws Exception {
+        int id = 999;
+
         ResultActions resultActions = mvc
                 .perform(
                         get("/coins/" + id)
@@ -80,27 +116,8 @@ public class CoinControllerTest {
         resultActions
                 .andExpect(handler().handlerType(CoinController.class))
                 .andExpect(handler().methodName("getCoin"))
-                .andExpect(status().isOk());
-    }
-
-    @Test
-    @DisplayName("Coin 삭제")
-    void deleteCoin() throws Exception {
-        int id = 1;
-        ResultActions resultActions = mvc
-                .perform(
-                        delete("/coins/" + id)
-                )
-                .andDo(print());
-
-        resultActions
-                .andExpect(handler().handlerType(CoinController.class))
-                .andExpect(handler().methodName("deleteCoin"))
-                .andExpect(status().isOk());
-
-        assertThrows(ErrorException.class, () -> {
-            coinService.findById(id);
-        });
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.status").value("404"));
     }
 
     @Test
@@ -133,12 +150,53 @@ public class CoinControllerTest {
     }
 
     @Test
-    @DisplayName("Coin 수정")
-    void modifyCoin() throws Exception {
-        int id = 1;
+    @DisplayName("코인 추가, Without symbol")
+    void addCoin2() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        put("/coins/" + id)
+                        post("/coins")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("""
+                                        {
+                                        "symbol" : "",
+                                        "koreanName" : "비트코인 new",
+                                        "englishName" : "Bitcoint new"
+                                        }
+                                        """)
+                ).andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CoinController.class))
+                .andExpect(handler().methodName("addCoin"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value("400"));
+    }
+
+    @Test
+    @DisplayName("Coin 삭제")
+    void deleteCoin() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        delete("/coins/" + coin1.getId())
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(handler().handlerType(CoinController.class))
+                .andExpect(handler().methodName("deleteCoin"))
+                .andExpect(status().isOk());
+
+        assertThrows(ErrorException.class, () -> {
+            coinService.findById(coin1.getId());
+        });
+    }
+
+    @Test
+    @DisplayName("Coin 수정")
+    void modifyCoin() throws Exception {
+        ResultActions resultActions = mvc
+                .perform(
+                        put("/coins/" + coin1.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -149,7 +207,7 @@ public class CoinControllerTest {
                                         """)
                 ).andDo(print());
 
-        Coin coin = coinService.findById(id);
+        Coin coin = coinService.findById(coin1.getId());
 
         resultActions
                 .andExpect(handler().handlerType(CoinController.class))

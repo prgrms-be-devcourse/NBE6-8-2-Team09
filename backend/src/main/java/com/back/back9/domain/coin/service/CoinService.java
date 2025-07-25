@@ -38,10 +38,7 @@ public class CoinService {
 
     // 코인 추가
     public Coin add(String symbol, String koreanName, String englishName) {
-        Coin coin = new Coin();
-        coin.setSymbol(symbol);
-        coin.setKoreanName(koreanName);
-        coin.setEnglishName(englishName);
+        Coin coin = new Coin(symbol, koreanName, englishName);
         return coinRepository.save(coin);
     }
 
