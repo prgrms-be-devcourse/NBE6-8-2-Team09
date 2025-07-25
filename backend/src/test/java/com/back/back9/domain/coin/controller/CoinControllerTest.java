@@ -3,6 +3,7 @@ package com.back.back9.domain.coin.controller;
 import com.back.back9.domain.coin.entity.Coin;
 import com.back.back9.domain.coin.repository.CoinRepository;
 import com.back.back9.domain.coin.service.CoinService;
+import com.back.back9.global.error.ErrorException;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -96,7 +98,9 @@ public class CoinControllerTest {
                 .andExpect(handler().methodName("deleteCoin"))
                 .andExpect(status().isOk());
 
-        assertTrue(coinService.findById(id).isEmpty());
+        assertThrows(ErrorException.class, () -> {
+            coinService.findById(id);
+        });
     }
 
     @Test
@@ -145,7 +149,7 @@ public class CoinControllerTest {
                                         """)
                 ).andDo(print());
 
-        Coin coin = coinService.findById(id).get();
+        Coin coin = coinService.findById(id);
 
         resultActions
                 .andExpect(handler().handlerType(CoinController.class))

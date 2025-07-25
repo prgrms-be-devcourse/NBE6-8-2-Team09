@@ -2,6 +2,8 @@ package com.back.back9.domain.coin.service;
 
 import com.back.back9.domain.coin.entity.Coin;
 import com.back.back9.domain.coin.repository.CoinRepository;
+import com.back.back9.global.error.ErrorCode;
+import com.back.back9.global.error.ErrorException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,22 +15,28 @@ import java.util.Optional;
 public class CoinService {
     private final CoinRepository coinRepository;
 
+    // 코인 전체 조회
     public List<Coin> findAll() {
         return coinRepository.findAll();
     }
 
-    public Optional<Coin> findById(int id) {
-        return coinRepository.findById(id);
+    // 코인 단건 조회
+    public Coin findById(int id) {
+        return coinRepository.findById(id)
+                .orElseThrow(() -> new ErrorException(ErrorCode.COIN_NOT_FOUND, id));
     }
 
+    // 코인 삭제
     public void delete(Coin coin) {
         coinRepository.delete(coin);
     }
 
+    // 코인 개수
     public long count() {
         return coinRepository.count();
     }
 
+    // 코인 추가
     public Coin add(String symbol, String koreanName, String englishName) {
         Coin coin = new Coin();
         coin.setSymbol(symbol);
@@ -37,11 +45,13 @@ public class CoinService {
         return coinRepository.save(coin);
     }
 
-    public Optional<Coin> findLastest(){
-        return coinRepository.findFirstByOrderByIdDesc();
-    }
-
+    // 코인 수정
     public void modify(Coin coin, String symbol, String koreanName, String englishName) {
         coin.modify(symbol, koreanName, englishName);
+    }
+
+    // 마지막 코인 조회
+    public Optional<Coin> findLastest() {
+        return coinRepository.findFirstByOrderByIdDesc();
     }
 }

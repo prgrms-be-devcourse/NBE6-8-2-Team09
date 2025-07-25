@@ -1,11 +1,12 @@
 package com.back.back9.domain.coin.controller;
 
+import com.back.back9.domain.coin.dto.CoinAddRequest;
 import com.back.back9.domain.coin.dto.CoinDto;
 import com.back.back9.domain.coin.entity.Coin;
 import com.back.back9.domain.coin.service.CoinService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,67 +18,71 @@ public class CoinController {
 
     private final CoinService coinService;
 
+    // 전체 코인 조회 (GET)
     @GetMapping("/coins")
     @Transactional
-    public List<CoinDto> getCoins() {
+    public ResponseEntity<List<CoinDto>> getCoins() {
         List<Coin> coins = coinService.findAll();
 
-        return coins
+        List<CoinDto> coinDtos = coins
                 .stream()
                 .map(c -> new CoinDto(c))
                 .toList();
+
+        return ResponseEntity.ok(coinDtos);
     }
 
+    // 코인 단건 조회 (GET)
     @GetMapping("/coins/{id}")
     @Transactional
-    public CoinDto getCoin(
-        @PathVariable int id
-    ){
-        Coin coin = coinService.findById(id).get();
-        return new CoinDto(coin);
+    public ResponseEntity<CoinDto> getCoin(
+            @PathVariable int id
+    ) {
+        Coin coin = coinService.findById(id);
+
+        return ResponseEntity.ok(new CoinDto(coin));
     }
 
+    // 코인 삭제 (DELETE)
     @DeleteMapping("/coins/{id}")
     @Transactional
-    public String deleteCoin(
+    public ResponseEntity<String> deleteCoin(
             @PathVariable int id
-    ){
-        Coin coin = coinService.findById(id).get();
+    ) {
+        Coin coin = coinService.findById(id);
 
         coinService.delete(coin);
 
-        return "%d번 코인이 삭제되었습니다.".formatted(id);
+        String result = "%d번 코인이 삭제 되었습니다.".formatted(id);
+
+        return ResponseEntity.ok(result);
     }
 
-    record CoinAddReqBody(
-            @NotBlank
-            String symbol,
 
-            @NotBlank
-            String koreanName,
-
-            @NotBlank
-            String englishName
-    ){}
-
+    // 코인 추가 (POST)
     @PostMapping("/coins")
     @Transactional
-    public CoinDto addCoin(
-            @Valid @RequestBody CoinAddReqBody reqBody
-    ){
-        Coin coin = coinService.add(reqBody.symbol, reqBody.koreanName, reqBody.englishName);
+    public ResponseEntity<CoinDto> addCoin(
+            @Valid @RequestBody CoinAddRequest reqBody
+    ) {
+        Coin coin = coinService.add(reqBody.symbol(), reqBody.koreanName(), reqBody.englishName());
 
-        return new CoinDto(coin);
+        return ResponseEntity.ok(new CoinDto(coin));
     }
 
+    // 코인 수정 (PUT)
     @PutMapping("/coins/{id}")
     @Transactional
-    public void modifyCoin(
+    public ResponseEntity<String> modifyCoin(
             @PathVariable int id,
-            @RequestBody CoinAddReqBody reqBody
-    ){
-        Coin coin = coinService.findById(id).get();
+            @RequestBody CoinAddRequest reqBody
+    ) {
+        Coin coin = coinService.findById(id);
 
-        coinService.modify(coin, reqBody.symbol, reqBody.koreanName, reqBody.englishName);
+        coinService.modify(coin, reqBody.symbol(), reqBody.koreanName(), reqBody.englishName());
+
+        String result = "%d번 코인이 수정되었습니다.".formatted(id);
+
+        return ResponseEntity.ok(result);
     }
 }
