@@ -53,7 +53,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          Invoke-WebRequest -Uri https://github.com/tporadowski/redis/releases/download/v7.0.11.0/redis-7.0.11.0.zip -OutFile redis.zip
+          Invoke-WebRequest -Uri https://github.com/tporadowski/redis/releases/download/v7.2.4.0/redis-7.2.4.0.zip
           Expand-Archive redis.zip -DestinationPath redis
           Start-Process -FilePath redis\\redis-server.exe
 
