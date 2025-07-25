@@ -218,7 +218,6 @@ public class UserControllerTest {
                 "adminpass"
         ));
 
-        // 관리자 권한 직접 설정 및 저장
         User adminUser = userService.findByUserLoginId("adminuser").orElseThrow();
         adminUser.setRole(User.UserRole.ADMIN);
         userService.save(adminUser);
