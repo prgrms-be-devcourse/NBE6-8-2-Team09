@@ -22,9 +22,6 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final AuthTokenService authTokenService;
 
-    public long count() {
-        return userRepository.count();
-    }
 
     public RsData<User> register(UserRegisterDto dto) {
         if (!dto.password().equals(dto.confirmPassword())) {
