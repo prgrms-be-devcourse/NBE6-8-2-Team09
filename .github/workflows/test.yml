@@ -53,7 +53,7 @@ jobs:
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          $url = "https://github.com/ServiceStack/redis-windows/releases/download/5.0.10/redis-windows-5.0.10.zip"
+          $url = "https://github.com/ServiceStack/redis-windows/downloads/redis-64.3.0.503.zip"
           Invoke-WebRequest -Uri $url -OutFile redis.zip
           Expand-Archive redis.zip -DestinationPath redis
           Start-Process -FilePath redis\\redis-server.exe
