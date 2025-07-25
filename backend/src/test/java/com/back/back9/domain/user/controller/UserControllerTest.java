@@ -4,9 +4,7 @@ import com.back.back9.domain.user.dto.UserRegisterDto;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.service.UserService;
 import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -25,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @Transactional
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class UserControllerTest {
     @Autowired
     private MockMvc mvc;
@@ -39,6 +38,21 @@ public class UserControllerTest {
                 "12345678",
                 "12345678"
         ));
+    }
+
+    @BeforeAll
+    void setUpAdminUser() {
+        if (userService.findByUserLoginId("adminuser").isEmpty()) {
+            userService.register(new UserRegisterDto(
+                    "adminuser",
+                    "관리자",
+                    "admin1234",
+                    "admin1234"
+            ));
+            User adminUser = userService.findByUserLoginId("adminuser").get();
+            adminUser.setRole(User.UserRole.ADMIN);
+            userService.save(adminUser);
+        }
     }
 
     @Test
@@ -211,14 +225,7 @@ public class UserControllerTest {
     @Test
     @DisplayName("관리자 로그인 후 관리자 API 접근")
     void t6() throws Exception {
-        userService.registerAdmin(new UserRegisterDto(
-                "adminuser",
-                "관리자",
-                "adminpass",
-                "adminpass"
-        ));
-
-        User adminUser = userService.findByUserLoginId("adminuser").orElseThrow();
+        User adminUser = userService.findByUserLoginId("adminuser").get();
         adminUser.setRole(User.UserRole.ADMIN);
         userService.save(adminUser);
 
@@ -229,7 +236,7 @@ public class UserControllerTest {
                                 .content("""
 {
     "userLoginId": "adminuser",
-    "password": "adminpass"
+    "password": "admin1234"
 }
 """)
                 )
