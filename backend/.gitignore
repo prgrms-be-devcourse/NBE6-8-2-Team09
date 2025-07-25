@@ -41,4 +41,4 @@ db_dev.mv.db
 db_dev.trace.db
 
 ### KEY ###
-src/main/resources/application-key.yml
+.env
