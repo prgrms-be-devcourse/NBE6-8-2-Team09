@@ -3,6 +3,8 @@ package com.back.back9.domain.coin.controller;
 import com.back.back9.domain.coin.dto.CoinDto;
 import com.back.back9.domain.coin.entity.Coin;
 import com.back.back9.domain.coin.service.CoinService;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -48,15 +50,20 @@ public class CoinController {
     }
 
     record CoinAddReqBody(
+            @NotBlank
             String symbol,
+
+            @NotBlank
             String koreanName,
+
+            @NotBlank
             String englishName
     ){}
 
     @PostMapping("/coins")
     @Transactional
     public CoinDto addCoin(
-            @RequestBody CoinAddReqBody reqBody
+            @Valid @RequestBody CoinAddReqBody reqBody
     ){
         Coin coin = coinService.add(reqBody.symbol, reqBody.koreanName, reqBody.englishName);
 
