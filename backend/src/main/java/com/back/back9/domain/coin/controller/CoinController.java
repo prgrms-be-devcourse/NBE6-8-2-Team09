@@ -14,12 +14,13 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/coins")
 public class CoinController {
 
     private final CoinService coinService;
 
     // 전체 코인 조회 (GET)
-    @GetMapping("/coins")
+    @GetMapping()
     @Transactional
     public ResponseEntity<List<CoinDto>> getCoins() {
         List<Coin> coins = coinService.findAll();
@@ -33,7 +34,7 @@ public class CoinController {
     }
 
     // 코인 단건 조회 (GET)
-    @GetMapping("/coins/{id}")
+    @GetMapping("/{id}")
     @Transactional
     public ResponseEntity<CoinDto> getCoin(
             @PathVariable int id
@@ -44,7 +45,7 @@ public class CoinController {
     }
 
     // 코인 삭제 (DELETE)
-    @DeleteMapping("/coins/{id}")
+    @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<String> deleteCoin(
             @PathVariable int id
@@ -60,7 +61,7 @@ public class CoinController {
 
 
     // 코인 추가 (POST)
-    @PostMapping("/coins")
+    @PostMapping()
     @Transactional
     public ResponseEntity<CoinDto> addCoin(
             @Valid @RequestBody CoinAddRequest reqBody
@@ -71,7 +72,7 @@ public class CoinController {
     }
 
     // 코인 수정 (PUT)
-    @PutMapping("/coins/{id}")
+    @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<String> modifyCoin(
             @PathVariable int id,
