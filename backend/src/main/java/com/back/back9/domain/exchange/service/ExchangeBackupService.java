@@ -5,7 +5,6 @@ import com.back.back9.domain.exchange.entity.Exchange;
 import com.back.back9.domain.exchange.repository.ExchangeRepository;
 import com.back.back9.global.error.ErrorCode;
 import com.back.back9.global.error.ErrorException;
-import com.back.back9.global.problem.ProblemDetails;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;

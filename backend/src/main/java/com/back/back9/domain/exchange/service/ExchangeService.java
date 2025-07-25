@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 public class ExchangeService {
 
     private final RedisService redisService;
-    private final StringRedisTemplate redisTemplate;
 
     public CoinPriceResponse getLatestCandleByScan(String symbol) {
         String marketCode = CoinSymbolMapper.toMarketCode(symbol);

@@ -19,8 +19,7 @@ import java.util.Objects;
 public class RedisService {
 
     private final RedisTemplate<String, String> redisTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .configure(SerializationFeature.WRITE_BIGDECIMAL_AS_PLAIN, true);
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void initRedis() {
         Objects.requireNonNull(redisTemplate.getConnectionFactory()).getConnection().serverCommands();
@@ -51,7 +50,7 @@ public class RedisService {
             String latestKey = "latest:" + symbol;
 
             // 💡 toPlainString()으로 변환 후 저장
-            RedisDTO redisDTO = new RedisDTO(
+            RedisDTO dto = new RedisDTO(
                     open.toPlainString(),
                     high.toPlainString(),
                     low.toPlainString(),
@@ -60,7 +59,7 @@ public class RedisService {
                     timestamp
             );
 
-            String value = objectMapper.writeValueAsString(redisDTO);
+            String value = objectMapper.writeValueAsString(dto);
 
             redisTemplate.opsForValue().set(redisKeyWithTime, value);
             redisTemplate.opsForValue().set(latestKey, value);
