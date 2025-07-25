@@ -25,6 +25,10 @@ jobs:
             report_path: "backend\\build\\reports\\tests"
             domain_tasks: "testUser testExchange testTrade_log testWallet testCoin"
     runs-on: ${{ matrix.os }}
+    env:
+      JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
+      GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
 
     steps:
     # 1) 소스 체크아웃
