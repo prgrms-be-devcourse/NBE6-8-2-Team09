@@ -36,5 +36,9 @@ out/
 ### VS Code ###
 .vscode/
 
-### 환경변수 제외
-.env
+### DB Code ###
+db_dev.mv.db
+db_dev.trace.db
+
+### KEY ###
+src/main/resources/application-key.yml
