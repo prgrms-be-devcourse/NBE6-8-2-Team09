@@ -20,7 +20,7 @@ public class AnalyticsController {
 
     @GetMapping("/wallet/{walletId}")
     @Transactional(readOnly = true)
-    public ResponseEntity<ProfitRateResponse> getUserProfitRate(@PathVariable Long walletId) {
+    public ResponseEntity<ProfitRateResponse> getUserProfitRate(@PathVariable int walletId) {
         ProfitRateResponse response = analyticsService.calculateRealizedProfitRates(walletId);
         return ResponseEntity.ok(response);
     }

@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 
 public record TradeLogDto(
     int id,
+    int walletId,
     String date,
     int coinId,
     TradeType tradeType,
@@ -15,7 +16,8 @@ public record TradeLogDto(
 ) {
     public TradeLogDto(TradeLog tradeLog){
         this(
-                tradeLog.getId(),
+                Math.toIntExact(tradeLog.getId()),
+                tradeLog.getWalletId(),
                 tradeLog.getCreatedAt().toLocalDate().toString(),
                 tradeLog.getCoinId(),
                 tradeLog.getType(),

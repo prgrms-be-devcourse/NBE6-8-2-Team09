@@ -77,7 +77,7 @@ public class BaseInitData {
             }
             log.setPrice(price);
 
-            log.setCreatedAt(baseDate.plusDays((i - 1) * 7));
+//            log.setCreatedAt(baseDate.plusDays((i - 1) * 7));
             logs.add(log);
         }
 

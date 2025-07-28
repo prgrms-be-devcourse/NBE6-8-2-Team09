@@ -34,10 +34,10 @@ public class TradeLogController {
     @Transactional(readOnly = true)
     ///back9/tradeLogs?startDate=2023-10-01&endDate=2023-10-31&type=buy
     public List<TradeLogDto> getItems(
-            @PathVariable Long wallet_id,
+            @PathVariable int wallet_id,
             @RequestParam(required = false) String type,
-            @RequestParam(required = false) Long coinId,
-            @RequestParam(required = false) Long siteId,
+            @RequestParam(required = false) int coinId,
+            @RequestParam(required = false) int siteId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             Pageable pageable

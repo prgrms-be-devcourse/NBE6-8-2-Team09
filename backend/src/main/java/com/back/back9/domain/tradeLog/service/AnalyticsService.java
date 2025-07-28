@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 @Service
 public class AnalyticsService {
-    private TradeLogRepository tradeLogRepository;
+    private final TradeLogRepository tradeLogRepository;
     public AnalyticsService(TradeLogRepository tradeLogRepository) {
         this.tradeLogRepository = tradeLogRepository;
     }
@@ -32,7 +32,7 @@ public class AnalyticsService {
     * 4-5. 현재 보유 수량 = 매수 수량 - 매도 수량
     * 4-6. 분석 결과 객체에 저장
     * */
-    public ProfitRateResponse calculateRealizedProfitRates(Long walletId) {
+    public ProfitRateResponse calculateRealizedProfitRates(int walletId) {
         List<TradeLog> tradeLogs = tradeLogRepository.findByWalletId(walletId);
 
         Map<Integer, List<TradeLog>> tradeLogsByCoin = tradeLogs.stream()
@@ -41,7 +41,7 @@ public class AnalyticsService {
         List<ProfitAnalysisDto> coinAnalytics = new ArrayList<>();
 
         for (Map.Entry<Integer, List<TradeLog>> entry : tradeLogsByCoin.entrySet()) {
-            Long coinId = Long.valueOf(entry.getKey());
+            int coinId = entry.getKey();
             List<TradeLog> logs = entry.getValue();
 
             BigDecimal totalBuyQuantity = BigDecimal.ZERO;
@@ -96,7 +96,7 @@ public class AnalyticsService {
     * 3-4. 현재 보유량 = 보유량
     * 3-5. 분석 결과 객체에 저장
     */
-    public ProfitRateResponse calculateUnRealizedProfitRates(Long walletId) {
+    public ProfitRateResponse calculateUnRealizedProfitRates(int walletId) {
         List<TradeLog> tradeLogs = tradeLogRepository.findByWalletId(walletId);
 
         Map<Integer, List<TradeLog>> tradeLogsByCoin = tradeLogs.stream()
@@ -105,7 +105,7 @@ public class AnalyticsService {
         List<ProfitAnalysisDto> coinAnalytics = new ArrayList<>();
 
         for (Map.Entry<Integer, List<TradeLog>> entry : tradeLogsByCoin.entrySet()) {
-            Long coinId = Long.valueOf(entry.getKey());
+            int coinId = entry.getKey();
             List<TradeLog> logs = entry.getValue();
 
             BigDecimal totalBuyQuantity = BigDecimal.ZERO;
