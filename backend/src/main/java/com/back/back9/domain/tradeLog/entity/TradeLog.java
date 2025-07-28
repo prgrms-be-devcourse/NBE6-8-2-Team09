@@ -10,7 +10,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -47,7 +46,7 @@ public class TradeLog extends BaseEntity {
 //    @Column(nullable = false, precision = 19, scale = 8)
 //    private BigDecimal profitRate;
 
-    public void setCreatedAt(LocalDateTime createdAt) {
-        super.createdAt = createdAt; // BaseEntity의 protected createdAt 필드 접근
-    }
+//    public void setCreatedAt(LocalDateTime createdAt) {
+//        super.createdAt = createdAt; // BaseEntity의 protected createdAt 필드 접근
+//    }
 }
