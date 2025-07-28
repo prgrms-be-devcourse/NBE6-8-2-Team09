@@ -207,4 +207,12 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.code").value(401))
                 .andExpect(jsonPath("$.message").value("Authorization 헤더가 Bearer 형식이 아닙니다."));
     }
+    @Test
+    @DisplayName("구글 OAuth2 로그인 엔드포인트 접근 시 구글 로그인 창으로 리다이렉트된다")
+    void t6() throws Exception {
+        mvc.perform(get("/oauth2/authorization/google"))
+                .andDo(print())
+                .andExpect(status().is3xxRedirection())
+                .andExpect(header().string("Location", org.hamcrest.Matchers.startsWith("https://accounts.google.com/")));
+    }
 }
