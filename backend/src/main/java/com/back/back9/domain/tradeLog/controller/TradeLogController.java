@@ -36,8 +36,8 @@ public class TradeLogController {
     public List<TradeLogDto> getItems(
             @PathVariable int wallet_id,
             @RequestParam(required = false) String type,
-            @RequestParam(required = false) int coinId,
-            @RequestParam(required = false) int siteId,
+            @RequestParam(required = false) Integer coinId,
+            @RequestParam(required = false) Integer siteId,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             Pageable pageable

@@ -26,8 +26,8 @@ public class TradeLogService {
 
     }
 
-    public List<TradeLog> findByFilter(int walletId, TradeType type, int coinId, int siteId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
-        if (type == null && coinId == -1 && siteId == -1 && startDate == null && endDate == null) {
+    public List<TradeLog> findByFilter(int walletId, TradeType type, Integer coinId, Integer siteId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        if (type == null && coinId == null && siteId == null && startDate == null && endDate == null) {
             return tradeLogRepository.findByWalletId(walletId, pageable).getContent();
         }
 

@@ -25,8 +25,8 @@ public interface TradeLogRepository extends JpaRepository<TradeLog, Long> {
             "AND (:endDate IS NULL OR t.createdAt <= :endDate)")
     Page<TradeLog> findByWalletIdFilter(@Param("walletId") int walletId,
                                         @Param("type") TradeType type, // ← enum으로 변경
-                                        @Param("coinId") int coinId,
-                                        @Param("siteId") int siteId,
+                                        @Param("coinId") Integer  coinId,
+                                        @Param("siteId") Integer  siteId,
                                         @Param("startDate") LocalDateTime startDate,
                                         @Param("endDate") LocalDateTime endDate,
                                         Pageable pageable);
