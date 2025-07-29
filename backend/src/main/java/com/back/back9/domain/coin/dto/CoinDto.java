@@ -3,7 +3,7 @@ package com.back.back9.domain.coin.dto;
 import com.back.back9.domain.coin.entity.Coin;
 
 public record CoinDto(
-        int id,
+        long id,
         String symbol,
         String koreanName,
         String englishName

@@ -1,7 +1,9 @@
 package com.back.back9.domain.coin.entity;
 
+import com.back.back9.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,10 +19,8 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Setter
 @NoArgsConstructor
 @EntityListeners(AuditingEntityListener.class)
-public class Coin {
-    @Id
-    @GeneratedValue(strategy = IDENTITY)
-    private int id;
+@Builder
+public class Coin extends BaseEntity {
 
     @NotBlank
     @Column(unique = true)

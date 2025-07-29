@@ -21,7 +21,7 @@ public class CoinService {
     }
 
     // 코인 단건 조회
-    public Coin findById(int id) {
+    public Coin findById(long id) {
         return coinRepository.findById(id)
                 .orElseThrow(() -> new ErrorException(ErrorCode.COIN_NOT_FOUND, id));
     }
