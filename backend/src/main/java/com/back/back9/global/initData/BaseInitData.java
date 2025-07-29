@@ -1,5 +1,6 @@
 package com.back.back9.global.initData;
 
+import com.back.back9.domain.coin.service.CoinService;
 import com.back.back9.domain.tradeLog.entity.TradeLog;
 import com.back.back9.domain.tradeLog.entity.TradeType;
 import com.back.back9.domain.tradeLog.service.TradeLogService;
@@ -25,6 +26,10 @@ public class BaseInitData {
     private BaseInitData self;
     @Autowired
     private final TradeLogService tradeLogService;
+    @Autowired
+    private final CoinService coinService;
+    @Autowired
+    private UserRepository userRepository;
 
     @Bean
     ApplicationRunner baseInitDataApplicationRunner() {
@@ -32,6 +37,19 @@ public class BaseInitData {
             self.tradeLogWork();
         };
     }
+
+    @Transactional
+    public void coinWork() {
+        if (coinService.count() > 0) return;
+
+        coinService.add("KRW-BTC", "비트코인", "Bitcoin");
+        coinService.add("KRW-ETH", "이더리움", "Ethereum");
+        coinService.add("KRW-XRP", "리플", "Ripple");
+        coinService.add("KRW-LTC", "라이트코인", "Litecoin");
+        coinService.add("KRW-BCH", "비트코인 캐시", "Bitcoin Cash");
+
+    }
+
     @Transactional
     public void tradeLogWork() {
         if(tradeLogService.count() > 0) return;
@@ -83,11 +101,4 @@ public class BaseInitData {
 
         tradeLogService.saveAll(logs);
     }
-
-
-
-    @Autowired
-    private UserRepository userRepository;
 }
-
-
