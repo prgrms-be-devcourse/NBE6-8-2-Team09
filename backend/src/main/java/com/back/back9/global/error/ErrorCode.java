@@ -16,6 +16,8 @@ public enum ErrorCode {
     WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "404-WALLET-NOT-FOUND", "지갑을 찾을 수 없습니다. id=%s"),
     COIN_NOT_FOUND(HttpStatus.NOT_FOUND, "404-COIN-NOT-FOUND", "코인을 찾을 수 없습니다. id=%s"),
     BACKUP_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "404-BACKUP-DATA-NOT-FOUND", "백업데이터를 찾을 수 없습니다."),
+    // 422
+    INVALID_COIN_DATA(HttpStatus.UNPROCESSABLE_ENTITY, "422-INVALID-COIN-DATA", "유효하지 않은 코인 데이터입니다. coinAmountId=%s"),
     // 409
     DUPLICATED_EMAIL(HttpStatus.CONFLICT, "409-DUPLICATED-EMAIL", "이미 존재하는 이메일입니다. email=%s"),
     // 500

@@ -1,7 +1,7 @@
 package com.back.back9.domain.wallet.controller;
 
 import com.back.back9.domain.wallet.dto.ChargePointsRequest;
-import com.back.back9.domain.wallet.dto.WalletBalanceResponse;
+import com.back.back9.domain.wallet.dto.WalletResponse;
 import com.back.back9.domain.wallet.service.WalletService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,28 +19,22 @@ public class WalletController {
 
     private final WalletService walletService;
 
-    // 지갑 잔액 조회(GET 요청)
-    @GetMapping("/users/{userId}/coins/{coinId}")
-    public ResponseEntity<WalletBalanceResponse> getWalletBalance(
-            @PathVariable int userId,
-            @PathVariable int coinId) {
-
-        log.info("지갑 잔액 조회 요청 - 사용자 ID: {}, 코인 ID: {}", userId, coinId);
-        return walletService.getWalletBalance(userId, coinId);
+    // 사용자 지갑 정보 조회 (모든 코인 수량 포함)
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<WalletResponse> getUserWallet(@PathVariable Long userId) {
+        log.info("사용자 지갑 조회 요청 - 사용자 ID: {}", userId);
+        return walletService.getUserWallet(userId);
     }
 
-    // 포인트 충전(POST 요청)
-    @PostMapping("/users/{userId}/coins/{coinId}/charge")
-    public ResponseEntity<WalletBalanceResponse> chargePoints(
-            @PathVariable int userId,
-            @PathVariable int coinId,
+    // 지갑 잔액 충전
+    @PostMapping("/users/{userId}/charge")
+    public ResponseEntity<WalletResponse> chargeWallet(
+            @PathVariable Long userId,
             @Valid @RequestBody ChargePointsRequest request) {
 
-        log.info("포인트 충전 요청 - 사용자 ID: {}, 코인 ID: {}, 충전 금액: {}",
-                userId, coinId, request.getAmount());
+        log.info("지갑 충전 요청 - 사용자 ID: {}, 충전 금액: {}",
+                userId, request.getAmount());
 
-        return walletService.chargePoints(userId, coinId, request);
+        return walletService.chargeWallet(userId, request);
     }
-
-
 }

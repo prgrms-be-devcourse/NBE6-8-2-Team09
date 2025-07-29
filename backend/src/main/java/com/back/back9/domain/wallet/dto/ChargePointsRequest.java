@@ -12,11 +12,7 @@ public record ChargePointsRequest(
         @Positive(message = "충전할 포인트는 양수여야 합니다")
         BigDecimal amount
 ) {
-    public ChargePointsRequest(BigDecimal amount) {
-        this.amount = amount;
-    }
     public BigDecimal getAmount() {
         return amount;
     }
-
 }

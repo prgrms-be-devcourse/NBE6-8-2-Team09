@@ -1,33 +1,40 @@
 package com.back.back9.domain.wallet.entity;
 
 
+import com.back.back9.domain.tradeLog.entity.TradeLog;
+import com.back.back9.domain.user.entity.User;
+import com.back.back9.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 // Wallet 엔티티
-// 이 클래스는 사용자의 지갑 정보를 나타내며, 잔액 충전 기능을 포함합니다.
+// 이 클래스는 사용자의 지갑 정보를 나타내며, 여러 코인의 수량 정보를 가질 수 있습니다.
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
 @Table(name = "wallet")
-public class Wallet {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+public class Wallet extends BaseEntity {
 
     @NotNull
-    @Column(name = "user_id")
-    private int userId;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @NotNull
-    @Column(name = "coin_id")
-    private int coinId;
+    @OneToOne
+    @JoinColumn(name = "tradelog_id")
+    private TradeLog tradeLog;
+
+
+
+    @OneToMany(mappedBy = "wallet", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<CoinAmount> coinAmounts;
 
     @NotNull
     private String address;
@@ -37,10 +44,6 @@ public class Wallet {
     @Column(precision = 19, scale = 8)
     private BigDecimal balance = BigDecimal.valueOf(500000000);
 
-    @Builder.Default
-    @Column(name = "created_at")
-    private OffsetDateTime createdAt = OffsetDateTime.now();
-
     @Column(name = "updated_at")
     private OffsetDateTime updatedAt;
 
@@ -49,5 +52,4 @@ public class Wallet {
         this.balance = this.balance.add(amount);
         this.updatedAt = OffsetDateTime.now();
     }
-
 }

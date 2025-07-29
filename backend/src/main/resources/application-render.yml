@@ -1,0 +1,26 @@
+spring:
+  datasource:
+    # Render 'External URL'을 분해해서 넣거나, 직접 JDBC URL로 지정
+    # host, port, db, user, password는 Render 대시보드에서 확인
+    url: ${RENDER_INTERNAL_URL}
+    username: ${RENDER_INTERNAL_DATABASE_USER}
+    password: ${RENDER_INTERNAL_DATABASE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10   # 무료/저사양 시작은 5~10 권장
+      minimum-idle: 2
+      connection-timeout: 30000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate      # 스키마는 마이그레이션 도구로 관리 권장
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc.time_zone: Asia/Seoul
+
+logging:
+  level:
+    org.hibernate.SQL: debug
