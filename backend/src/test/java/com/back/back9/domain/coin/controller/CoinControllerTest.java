@@ -79,7 +79,7 @@ public class CoinControllerTest {
     void getCoins() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        get("/api/v1/coins")
+                        get("/api/v1/adm/coins")
                 )
                 .andDo(print());
 
@@ -107,7 +107,7 @@ public class CoinControllerTest {
     void getCoin() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        get("/api/v1/coins/" + coin1.getId())
+                        get("/api/v1/adm/coins/" + coin1.getId())
                 )
                 .andDo(print());
 
@@ -125,7 +125,7 @@ public class CoinControllerTest {
 
         ResultActions resultActions = mvc
                 .perform(
-                        get("/api/v1/coins/" + id)
+                        get("/api/v1/adm/coins/" + id)
                 )
                 .andDo(print());
 
@@ -141,13 +141,13 @@ public class CoinControllerTest {
     void addCoin() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/coins")
+                        post("/api/v1/adm/coins")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
                                         "symbol" : "BTC new",
                                         "koreanName" : "비트코인 new",
-                                        "englishName" : "Bitcoint new"
+                                        "englishName" : "Bitcoin new"
                                         }
                                         """)
                 ).andDo(print());
@@ -170,7 +170,7 @@ public class CoinControllerTest {
     void addCoin2() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        post("/api/v1/coins")
+                        post("/api/v1/adm/coins")
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {
@@ -193,7 +193,7 @@ public class CoinControllerTest {
     void deleteCoin() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        delete("/api/v1/coins/" + coin1.getId())
+                        delete("/api/v1/adm/coins/" + coin1.getId())
                 )
                 .andDo(print());
 
@@ -212,7 +212,7 @@ public class CoinControllerTest {
     void modifyCoin() throws Exception {
         ResultActions resultActions = mvc
                 .perform(
-                        put("/api/v1/coins/" + coin1.getId())
+                        put("/api/v1/adm/coins/" + coin1.getId())
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .content("""
                                         {

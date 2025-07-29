@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface CoinRepository extends JpaRepository<Coin, Long> {
 
     Optional<Coin> findFirstByOrderByIdDesc();
+
+    Optional<Coin> findBySymbol(String symbol);
 }

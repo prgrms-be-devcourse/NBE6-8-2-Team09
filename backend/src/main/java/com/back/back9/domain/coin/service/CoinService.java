@@ -64,4 +64,9 @@ public class CoinService {
     public Optional<Coin> findLastest() {
         return coinRepository.findFirstByOrderByIdDesc();
     }
+
+    // 심볼로 코인 조회
+    public Optional<Coin> findBySymbol(String symbol) {
+        return coinRepository.findBySymbol(symbol);
+    }
 }
