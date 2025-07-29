@@ -13,7 +13,7 @@ import { fadeInUp } from "@/lib/motion";
 
 const schema = z.object({
     userLoginId: z.string().min(1, "아이디를 입력해주세요."),
-    password: z.string().min(3, "비밀번호는 3자 이상"),
+    password: z.string().min(6, "비밀번호는 6자 이상"),
 });
 type FormValues = z.infer<typeof schema>;
 
@@ -64,23 +64,21 @@ export default function LoginPage() {
         resolver: zodResolver(schema),
         defaultValues: { userLoginId: "", password: "" },
     });
-    //const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/login` 
-    const onSubmit = async (values: any) => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/login`, {
+
+    const onSubmit = async (values: FormValues) => {
+        setError(null);
+        const res = await fetch("/api/auth/login", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
             body: JSON.stringify(values),
-            credentials: "include", // 쿠키 저장
         });
-        const data = await res.json();
-        if (res.ok && data.result?.accessToken) {
-            // accessToken을 쿠키에 저장
-            document.cookie = `access_token=${data.result.accessToken}; path=/`;
-            document.cookie = `accessToken=${data.result.accessToken}; path=/`;
-            router.replace("/dashboard");
-        } else {
-            setError(data.message || "로그인 실패");
+
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            setError(data.message ?? "로그인 실패");
+            return;
         }
+
+        router.replace("/dashboard");
     };
 
     return (
@@ -136,8 +134,8 @@ export default function LoginPage() {
                         variant="outline" 
                         className="w-full"
                         onClick={() => {
-                            const redirectUri = encodeURIComponent("http://localhost:3000/api/auth/callback/google");
-                            const googleAuthUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/oauth2/authorization/google?redirect_uri=${redirectUri}`;
+                            // 구글 OAuth 리다이렉트
+                            const googleAuthUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/oauth2/authorization/google`;
                             window.location.href = googleAuthUrl;
                         }}
                     >
