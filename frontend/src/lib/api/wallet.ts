@@ -1,5 +1,5 @@
 import { apiCall } from './client';
-import type { WalletDto, ChargeDto } from './types';
+import type { WalletDto, ChargeDto } from '@/lib/types/wallet';
 
 // 지갑 API 호출들
 export const walletApi = {
