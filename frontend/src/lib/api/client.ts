@@ -1,7 +1,7 @@
 // API 호출 공통 함수
 
 // API 기본 설정
-const API_BASE_URL = '/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
 /**
  * 공통 API 호출 헬퍼 함수
