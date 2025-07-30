@@ -58,15 +58,46 @@ export default function RegisterPage() {
     });
     //(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/register`
     const onRegister = async (values: any) => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/register`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(values),
-        }); 
-        const data = await res.json();
-        if (res.ok && data.result) {
-            router.replace("/login");
-            setError(data.message || "회원가입 실패");
+        setIsLoading(true);
+        setError(null); 
+        
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/register`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(values),
+            }); 
+            
+            const data = await res.json();
+            
+             if (res.ok && data.result) {
+                // 성공 팝업 표시
+                alert('회원가입이 완료되었습니다!');
+                
+                // 잠시 후 로그인 페이지로 이동
+                setTimeout(() => {
+                    router.replace("/login?message=register_success");
+                }, 500);
+            } else {
+                // 실패 시 - 에러 메시지 표시
+                if (data.message) {
+                    // 백엔드에서 온 구체적인 에러 메시지
+                    if (data.message.includes('아이디')) {
+                        setError('이미 사용 중인 아이디입니다.');
+                    } else if (data.message.includes('유저이름') || data.message.includes('username')) {
+                        setError('이미 사용 중인 유저이름입니다.');
+                    } else {
+                        setError(data.message);
+                    }
+                } else {
+                    setError("회원가입에 실패했습니다. 다시 시도해주세요.");
+                }
+            }
+        } catch (error) {
+            console.error('회원가입 요청 에러:', error);
+            setError("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+        } finally {
+            setIsLoading(false);
         }
     };
 
