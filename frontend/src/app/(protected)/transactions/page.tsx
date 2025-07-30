@@ -1,5 +1,6 @@
 "use client";
-
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { DataTable } from "@/components/transactions/data-table";
 import { columns, Transaction } from "@/components/transactions/columns";
@@ -24,6 +25,13 @@ const stagger = (delay = 0.1) => ({
 });
 
 export default function TransactionsPage() {
+    const router = useRouter();
+    useEffect(() => {
+        const hasToken = document.cookie.includes("access_token");
+        if (!hasToken) {
+            router.replace("/login");
+        }
+    }, [router]);
 	return (
 		<motion.div
 			className="container py-8 space-y-6"

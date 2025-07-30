@@ -17,24 +17,27 @@ const defaultLinks: NavLink[] = [
 ];
 
 type MainNavProps = React.ComponentPropsWithoutRef<"header"> & {
-    /** 내부 컨텐츠(wrapper div)에 줄 클래스 */
     innerClassName?: string;
     links?: NavLink[];
 };
 
 export function MainNav({
-                            className,
-                            innerClassName,
-                            links = defaultLinks,
-                            ...props
-                        }: MainNavProps) {
+    className,
+    innerClassName,
+    links = defaultLinks,
+    ...props
+}: MainNavProps) {
     const pathname = usePathname();
+    const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+
+    React.useEffect(() => {
+        setIsLoggedIn(document.cookie.includes("access_token"));
+    }, []);
 
     return (
         <header className={cn("border-b bg-white", className)} {...props}>
             <div
                 className={cn(
-                    // PageShell에서 이미 max-width를 관리하므로 여기서는 제거
                     "w-full px-4 md:px-6 lg:px-8",
                     "flex h-16 items-center justify-between",
                     innerClassName
@@ -65,7 +68,9 @@ export function MainNav({
                 </nav>
 
                 <Button asChild variant="outline" size="sm">
-                    <Link href="/login">Login</Link>
+                    <Link href={isLoggedIn ? "/user" : "/login"}>
+                        {isLoggedIn ? "MyPage" : "Login"}
+                    </Link>
                 </Button>
             </div>
         </header>
