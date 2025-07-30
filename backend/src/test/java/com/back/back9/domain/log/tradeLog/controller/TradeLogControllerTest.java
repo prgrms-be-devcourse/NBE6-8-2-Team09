@@ -1,15 +1,10 @@
-package com.back.back9.domain.tradeLog.controller;
+package com.back.back9.domain.log.tradeLog.controller;
 
-import com.back.back9.domain.coin.entity.Coin;
 import com.back.back9.domain.log.tradeLog.controller.TradeLogController;
 import com.back.back9.domain.log.tradeLog.entity.TradeLog;
 import com.back.back9.domain.log.tradeLog.entity.TradeType;
 import com.back.back9.domain.log.tradeLog.repository.TradeLogRepository;
 import com.back.back9.domain.log.tradeLog.service.TradeLogService;
-import com.back.back9.domain.user.entity.User;
-import com.back.back9.domain.user.repository.UserRepository;
-import com.back.back9.domain.wallet.entity.Wallet;
-import com.back.back9.domain.wallet.repository.WalletRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;

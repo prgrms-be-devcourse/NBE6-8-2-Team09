@@ -1,4 +1,4 @@
-package com.back.back9.domain.analytics;
+package com.back.back9.domain.analytics.contoller;
 
 import com.back.back9.domain.analytics.controller.AnalyticsController;
 import com.back.back9.domain.coin.entity.Coin;
