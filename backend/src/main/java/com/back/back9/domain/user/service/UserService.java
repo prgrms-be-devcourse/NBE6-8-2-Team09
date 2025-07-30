@@ -78,6 +78,12 @@ public class UserService {
         return userRepository.findByUserLoginId(userLoginId);
     }
 
+    public void deleteByUserLoginId(String userLoginId) {
+        User user = userRepository.findByUserLoginId(userLoginId)
+                .orElseThrow(() -> new ServiceException("404", "해당 아이디의 사용자가 없습니다."));
+        userRepository.delete(user);
+    }
+
     public Optional<User> findByApiKey(String apiKey) {
         return userRepository.findByApiKey(apiKey);
     }
