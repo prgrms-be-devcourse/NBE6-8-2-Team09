@@ -18,9 +18,6 @@ const schema = z.object({
     password: z.string().min(3, "비밀번호는 3자 이상"),
     confirmPassword: z.string().min(1, "비밀번호 확인을 입력해주세요."),
     username: z.string().min(1, "유저이름을 입력해주세요."),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "비밀번호가 일치하지 않습니다.",
-    path: ["confirmPassword"],
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -67,30 +64,37 @@ export default function RegisterPage() {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(values),
             }); 
-            
+
             const data = await res.json();
-            
-             if (res.ok && data.result) {
-                // 성공 팝업 표시
+
+            if (res.ok && data.result) {
                 alert('회원가입이 완료되었습니다!');
-                
-                // 잠시 후 로그인 페이지로 이동
                 setTimeout(() => {
                     router.replace("/login?message=register_success");
                 }, 500);
             } else {
-                // 실패 시 - 에러 메시지 표시
-                if (data.message) {
-                    // 백엔드에서 온 구체적인 에러 메시지
-                    if (data.message.includes('아이디')) {
-                        setError('이미 사용 중인 아이디입니다.');
-                    } else if (data.message.includes('유저이름') || data.message.includes('username')) {
-                        setError('이미 사용 중인 유저이름입니다.');
-                    } else {
-                        setError(data.message);
-                    }
+                // 백엔드 에러 코드에 따라 특정 필드에 에러 설정
+                if (data.resultCode === "400-1" || data.message?.includes('아이디')) {
+                    // 아이디 중복 에러
+                    form.setError("userLoginId", {
+                        type: "server",
+                        message: data.message || "이미 존재하는 아이디입니다."
+                    });
+                } else if (data.resultCode === "400-2" || data.message?.includes('유저이름')) {
+                    // 유저이름 중복 에러
+                    form.setError("username", {
+                        type: "server", 
+                        message: data.message || "이미 존재하는 유저이름입니다."
+                    });
+                } else if (data.resultCode === "400" || data.message?.includes('비밀번호 확인')) {
+                    // 비밀번호 불일치 에러
+                    form.setError("confirmPassword", {
+                        type: "server",
+                        message: data.message || "비밀번호 확인이 일치하지 않습니다."
+                    });
                 } else {
-                    setError("회원가입에 실패했습니다. 다시 시도해주세요.");
+                    // 기타 에러는 전체 에러로 표시
+                    setError(data.message || "회원가입에 실패했습니다. 다시 시도해주세요.");
                 }
             }
         } catch (error) {
