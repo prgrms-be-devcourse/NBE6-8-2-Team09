@@ -68,10 +68,8 @@ public class Rq {
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
         cookie.setHttpOnly(true);
-        cookie.setDomain("localhost");
-        //********개발환경에선 false로 설정, 실제 서비스에서는 true로 설정 필요***********
-        cookie.setSecure(false);
-        cookie.setAttribute("SameSite", "Strict");
+        cookie.setSecure(false); // 개발환경
+        cookie.setAttribute("SameSite", "Lax"); // Strict 대신 Lax
 
         if (value.isBlank()) cookie.setMaxAge(0);
         else cookie.setMaxAge(60 * 60 * 24 * 365);
