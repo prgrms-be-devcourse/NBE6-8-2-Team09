@@ -6,5 +6,6 @@ import java.util.List;
 public record ProfitRateResponse(
         int userId,
         List<ProfitAnalysisDto> coinAnalytics,
-        BigDecimal totalProfitRate
+        BigDecimal profitRateOnInvestment , // 투자 대비 수익률
+        BigDecimal profitRateOnTotalAssets //총 자산 대비 수익률
 ){}

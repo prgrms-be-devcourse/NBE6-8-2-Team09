@@ -256,7 +256,7 @@ public class AnalyticsControllerTest {
                 .andExpect(jsonPath("$.coinAnalytics[1].totalQuantity").value(2))
                 .andExpect(jsonPath("$.coinAnalytics[1].averageBuyPrice").value(190000000.0))
                 .andExpect(jsonPath("$.coinAnalytics[1].realizedProfitRate").value(closeTo(3.94736842, 0.000001)))
-                .andExpect(jsonPath("$.totalProfitRate").value(closeTo(6.81818181, 0.000001)));
+                .andExpect(jsonPath("$.profitRateOnInvestment").value(closeTo(6.81818181, 0.000001)));
     }
 
     @DisplayName("유저 평가 수익률 계산 API - 성공")
@@ -284,6 +284,6 @@ public class AnalyticsControllerTest {
                         .value(closeTo(205000000.00, 0.000001)))
                 .andExpect(jsonPath("$.coinAnalytics[1].realizedProfitRate").value(closeTo(12.19512200, 0.000001)))
                 // 총 수익률
-                .andExpect(jsonPath("$.totalProfitRate").value(closeTo(11.65048500, 0.000001)));
+                .andExpect(jsonPath("$.profitRateOnInvestment").value(closeTo(11.65048500, 0.000001)));
     }
 }
