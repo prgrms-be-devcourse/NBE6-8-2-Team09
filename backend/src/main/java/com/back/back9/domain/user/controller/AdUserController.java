@@ -71,4 +71,11 @@ public class AdUserController {
                 dtos
         );
     }
+
+    @DeleteMapping("/loginId/{userLoginId}")
+    @Operation(summary = "userLoginId로 사용자 삭제")
+    public RsData<Void> deleteUserByLoginId(@PathVariable String userLoginId) {
+        userService.deleteByUserLoginId(userLoginId);
+        return new RsData<>("200", "사용자가 성공적으로 삭제되었습니다.", null);
+    }
 }

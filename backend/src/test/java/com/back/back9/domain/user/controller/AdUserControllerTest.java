@@ -124,4 +124,27 @@ public class AdUserControllerTest {
                     .andExpect(jsonPath("$.result[%d].username".formatted(i)).value(user.getUsername()));
         }
     }
+
+    @Test
+    @DisplayName("userLoginId로 사용자 삭제 - ADMIN 권한")
+    void deleteUserByLoginId_withAdmin() throws Exception {
+        String loginId = "deleteTestUser";
+        userService.register(new UserRegisterDto(
+                loginId,
+                "삭제테스트",
+                "test1234",
+                "test1234"
+        ));
+
+        ResultActions resultActions = mvc.perform(delete("/api/v1/adm/users/loginId/{userLoginId}", loginId)
+                        .cookie(apiKeyCookie, accessTokenCookie))
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("사용자가 성공적으로 삭제되었습니다."));
+
+        Assertions.assertTrue(userService.findByUserLoginId(loginId).isEmpty());
+    }
 }
