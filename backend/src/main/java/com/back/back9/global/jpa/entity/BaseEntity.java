@@ -23,9 +23,9 @@ public abstract class BaseEntity {
     @Setter(AccessLevel.PROTECTED)
     private Long id;
 
-    @CreatedDate
+//    @CreatedDate
     @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
+    protected LocalDateTime createdAt;
 
     @LastModifiedDate
     @Column(name = "modified_at")

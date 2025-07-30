@@ -1,4 +1,4 @@
-package com.back.back9.domain.tradeLog.entity;
+package com.back.back9.domain.log.tradeLog.entity;
 
 import com.back.back9.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Column;
@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -21,9 +22,9 @@ public class TradeLog extends BaseEntity {
     @Column(name = "wallet_id")
     private int walletId;
     //거래한 거래소
-    @NotNull
-    @Column(name = "exchange_id")
-    private int exchangeId;
+//    @NotNull
+//    @Column(name = "exchange_id")
+//    private int exchangeId;
 
     //거래한 코인
     @NotNull
@@ -46,7 +47,7 @@ public class TradeLog extends BaseEntity {
 //    @Column(nullable = false, precision = 19, scale = 8)
 //    private BigDecimal profitRate;
 
-//    public void setCreatedAt(LocalDateTime createdAt) {
-//        super.createdAt = createdAt; // BaseEntity의 protected createdAt 필드 접근
-//    }
+    public void setCreatedAt(LocalDateTime createdAt) {
+        super.createdAt = createdAt; // BaseEntity의 protected createdAt 필드 접근
+    }
 }

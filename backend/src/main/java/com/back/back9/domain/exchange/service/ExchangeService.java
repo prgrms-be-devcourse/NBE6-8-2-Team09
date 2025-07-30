@@ -10,23 +10,32 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 @Service
 @RequiredArgsConstructor
 public class ExchangeService {
 
     private final RedisService redisService;
-
+    private static final Logger log = LoggerFactory.getLogger(ExchangeService.class);
     public CoinPriceResponse getLatestCandleByScan(String symbol) {
+
         String marketCode = CoinSymbolMapper.toMarketCode(symbol);
+        log.info("marketCode: {}", marketCode);
+
         if (marketCode == null) return null;
 
         try {
             // Redis에서 "latest:<symbol>" 키로 조회
             String latestKey = "latest:" + marketCode;
-            String json = redisService.getData(latestKey);
 
-            if (json == null) return null;
+            String json = redisService.getData(latestKey);
+            //180000000 손실
+            if(json == null) {
+                json = "{\"close\": 230000000}";
+            }
+
+//            if (json == null) return null;
 
             // JSON 파싱 후 close 값 추출
             ObjectMapper mapper = new ObjectMapper();

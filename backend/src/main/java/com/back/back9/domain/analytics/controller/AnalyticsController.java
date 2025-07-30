@@ -1,7 +1,7 @@
-package com.back.back9.domain.tradeLog.controller;
+package com.back.back9.domain.analytics.controller;
 
-import com.back.back9.domain.tradeLog.dto.ProfitRateResponse;
-import com.back.back9.domain.tradeLog.service.AnalyticsService;
+import com.back.back9.domain.analytics.dto.ProfitRateResponse;
+import com.back.back9.domain.analytics.service.AnalyticsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,10 +18,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class AnalyticsController {
     private final AnalyticsService analyticsService;
 
-    @GetMapping("/wallet/{walletId}")
+    @GetMapping("/wallet/{walletId}/realized")
     @Transactional(readOnly = true)
-    public ResponseEntity<ProfitRateResponse> getUserProfitRate(@PathVariable int walletId) {
+    public ResponseEntity<ProfitRateResponse> calculateRealizedProfitRates(@PathVariable int walletId) {
         ProfitRateResponse response = analyticsService.calculateRealizedProfitRates(walletId);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/wallet/{walletId}/Unrealized")
+    @Transactional(readOnly = true)
+    public ResponseEntity<ProfitRateResponse> calculateUnRealizedProfitRates(@PathVariable int walletId) {
+        ProfitRateResponse response = analyticsService.calculateUnRealizedProfitRates(walletId);
         return ResponseEntity.ok(response);
     }
 }

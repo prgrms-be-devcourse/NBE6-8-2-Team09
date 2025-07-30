@@ -1,7 +1,10 @@
-package com.back.back9.domain.tradeLog.service;
+package com.back.back9.domain.log.tradeLog.service;
 
-import com.back.back9.domain.tradeLog.entity.TradeLog;
-import com.back.back9.domain.tradeLog.entity.TradeType;
+import com.back.back9.domain.log.tradeLog.entity.TradeLog;
+import com.back.back9.domain.log.tradeLog.entity.TradeType;
+import com.back.back9.domain.log.tradeLog.service.TradeLogService;
+import com.back.back9.domain.log.tradeLog.entity.TradeLog;
+import com.back.back9.domain.log.tradeLog.entity.TradeType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -32,7 +35,6 @@ public class TradeLogServiceTest {
     public void createTradeLog() {
         TradeLog tradeLog = new TradeLog();
         tradeLog.setWalletId(22);
-        tradeLog.setExchangeId(22);
         tradeLog.setCoinId(22);
         tradeLog.setType(TradeType.BUY);
         tradeLog.setQuantity(new BigDecimal("0.5"));

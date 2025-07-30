@@ -1,7 +1,7 @@
-package com.back.back9.domain.tradeLog.repository;
+package com.back.back9.domain.log.tradeLog.repository;
 
-import com.back.back9.domain.tradeLog.entity.TradeLog;
-import com.back.back9.domain.tradeLog.entity.TradeType;
+import com.back.back9.domain.log.tradeLog.entity.TradeLog;
+import com.back.back9.domain.log.tradeLog.entity.TradeType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,13 +20,11 @@ public interface TradeLogRepository extends JpaRepository<TradeLog, Long> {
             "WHERE t.walletId = :walletId " +
             "AND (:type IS NULL OR t.type = :type) " +
             "AND (:coinId IS NULL OR t.coinId = :coinId) " +
-            "AND (:siteId IS NULL OR t.exchangeId = :siteId) " +
             "AND (:startDate IS NULL OR t.createdAt >= :startDate) " +
             "AND (:endDate IS NULL OR t.createdAt <= :endDate)")
     Page<TradeLog> findByWalletIdFilter(@Param("walletId") int walletId,
                                         @Param("type") TradeType type, // ← enum으로 변경
                                         @Param("coinId") Integer  coinId,
-                                        @Param("siteId") Integer  siteId,
                                         @Param("startDate") LocalDateTime startDate,
                                         @Param("endDate") LocalDateTime endDate,
                                         Pageable pageable);

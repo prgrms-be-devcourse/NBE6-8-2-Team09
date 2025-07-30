@@ -1,5 +1,16 @@
 package com.back.back9.domain.tradeLog.controller;
 
+import com.back.back9.domain.coin.entity.Coin;
+import com.back.back9.domain.log.tradeLog.controller.TradeLogController;
+import com.back.back9.domain.log.tradeLog.entity.TradeLog;
+import com.back.back9.domain.log.tradeLog.entity.TradeType;
+import com.back.back9.domain.log.tradeLog.repository.TradeLogRepository;
+import com.back.back9.domain.log.tradeLog.service.TradeLogService;
+import com.back.back9.domain.user.entity.User;
+import com.back.back9.domain.user.repository.UserRepository;
+import com.back.back9.domain.wallet.entity.Wallet;
+import com.back.back9.domain.wallet.repository.WalletRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
@@ -12,10 +23,14 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @Tag("trade_log")
 @ActiveProfiles("test")
@@ -24,11 +39,63 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Transactional
 public class TradeLogControllerTest {
     @Autowired
-    private TradeLogController TradeLogController;
+    private TradeLogController tradeLogController;
+    @Autowired
+    private TradeLogService tradeLogService;
+    @Autowired
+    private TradeLogRepository tradeLogRepository;
 
     @Autowired
     private MockMvc mock;
 
+    void setUp() {
+        tradeLogCreate();
+    }
+
+    /*
+    * 거래 로그 필터 테스트용
+    * 생성 날짜 의도적으로 2025년 7월 25일로 설정, 일주일 마다 구매 하여 총 15번 구매
+    * 구매 수량은 0~1사이의 소수점 8자리
+    * setCreatedAt() 메서드로 날짜 설정
+    */
+    @BeforeEach
+    public void tradeLogCreate() {
+        tradeLogRepository.deleteAll();
+        if(tradeLogService.count() > 0) return;
+
+        List<TradeLog> logs = new ArrayList<>();
+        LocalDateTime baseDate = LocalDateTime.of(2025, 7, 25, 0, 0);
+
+        for (int i = 1; i <= 15; i++) {
+            TradeLog log = new TradeLog();
+
+            if(i <= 5){
+                log.setWalletId(1);
+                log.setCoinId(1);
+
+            }else if(i <= 10){
+                log.setWalletId(1);
+                log.setCoinId(2);
+            }else{
+                log.setWalletId(1);
+                log.setCoinId(3);
+            }
+            TradeType type = (i % 3 == 0) ? TradeType.SELL : TradeType.BUY;
+
+            log.setType(i % 3 == 0 ? TradeType.SELL : TradeType.BUY);
+
+            log.setCreatedAt(baseDate.plusDays((i - 1) * 7));
+            logs.add(log);
+
+            log.setQuantity(BigDecimal.valueOf(1));
+
+            BigDecimal price = BigDecimal.valueOf(1000 + (i * 1000));
+            log.setPrice(price);
+            
+        }
+
+        tradeLogService.saveAll(logs);
+    }
 //    @Test
 //    @DisplayName("거래 내역 생성")
 //    void t1() throws Exception {
@@ -128,7 +195,8 @@ public class TradeLogControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
-                .andExpect(handler().methodName("getItems"));
+                .andExpect(handler().methodName("getItems"))
+                .andExpect(jsonPath("$.length()").value(15));
     }
     @Test
     @DisplayName("거래 내역 필터 조회 - 당일, 모든 거래")
@@ -144,7 +212,9 @@ public class TradeLogControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
-                .andExpect(handler().methodName("getItems"));
+                .andExpect(handler().methodName("getItems"))
+                .andExpect(jsonPath("$.length()").value(1));
+
     }
 
     @Test
@@ -162,7 +232,9 @@ public class TradeLogControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
-                .andExpect(handler().methodName("getItems"));
+                .andExpect(handler().methodName("getItems"))
+                .andExpect(jsonPath("$.length()").value(3));
+
     }
 
     @Test
@@ -180,7 +252,8 @@ public class TradeLogControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
-                .andExpect(handler().methodName("getItems"));
+                .andExpect(handler().methodName("getItems"))
+                .andExpect(jsonPath("$.length()").value(2));
     }
 
     @Test
@@ -196,7 +269,8 @@ public class TradeLogControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
-                .andExpect(handler().methodName("getItems"));
+                .andExpect(handler().methodName("getItems"))
+                .andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
@@ -210,7 +284,8 @@ public class TradeLogControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
-                .andExpect(handler().methodName("getItems"));
+                .andExpect(handler().methodName("getItems"))
+                .andExpect(jsonPath("$.length()").value(15));
     }
 
     @Test
@@ -225,7 +300,8 @@ public class TradeLogControllerTest {
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
-                .andExpect(handler().methodName("getItems"));
+                .andExpect(handler().methodName("getItems"))
+                .andExpect(jsonPath("$.length()").value(0));
     }
 
 }
