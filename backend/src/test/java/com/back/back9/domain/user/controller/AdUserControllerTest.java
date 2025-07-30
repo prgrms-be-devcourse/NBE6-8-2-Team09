@@ -36,7 +36,7 @@ public class AdUserControllerTest {
     private Cookie apiKeyCookie;
     private Cookie accessTokenCookie;
 
-    @BeforeAll
+    @BeforeEach
     void setUpAdmin() throws Exception {
         if (userService.findByUserLoginId("admin").isEmpty()) {
             userService.register(new UserRegisterDto(
