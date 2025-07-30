@@ -215,4 +215,33 @@ public class UserControllerTest {
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location", org.hamcrest.Matchers.startsWith("https://accounts.google.com/")));
     }
+
+    @Test
+    @DisplayName("로그인 시 쿠키가 정상적으로 발급된다")
+    void t7() throws Exception {
+        ResultActions resultActions = mvc.perform(post("/api/v1/users/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                {
+                    "userLoginId": "testuser",
+                    "password": "12345678"
+                }
+            """))
+                .andDo(print());
+
+        Cookie apiKeyCookie = resultActions.andReturn().getResponse().getCookie("apiKey");
+        Cookie accessTokenCookie = resultActions.andReturn().getResponse().getCookie("accessToken");
+
+        assertThat(apiKeyCookie).isNotNull();
+        assertThat(accessTokenCookie).isNotNull();
+
+        assertThat(apiKeyCookie.getValue()).isNotBlank();
+        assertThat(accessTokenCookie.getValue()).isNotBlank();
+
+        assertThat(apiKeyCookie.getPath()).isEqualTo("/");
+        assertThat(accessTokenCookie.getPath()).isEqualTo("/");
+
+        assertThat(apiKeyCookie.isHttpOnly()).isTrue();
+        assertThat(accessTokenCookie.isHttpOnly()).isTrue();
+    }
 }
