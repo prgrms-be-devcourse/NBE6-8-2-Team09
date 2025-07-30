@@ -2,7 +2,6 @@ package com.back.back9.domain.log.tradeLog.service;
 
 import com.back.back9.domain.log.tradeLog.entity.TradeLog;
 import com.back.back9.domain.log.tradeLog.entity.TradeType;
-import com.back.back9.domain.log.tradeLog.service.TradeLogService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;

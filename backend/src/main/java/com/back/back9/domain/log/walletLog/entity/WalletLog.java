@@ -1,11 +1,7 @@
 package com.back.back9.domain.log.walletLog.entity;
 
-import com.back.back9.domain.user.entity.User;
-import com.back.back9.domain.wallet.entity.Wallet;
 import com.back.back9.global.jpa.entity.BaseEntity;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;

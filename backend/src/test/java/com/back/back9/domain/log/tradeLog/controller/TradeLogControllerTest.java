@@ -1,6 +1,5 @@
 package com.back.back9.domain.log.tradeLog.controller;
 
-import com.back.back9.domain.log.tradeLog.controller.TradeLogController;
 import com.back.back9.domain.log.tradeLog.entity.TradeLog;
 import com.back.back9.domain.log.tradeLog.entity.TradeType;
 import com.back.back9.domain.log.tradeLog.repository.TradeLogRepository;
@@ -50,12 +49,12 @@ public class TradeLogControllerTest {
      */
     @BeforeEach
     void setUp() {
+        tradeLogRepository.deleteAll();
         tradeLogCreate();
     }
 
 
     public void tradeLogCreate() {
-        tradeLogRepository.deleteAll();
         if(tradeLogService.count() > 0) return;
 
         List<TradeLog> logs = new ArrayList<>();
@@ -86,7 +85,7 @@ public class TradeLogControllerTest {
 
             BigDecimal price = BigDecimal.valueOf(1000 + (i * 1000));
             log.setPrice(price);
-            
+
         }
 
         tradeLogService.saveAll(logs);

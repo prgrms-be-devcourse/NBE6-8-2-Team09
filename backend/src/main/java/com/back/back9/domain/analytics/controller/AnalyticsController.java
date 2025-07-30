@@ -25,7 +25,7 @@ public class AnalyticsController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/wallet/{walletId}/Unrealized")
+    @GetMapping("/wallet/{walletId}/unrealized")
     @Transactional(readOnly = true)
     public ResponseEntity<ProfitRateResponse> calculateUnRealizedProfitRates(@PathVariable int walletId) {
         ProfitRateResponse response = analyticsService.calculateUnRealizedProfitRates(walletId);

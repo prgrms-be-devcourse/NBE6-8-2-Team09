@@ -87,28 +87,76 @@ public class AnalyticsControllerTest {
     private CoinAmountRepository coinAmountRepository;
     @Autowired
     private MockMvc mockMvc;
-    private User testUser;
+    private User user1;
+    private User user2;
+    private User user3;
+
     private Coin coin1;
     private Coin coin2;
     private Coin coin3;
     private Coin coin4;
-    private Wallet wallet;
+
+    private Wallet wallet1;
+    private Wallet wallet2;
+    private Wallet wallet3;
 
     @BeforeEach
     void setUp() {
+        userRepository.deleteAll();
+        walletRepository.deleteAll();
+        tradeLogRepository.deleteAll();
+        walletLogRepository.deleteAll();      // 예시용 유저, 지갑 ID (1번째 유저/지갑 기준)
+        coinRepository.deleteAll();
+        coinAmountRepository.deleteAll();
 
-        this.testUser = userRepository.findByUserLoginId("user1")
-                .orElseThrow(() -> new RuntimeException("유저 없음"));
-        this.wallet = walletRepository.findByUser(testUser)
-                .orElseThrow(() -> new RuntimeException("지갑 없음"));
+        userCreate();
+        walletCreate();
         coinCreate();
         coinAmountCreate();
         tradeLogCreate();
         walletLogCreate();
     }
-
+    public void userCreate() {
+        user1 = userRepository.save(User.builder()
+                .userLoginId("user1")
+                .username("유저1")
+                .password("password")
+                .role(User.UserRole.ADMIN)
+                .build());
+        user2 = userRepository.save(User.builder()
+                .userLoginId("user2")
+                .username("유저2")
+                .password("password")
+                .role(User.UserRole.MEMBER)
+                .build());
+        user3 = userRepository.save(User.builder()
+                .userLoginId("user3")
+                .username("유저3")
+                .password("password")
+                .role(User.UserRole.MEMBER)
+                .build());
+    }
+    public void walletCreate() {
+        wallet1 = walletRepository.save(Wallet.builder()
+                .user(user1)
+                .address("Korea")
+                .balance(BigDecimal.valueOf(500_000_000L))
+                .coinAmounts(new ArrayList<>())  // null 방지
+                .build());
+        wallet2 = walletRepository.save(Wallet.builder()
+                .user(user2)
+                .address("Korea")
+                .balance(BigDecimal.valueOf(500_000_000L))
+                .coinAmounts(new ArrayList<>())
+                .build());
+        wallet3 = walletRepository.save(Wallet.builder()
+                .user(user3)
+                .address("Korea")
+                .balance(BigDecimal.valueOf(500_000_000L))
+                .coinAmounts(new ArrayList<>())
+                .build());
+    }
     public void tradeLogCreate() {
-        tradeLogRepository.deleteAll();
         if(tradeLogService.count() > 0) return;
 
         List<TradeLog> logs = new ArrayList<>();
@@ -116,56 +164,31 @@ public class AnalyticsControllerTest {
 
         for (int i = 1; i <= 15; i++) {
             TradeLog log = new TradeLog();
-
-            if(i <= 6){
-                log.setWalletId(1);
-                log.setCoinId(1);
-
-            }else if(i <= 12){
-                log.setWalletId(1);
-                log.setCoinId(2);
-            }else{
-                log.setWalletId(1);
-                log.setCoinId(1);
-            }
-            TradeType type = (i % 3 == 0) ? TradeType.SELL : TradeType.BUY;
-
+            log.setWalletId(Math.toIntExact(wallet1.getId()));
+            log.setCoinId(Math.toIntExact(i <= 6 || i > 12 ? coin1.getId() : coin2.getId()));
             log.setType(i % 3 == 0 ? TradeType.SELL : TradeType.BUY);
-
             log.setCreatedAt(baseDate.plusDays((i - 1) * 7));
+            log.setQuantity(BigDecimal.ONE);
+            log.setPrice(BigDecimal.valueOf(100_000_000L + (i * 10_000_000L)));
             logs.add(log);
-
-            log.setQuantity(BigDecimal.valueOf(1));
-
-            BigDecimal price = BigDecimal.valueOf(100_000_000L + (i * 10_000_000L));
-            log.setPrice(price);
-
         }
 
         tradeLogService.saveAll(logs);
     }
     public void walletLogCreate() {
-        walletLogRepository.deleteAll();      // 예시용 유저, 지갑 ID (1번째 유저/지갑 기준)
-        int userId = 1;
-        int walletId = 1;
-
         List<WalletLog> logs = new ArrayList<>();
-
         for (int i = 0; i < 3; i++) {
-            WalletLog log = WalletLog.builder()
-                    .userId(userId)
-                    .walletId(walletId)
-                    .transactionType(TransactionType.CHARGE) // 또는 WITHDRAW
-                    .price(BigDecimal.valueOf(200000000)) // 만원씩 충전
-                    .build();
-            logs.add(log);
+            logs.add(WalletLog.builder()
+                    .userId(Math.toIntExact(user1.getId()))
+                    .walletId(Math.toIntExact(wallet1.getId()))
+                    .transactionType(TransactionType.CHARGE)
+                    .price(BigDecimal.valueOf(200_000_000))
+                    .build());
         }
-
         walletLogRepository.saveAll(logs);
     }
 
     public void coinCreate() {
-        coinRepository.deleteAll();
 
         coin1 = coinRepository.save(Coin.builder()
                 .symbol("KRW-BTC")
@@ -192,32 +215,33 @@ public class AnalyticsControllerTest {
                 .build());
     }
     public void coinAmountCreate() {
-        coinAmountRepository.deleteAll();
-        CoinAmount coinAmount = CoinAmount.builder()
-                .wallet(wallet) // wallet 필드에 세팅
-                .coin(coin1)         // coin 필드에 세팅
-                .quantity(BigDecimal.valueOf(3.0))     // 예: 3개 보유
+        CoinAmount ca1 = CoinAmount.builder()
+                .wallet(wallet1)
+                .coin(coin1)
+                .quantity(BigDecimal.valueOf(3.0))
                 .totalAmount(BigDecimal.valueOf(620_000_000L))
                 .build();
-        CoinAmount coinAmount1 = CoinAmount.builder()
-                .wallet(wallet) // wallet 필드에 세팅
-                .coin(coin2)         // coin 필드에 세팅
-                .quantity(BigDecimal.valueOf(2.0))     // 예: 2개 보유
+
+        CoinAmount ca2 = CoinAmount.builder()
+                .wallet(wallet1)
+                .coin(coin2)
+                .quantity(BigDecimal.valueOf(2.0))
                 .totalAmount(BigDecimal.valueOf(410_000_000L))
                 .build();
-        wallet.getCoinAmounts().add(coinAmount);
-        wallet.getCoinAmounts().add(coinAmount1);
-        coinAmountRepository.save(coinAmount);
-        coinAmountRepository.save(coinAmount1);
+
+        wallet1.getCoinAmounts().add(ca1);
+        wallet1.getCoinAmounts().add(ca2);
+        coinAmountRepository.save(ca1);
+        coinAmountRepository.save(ca2);
 
     }
     @DisplayName("유저 실현 수익률 계산 API - 성공")
     @Test
     void t1() throws Exception {
+        String url = "/api/analytics/wallet/" + wallet1.getId() + "/realized";
+
         ResultActions resultActions = mockMvc
-                .perform(get("/api/analytics/wallet/1/realized")
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
+                .perform(get(url).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
         resultActions
                 .andExpect(status().isOk())
@@ -238,10 +262,10 @@ public class AnalyticsControllerTest {
     @DisplayName("유저 평가 수익률 계산 API - 성공")
     @Test
     void  t2() throws Exception {
+        String url = "/api/analytics/wallet/" + wallet1.getId() + "/unrealized";
+
         ResultActions resultActions = mockMvc
-                .perform(get("/api/analytics/wallet/1/Unrealized")
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
+                .perform(get(url).contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
         resultActions
                 .andExpect(status().isOk())
