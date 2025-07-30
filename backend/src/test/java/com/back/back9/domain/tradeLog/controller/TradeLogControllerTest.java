@@ -47,18 +47,18 @@ public class TradeLogControllerTest {
 
     @Autowired
     private MockMvc mock;
-
+    /*
+     * 거래 로그 필터 테스트용
+     * 생성 날짜 의도적으로 2025년 7월 25일로 설정, 일주일 마다 구매 하여 총 15번 구매
+     * 구매 수량은 0~1사이의 소수점 8자리
+     * setCreatedAt() 메서드로 날짜 설정
+     */
+    @BeforeEach
     void setUp() {
         tradeLogCreate();
     }
 
-    /*
-    * 거래 로그 필터 테스트용
-    * 생성 날짜 의도적으로 2025년 7월 25일로 설정, 일주일 마다 구매 하여 총 15번 구매
-    * 구매 수량은 0~1사이의 소수점 8자리
-    * setCreatedAt() 메서드로 날짜 설정
-    */
-    @BeforeEach
+
     public void tradeLogCreate() {
         tradeLogRepository.deleteAll();
         if(tradeLogService.count() > 0) return;
