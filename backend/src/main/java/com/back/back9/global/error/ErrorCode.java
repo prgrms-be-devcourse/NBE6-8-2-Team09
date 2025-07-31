@@ -14,6 +14,7 @@ public enum ErrorCode {
     // 404
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "404-USER-NOT-FOUND", "사용자를 찾을 수 없습니다. id=%s"),
     WALLET_NOT_FOUND(HttpStatus.NOT_FOUND, "404-WALLET-NOT-FOUND", "지갑을 찾을 수 없습니다. id=%s"),
+    WALLET_ALREADY_EXISTS(HttpStatus.CONFLICT, "409-WALLET-ALREADY-EXISTS", "이미 지갑이 존재합니다. userId=%s"),
     COIN_NOT_FOUND(HttpStatus.NOT_FOUND, "404-COIN-NOT-FOUND", "코인을 찾을 수 없습니다. id=%s"),
     BACKUP_DATA_NOT_FOUND(HttpStatus.NOT_FOUND, "404-BACKUP-DATA-NOT-FOUND", "백업데이터를 찾을 수 없습니다."),
     // 422
