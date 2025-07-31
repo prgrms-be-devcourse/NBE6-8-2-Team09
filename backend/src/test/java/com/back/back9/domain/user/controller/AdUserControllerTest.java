@@ -65,7 +65,7 @@ public class AdUserControllerTest {
                 .andDo(print());
 
         apiKeyCookie = loginResult.andReturn().getResponse().getCookie("apiKey");
-        accessTokenCookie = loginResult.andReturn().getResponse().getCookie("accessToken");
+        accessTokenCookie = loginResult.andReturn().getResponse().getCookie("access_Token");
     }
 
     @Test

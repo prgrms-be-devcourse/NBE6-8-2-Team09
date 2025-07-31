@@ -5,9 +5,11 @@ import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.service.UserService;
 import com.back.back9.domain.wallet.entity.Wallet;
 import com.back.back9.domain.wallet.repository.WalletRepository;
-import com.back.back9.domain.wallet.service.WalletService;
 import jakarta.servlet.http.Cookie;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -110,7 +112,7 @@ public class UserControllerTest {
         resultActions.andExpect(
                 result -> {
                     Cookie apiKeyCookie = result.getResponse().getCookie("apiKey");
-                    Cookie accessTokenCookie = result.getResponse().getCookie("accessToken");
+                    Cookie accessTokenCookie = result.getResponse().getCookie("access_Token");
                     assertThat(apiKeyCookie).isNotNull(); // Null 체크
                     assertThat(accessTokenCookie).isNotNull();
 
@@ -142,7 +144,7 @@ public class UserControllerTest {
                 .andDo(print());
 
         Cookie apiKeyCookie = loginResult.andReturn().getResponse().getCookie("apiKey");
-        Cookie accessTokenCookie = loginResult.andReturn().getResponse().getCookie("accessToken");
+        Cookie accessTokenCookie = loginResult.andReturn().getResponse().getCookie("access_Token");
 
         assertThat(apiKeyCookie).isNotNull(); // Null 체크
         assertThat(accessTokenCookie).isNotNull();
@@ -183,7 +185,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("로그아웃 되었습니다."))
                 .andExpect(result -> {
                     Cookie apiKey = result.getResponse().getCookie("apiKey");
-                    Cookie accessToken = result.getResponse().getCookie("accessToken");
+                    Cookie accessToken = result.getResponse().getCookie("access_Token");
                     assertThat(apiKey).isNotNull(); // Null 체크
                     assertThat(accessToken).isNotNull();
 
@@ -237,7 +239,7 @@ public class UserControllerTest {
                 .andDo(print());
 
         Cookie apiKeyCookie = resultActions.andReturn().getResponse().getCookie("apiKey");
-        Cookie accessTokenCookie = resultActions.andReturn().getResponse().getCookie("accessToken");
+        Cookie accessTokenCookie = resultActions.andReturn().getResponse().getCookie("access_Token");
 
         assertThat(apiKeyCookie).isNotNull();
         assertThat(accessTokenCookie).isNotNull();
