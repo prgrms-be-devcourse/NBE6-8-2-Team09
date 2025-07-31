@@ -92,16 +92,14 @@ public class TradeLogControllerTest {
 
         for (int i = 1; i <= 15; i++) {
             TradeLog log = new TradeLog();
+            log.setWallet(wallet1);
 
             if(i <= 5){
-                log.setWallet(wallet1);
                 log.setCoin(coin1);
 
             }else if(i <= 10){
-                log.setWallet(wallet2);
                 log.setCoin(coin2);
             }else{
-                log.setWallet(wallet3);
                 log.setCoin(coin3);
             }
             TradeType type = (i % 3 == 0) ? TradeType.SELL : TradeType.BUY;
