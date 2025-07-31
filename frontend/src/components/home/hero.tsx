@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react"; 
 import { cn } from "@/lib/utils";
 import { PageShell } from "@/components/layout/page-shell";
 
@@ -36,6 +37,22 @@ export function Hero({
                          className,
                          innerClassName,
                      }: HeroProps) {
+    // 로그인 상태 추가
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    useEffect(() => {
+        const checkLoginStatus = () => {
+            setIsLoggedIn(document.cookie.includes("access_token"));
+        };
+        
+        checkLoginStatus();
+        window.addEventListener('focus', checkLoginStatus);
+        
+        return () => {
+            window.removeEventListener('focus', checkLoginStatus);
+        };
+    }, []);
+
     return (
         <section
             className={cn("relative overflow-hidden w-full", className)}
@@ -78,13 +95,17 @@ export function Hero({
                         >
                             {primaryCta.label}
                         </Link>
-                        <Link
-                            href={secondaryCta.href}
-                            className="inline-flex items-center px-4 py-2 rounded-md border transition
-                         hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.99]"
-                        >
-                            {secondaryCta.label}
-                        </Link>
+                        
+                        {/* 조건부 렌더링 추가 */}
+                        {!isLoggedIn && (
+                            <Link
+                                href={secondaryCta.href}
+                                className="inline-flex items-center px-4 py-2 rounded-md border transition
+                             hover:bg-gray-50 hover:scale-[1.02] active:scale-[0.99]"
+                            >
+                                {secondaryCta.label}
+                            </Link>
+                        )}
                     </motion.div>
                 </motion.div>
             </PageShell>
