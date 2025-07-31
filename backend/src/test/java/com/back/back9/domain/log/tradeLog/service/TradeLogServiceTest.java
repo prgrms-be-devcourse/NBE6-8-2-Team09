@@ -5,6 +5,7 @@ import com.back.back9.domain.tradeLog.entity.TradeLog;
 import com.back.back9.domain.tradeLog.entity.TradeType;
 import com.back.back9.domain.tradeLog.service.TradeLogService;
 import com.back.back9.domain.user.entity.User;
+import com.back.back9.domain.user.repository.UserRepository;
 import com.back.back9.domain.wallet.entity.Wallet;
 import com.back.back9.domain.wallet.repository.WalletRepository;
 import com.back.back9.domain.coin.repository.CoinRepository;
@@ -33,21 +34,22 @@ public class TradeLogServiceTest {
     private WalletRepository walletRepository;
     @Autowired
     private CoinRepository coinRepository;
-
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private MockMvc mock;
 
     private Wallet wallet;
     private Coin coin;
-
+    private User user;
     @BeforeEach
     void setUp() {
-        User user = User.builder()
+        user = userRepository.save(User.builder()
                 .userLoginId("user1")
                 .username("테스트유저")
                 .password("test1234")
                 .role(User.UserRole.MEMBER)
-                .build();
+                .build());
 
         wallet = walletRepository.save(Wallet.builder()
                 .user(user)
@@ -76,7 +78,7 @@ public class TradeLogServiceTest {
 
         // then
         Assertions.assertNotNull(saved.getId());
-        Assertions.assertEquals(22, saved.getWallet());
+        Assertions.assertEquals(wallet.getId(), saved.getWallet().getId());
     }
 
 }
