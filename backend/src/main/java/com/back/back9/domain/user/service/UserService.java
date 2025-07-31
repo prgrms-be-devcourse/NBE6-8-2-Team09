@@ -4,6 +4,7 @@ import com.back.back9.domain.user.dto.UserRegisterDto;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.repository.UserRepository;
 import com.back.back9.global.exception.ServiceException;
+import com.back.back9.domain.wallet.service.WalletService;
 import com.back.back9.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,7 +22,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthTokenService authTokenService;
-
+    private final WalletService walletService;
 
     public RsData<User> register(UserRegisterDto dto) {
         if (!dto.password().equals(dto.confirmPassword())) {
@@ -45,6 +46,9 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
+
+        walletService.createWallet(user.getId());
+
         return new RsData<>("200-1", "회원가입이 완료되었습니다.", user);
     }
 
@@ -71,6 +75,9 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
+
+        walletService.createWallet(user.getId());
+
         return new RsData<>("200-1", "관리자 회원가입이 완료되었습니다.", user);
     }
 
