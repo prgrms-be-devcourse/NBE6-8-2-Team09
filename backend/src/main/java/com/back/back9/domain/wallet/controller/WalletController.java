@@ -28,7 +28,7 @@ public class WalletController {
     }
 
     // 지갑 잔액 충전
-    @PostMapping("/users/{userId}/charge")
+    @PutMapping("/users/{userId}/charge")
     public ResponseEntity<WalletResponse> chargeWallet(
             @PathVariable Long userId,
             @Valid @RequestBody ChargePointsRequest request) {
@@ -40,7 +40,7 @@ public class WalletController {
     }
 
     // 구매시 지갑 잔액 차감 및 코인 수량 업데이트
-    @PostMapping("/users/{userId}/purchase")
+    @PutMapping("/users/{userId}/purchase")
     public ResponseEntity<WalletResponse> purchaseItem(
             @PathVariable Long userId,
             @Valid @RequestBody BuyCoinRequest request) {
@@ -52,7 +52,7 @@ public class WalletController {
     }
 
     // 판매시 지갑 잔액 증가 및 코인 수량 차감
-    @PostMapping("/users/{userId}/sell")
+    @PutMapping("/users/{userId}/sell")
     public ResponseEntity<WalletResponse> sellItem(
             @PathVariable Long userId,
             @Valid @RequestBody BuyCoinRequest request) {
