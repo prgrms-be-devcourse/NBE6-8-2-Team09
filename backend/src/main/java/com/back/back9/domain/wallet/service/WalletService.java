@@ -298,7 +298,9 @@ public class WalletService {
         walletRepository.findByUserId(userId)
                 .ifPresent(walletRepository::delete);
     }
-
+    public boolean existsByUserId(Long userId) {
+        return walletRepository.existsByUserId(userId);
+    }
 }
 
 

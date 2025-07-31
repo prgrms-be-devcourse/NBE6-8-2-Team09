@@ -3,6 +3,7 @@ package com.back.back9.domain.user.controller;
 import com.back.back9.domain.user.dto.UserDto;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.service.UserService;
+import com.back.back9.domain.wallet.service.WalletService;
 import com.back.back9.global.exception.ServiceException;
 import com.back.back9.global.rq.Rq;
 import com.back.back9.global.rsData.RsData;
@@ -25,6 +26,7 @@ public class UserController {
 
     private final UserService userService;
     private final Rq rq;
+    private final WalletService walletService;
 
     public record UserRegisterReqBody(
             @NotBlank @Size(min = 2, max = 30) String userLoginId,
@@ -110,10 +112,8 @@ public class UserController {
     public RsData<UserLoginResBody> login(@Valid @RequestBody UserLoginReqBody reqBody) {
         User actor = rq.getActor();
         if (actor == null) {
-            // 쿠키에서 apiKey 확인
             String apiKey = rq.getCookieValue("apiKey", null);
             if (apiKey != null && !apiKey.isBlank()) {
-                // UserService로 사용자 조회
                 if (userService.findByApiKey(apiKey).isPresent()) {
                     return new RsData<>("400", "이미 로그인된 상태입니다.");
                 }
@@ -125,8 +125,11 @@ public class UserController {
         User user = userService.findByUserLoginId(reqBody.userLoginId())
                 .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 아이디입니다."));
 
-        userService.checkPassword(user, reqBody.password());
+        if (!walletService.existsByUserId(user.getId())) {
+            walletService.createWallet(user.getId());
+        }
 
+        userService.checkPassword(user, reqBody.password());
         String accessToken = userService.genAccessToken(user);
 
         rq.setCookie("apiKey", user.getApiKey());
