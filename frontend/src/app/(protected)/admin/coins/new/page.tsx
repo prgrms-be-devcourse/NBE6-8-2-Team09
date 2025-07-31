@@ -13,6 +13,7 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { getCoins, createCoin, deleteCoin } from "@/app/api/coins/route";
 
 // symbol 컬럼 추가
 const schema = z.object({
@@ -72,28 +73,12 @@ export default function AdminCoinNewPage() {
         setLoading(true);
         setError(null);
         try {
-            // 실제 API 엔드포인트로 변경
-            const res = await fetch("http://localhost:8080/api/v1/adm/coins", {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-
-            if (!res.ok) {
-                // 응답이 실패일 때 에러 메시지 출력
-                const text = await res.text();
-                setError(`코인 목록 불러오기 실패: ${text}`);
-                setCoins([]);
-                setLoading(false);
-                return;
-            }
-
-            // 응답 데이터가 배열이 아닐 경우를 대비한 방어 코드
-            const data = await res.json();
-        
+            const data = await getCoins();
             console.log("서버 응답:", data);
             console.log("첫 번째 코인:", data[0]); // 확인용
+            console.log("첫 번째 코인의 필드들:", Object.keys(data[0] || {}));
+            console.log("생성일 필드 값:", data[0]?.createdAt);
+            console.log("수정일 필드 값:", data[0]?.modifiedAt);
 
             if (!Array.isArray(data)) {
                 setError("서버에서 올바른 코인 목록을 반환하지 않았습니다.");
@@ -114,44 +99,22 @@ export default function AdminCoinNewPage() {
 
     const onSubmit: SubmitHandler<FormValues> = async (values) => {
         try {
-            // 실제 API 엔드포인트로 변경
-            const res = await fetch("http://localhost:8080/api/v1/adm/coins", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(values),
-            });
-            if (!res.ok) throw new Error("코인 등록 실패");
-            await res.json();
+            await createCoin(values);
             form.reset();
             fetchCoins();
         } catch (e) {
-            // 에러 처리 필요시 여기에 추가
             alert("코인 등록에 실패했습니다.");
         }
     };
 
     // 코인 삭제 함수 추가
-    const deleteCoin = async (id: number) => {
+    const handleDeleteCoin = async (id: number) => {
         if (!confirm(`정말로 이 코인을 삭제하시겠습니까?`)) {
             return;
         }
 
         try {
-            const res = await fetch(`http://localhost:8080/api/v1/adm/coins/${id}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            
-            if (!res.ok) {
-                const errorText = await res.text();
-                alert(`삭제 실패: ${errorText}`);
-                return;
-            }
-            
+            await deleteCoin(id);
             alert("코인이 성공적으로 삭제되었습니다.");
             fetchCoins(); // 목록 새로고침
         } catch (e) {
@@ -242,7 +205,9 @@ export default function AdminCoinNewPage() {
                                             <td className="border px-2 py-1">{coin.id}</td>
                                             {/* 생성일, 수정일이 제대로 표시되지 않는 경우를 위해 포맷팅 추가 */}
                                             <td className="border px-2 py-1">
-                                                {coin.createdAt ? formatDate(coin.createdAt) : <span className="text-gray-400">-</span>}
+                                                {coin.createdAt ? formatDate(coin.createdAt) : 
+                                                 coin.modifiedAt ? formatDate(coin.modifiedAt) : 
+                                                 <span className="text-gray-400" title="생성일 정보가 없습니다">-</span>}
                                             </td>
                                             <td className="border px-2 py-1">
                                                 {coin.modifiedAt ? formatDate(coin.modifiedAt) : <span className="text-gray-400">-</span>}
@@ -252,14 +217,14 @@ export default function AdminCoinNewPage() {
                                             <td className="border px-2 py-1">{coin.symbol}</td>
                                             <td className="border px-2 py-1 text-center">
                                                 <div className="flex justify-center">
-                                                    <Button
-                                                        onClick={() => deleteCoin(coin.id)}
-                                                        variant="destructive"
-                                                        size="sm"
-                                                        className="text-xs px-2 py-1"
-                                                    >
-                                                        삭제
-                                                    </Button>
+                                                                                                    <Button
+                                                    onClick={() => handleDeleteCoin(coin.id)}
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    className="text-xs px-2 py-1"
+                                                >
+                                                    삭제
+                                                </Button>
                                                 </div>
                                             </td>
                                         </motion.tr>
@@ -267,13 +232,7 @@ export default function AdminCoinNewPage() {
                                 )}
                             </tbody>
                         </table>
-                        {/* 생성일, 수정일이 안 뜨는 경우 안내 메시지 */}
-                        {coins.length > 0 && coins.some(c => !c.createdAt || !c.modifiedAt) && (
-                            <div className="mt-2 text-xs text-yellow-600">
-                                ※ 생성일/수정일이 비어있다면 서버에서 해당 필드가 누락되어 내려오고 있을 수 있습니다.<br />
-                                API 응답의 createdAt, modifiedAt 필드 값을 확인해 주세요.
-                            </div>
-                        )}
+
                     </motion.div>
                 )}
             </motion.div>
