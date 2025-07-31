@@ -123,8 +123,10 @@ public class TradeLogControllerTest {
 //    @Test
 //    @DisplayName("거래 내역 생성")
 //    void t1() throws Exception {
+//        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+//
 //        ResultActions resultActions = mock
-//                .perform(post("/api/tradeLog/wallet/1")
+//                .perform(get(url)
 //                        .contentType(MediaType.APPLICATION_JSON)
 //                        .content("""
 //                                {
@@ -156,8 +158,10 @@ public class TradeLogControllerTest {
 //    @DisplayName("거래 내역 생성 - 잘못된 apiKey, 유효한 accessToken")
 //    void t2() throws Exception {
 //
+//        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+//
 //        ResultActions resultActions = mock
-//                .perform(post("/api/tradeLog/wallet/1")
+//                .perform(get(url)
 //                        .header("Authorization", "Bearer wrong-api-key " + actorAccessToken)
 //                        .contentType(MediaType.APPLICATION_JSON)
 //                        .content("""
@@ -211,8 +215,10 @@ public class TradeLogControllerTest {
     @Test
     @DisplayName("거래 내역 전체 조회")
     void t4() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
         ResultActions resultActions = mock
-                .perform(get("/api/tradeLog/wallet/1")
+                .perform(get(url)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andDo(print());
@@ -225,8 +231,10 @@ public class TradeLogControllerTest {
     @Test
     @DisplayName("거래 내역 필터 조회 - 당일, 모든 거래")
     void t5() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
         ResultActions resultActions = mock
-                .perform(get("/api/tradeLog/wallet/1")
+                .perform(get(url)
                         .param("startDate", "2025-07-25")
                         .param("endDate", "2025-07-25")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -244,8 +252,10 @@ public class TradeLogControllerTest {
     @Test
     @DisplayName("거래 내역 조회 - 일별, 매수 거래")
     void t6() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
         ResultActions resultActions = mock
-                .perform(get("/api/tradeLog/wallet/1")
+                .perform(get(url)
                         .param("startDate", "2025-07-27")
                         .param("endDate", "2025-08-27")
                         .param("type", "BUY")
@@ -264,8 +274,10 @@ public class TradeLogControllerTest {
     @Test
     @DisplayName("거래 내역 조회 - 월별, 매도 거래")
     void t7() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
         ResultActions resultActions = mock
-                .perform(get("/api/tradeLog/wallet/1")
+                .perform(get(url)
                         .param("startDate", "2025-07-01")
                         .param("endDate", "2025-08-31")
                         .param("type", "SELL")
@@ -283,8 +295,10 @@ public class TradeLogControllerTest {
     @Test
     @DisplayName("시작일이 종료일보다 이후일 때")
     void t8() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
         ResultActions resultActions = mock
-                .perform(get("/api/tradeLog/wallet/1")
+                .perform(get(url)
                         .param("startDate", "2025-03-01")
                         .param("endDate", "2025-01-01")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -300,8 +314,10 @@ public class TradeLogControllerTest {
     @Test
     @DisplayName("모든 필터 없음 (파라미터 없음)")
     void t9() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
         ResultActions resultActions = mock
-            .perform(get("/api/tradeLog/wallet/1")
+                .perform(get(url)
                 .contentType(MediaType.APPLICATION_JSON)
             )
             .andDo(print());
@@ -315,8 +331,10 @@ public class TradeLogControllerTest {
     @Test
     @DisplayName("거래 없음")
     void t10() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
         ResultActions resultActions = mock
-            .perform(get("/api/tradeLog/wallet/1")
+                .perform(get(url)
                     .param("startDate", "1999-01-01")
                     .param("endDate", "1999-01-31")
                     .contentType(MediaType.APPLICATION_JSON)
