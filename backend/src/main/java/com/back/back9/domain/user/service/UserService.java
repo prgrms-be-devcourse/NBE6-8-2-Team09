@@ -5,6 +5,7 @@ import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.repository.UserRepository;
 import com.back.back9.global.exception.ServiceException;
 import com.back.back9.domain.wallet.service.WalletService;
+import com.back.back9.domain.coin.repository.CoinRepository;
 import com.back.back9.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,7 +46,7 @@ public class UserService {
                 .apiKey(apiKey)
                 .build();
 
-        userRepository.save(user);
+        user = userRepository.save(user);
 
         walletService.createWallet(user.getId());
 
@@ -74,7 +75,7 @@ public class UserService {
                 .apiKey(apiKey)
                 .build();
 
-        userRepository.save(user);
+        user = userRepository.save(user);
 
         walletService.createWallet(user.getId());
 
@@ -88,6 +89,7 @@ public class UserService {
     public void deleteByUserLoginId(String userLoginId) {
         User user = userRepository.findByUserLoginId(userLoginId)
                 .orElseThrow(() -> new ServiceException("404", "해당 아이디의 사용자가 없습니다."));
+        walletService.deleteWalletByUserId(user.getId());
         userRepository.delete(user);
     }
 

@@ -4,7 +4,10 @@ import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.service.UserService;
 import com.back.back9.domain.user.dto.UserRegisterDto;
 import jakarta.servlet.http.Cookie;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.*;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -12,7 +15,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -23,7 +25,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc
-@Transactional
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public class AdUserControllerTest {
 
@@ -32,6 +33,9 @@ public class AdUserControllerTest {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private EntityManager entityManager;
 
     private Cookie apiKeyCookie;
     private Cookie accessTokenCookie;
@@ -50,7 +54,6 @@ public class AdUserControllerTest {
             userService.save(admin);
         }
 
-        // 로그인하여 인증 쿠키 획득
         ResultActions loginResult = mvc.perform(post("/api/v1/users/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
@@ -129,6 +132,8 @@ public class AdUserControllerTest {
 
     @Test
     @DisplayName("userLoginId로 사용자 삭제 - ADMIN 권한")
+    @Transactional
+    @Rollback(false)
     void deleteUserByLoginId_withAdmin() throws Exception {
         String loginId = "deleteTestUser";
         userService.register(new UserRegisterDto(
@@ -137,6 +142,8 @@ public class AdUserControllerTest {
                 "test1234",
                 "test1234"
         ));
+
+        entityManager.flush();
 
         ResultActions resultActions = mvc.perform(delete("/api/v1/adm/users/loginId/{userLoginId}", loginId)
                         .cookie(apiKeyCookie, accessTokenCookie))
@@ -147,6 +154,14 @@ public class AdUserControllerTest {
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("사용자가 성공적으로 삭제되었습니다."));
 
-        Assertions.assertTrue(userService.findByUserLoginId(loginId).isEmpty());
+        entityManager.flush();
+        entityManager.clear();
+
+        boolean exists = entityManager.createQuery(
+                        "SELECT COUNT(u) FROM User u WHERE u.userLoginId = :loginId", Long.class)
+                .setParameter("loginId", loginId)
+                .getSingleResult() == 0;
+
+        Assertions.assertTrue(exists);
     }
 }
