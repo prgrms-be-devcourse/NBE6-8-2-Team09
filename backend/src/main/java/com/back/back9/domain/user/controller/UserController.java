@@ -108,6 +108,20 @@ public class UserController {
     @Transactional(readOnly = true)
     @Operation(summary = "로그인")
     public RsData<UserLoginResBody> login(@Valid @RequestBody UserLoginReqBody reqBody) {
+        User actor = rq.getActor();
+        if (actor == null) {
+            // 쿠키에서 apiKey 확인
+            String apiKey = rq.getCookieValue("apiKey", null);
+            if (apiKey != null && !apiKey.isBlank()) {
+                // UserService로 사용자 조회
+                if (userService.findByApiKey(apiKey).isPresent()) {
+                    return new RsData<>("400", "이미 로그인된 상태입니다.");
+                }
+            }
+        } else {
+            return new RsData<>("400", "이미 로그인된 상태입니다.");
+        }
+
         User user = userService.findByUserLoginId(reqBody.userLoginId())
                 .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 아이디입니다."));
 
