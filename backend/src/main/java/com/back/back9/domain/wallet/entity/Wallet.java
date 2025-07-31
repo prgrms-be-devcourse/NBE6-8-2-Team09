@@ -24,7 +24,7 @@ import java.util.List;
 public class Wallet extends BaseEntity {
 
     @NotNull
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
 
