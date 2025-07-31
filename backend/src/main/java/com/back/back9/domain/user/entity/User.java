@@ -46,6 +46,10 @@ public class User extends BaseEntity {
         this.apiKey = UUID.randomUUID().toString();
     }
 
+    public void assignId(Long id) {
+        super.setId(id);
+    }
+
     public enum UserRole {
         MEMBER, ADMIN
     }
