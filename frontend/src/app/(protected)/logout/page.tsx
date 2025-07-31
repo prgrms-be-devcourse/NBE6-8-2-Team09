@@ -9,19 +9,20 @@ export default function LogoutPage() {
     useEffect(() => {
         const logout = async () => {
             try {
-                // DELETE 메서드로 변경
+                // 백엔드 로그아웃 (accessToken, apiKey 삭제)
                 await fetch(
                     `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/users/logout`,
                     {
-                        method: "DELETE", // POST에서 DELETE로 변경
+                        method: "DELETE",
                         credentials: "include",
                     }
                 );
-                console.log('로그아웃 성공');
             } catch (error) {
                 console.warn('백엔드 로그아웃 실패:', error);
             } finally {
-                // 백엔드에서 쿠키를 삭제하므로 바로 리다이렉트
+                // 프론트엔드가 만든 중복 쿠키들 삭제
+                document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                
                 setTimeout(() => {
                     router.replace("/login");
                 }, 500);

@@ -31,7 +31,37 @@ export function MainNav({
     const [isLoggedIn, setIsLoggedIn] = React.useState(false);
 
     React.useEffect(() => {
-        setIsLoggedIn(document.cookie.includes("access_token"));
+        const checkLoginStatus = async () => {
+            try {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/users/me`,
+                    {
+                        method: "GET",
+                        credentials: "include", // HttpOnly 쿠키 전송
+                    }
+                );
+                
+                setIsLoggedIn(response.ok);
+                console.log('🔐 로그인 상태:', response.ok);
+            } catch (error) {
+                console.error('로그인 상태 확인 실패:', error);
+                setIsLoggedIn(false);
+            }
+        };
+        
+        // 초기 체크
+        checkLoginStatus();
+        
+        // 페이지 포커스 시에도 체크
+        window.addEventListener('focus', checkLoginStatus);
+        
+        // 주기적 체크 (30초마다)
+        const interval = setInterval(checkLoginStatus, 30000);
+        
+        return () => {
+            window.removeEventListener('focus', checkLoginStatus);
+            clearInterval(interval);
+        };
     }, []);
 
     return (

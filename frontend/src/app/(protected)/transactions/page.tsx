@@ -1,5 +1,5 @@
 "use client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { DataTable } from "@/components/transactions/data-table";
@@ -26,12 +26,51 @@ const stagger = (delay = 0.1) => ({
 
 export default function TransactionsPage() {
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true); // 추가
+    const [isAuthenticated, setIsAuthenticated] = useState(false); // 추가
+
     useEffect(() => {
-        const hasToken = document.cookie.includes("access_token");
-        if (!hasToken) {
-            router.replace("/login");
-        }
+        const checkAuth = async () => {
+            try {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/users/me`,
+                    {
+                        method: "GET",
+                        credentials: "include",
+                    }
+                );
+                
+                if (response.ok) {
+                    setIsAuthenticated(true);
+                } else {
+                    router.replace("/login");
+                    return;
+                }
+            } catch (error) {
+                console.error('인증 확인 실패:', error);
+                router.replace("/login");
+                return;
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        checkAuth();
     }, [router]);
+
+    // 로딩 중일 때
+    if (isLoading) {
+        return (
+            <div className="container py-8 flex items-center justify-center">
+                <p>로딩 중...</p>
+            </div>
+        );
+    }
+
+    // 인증되지 않았을 때 (리다이렉트 중)
+    if (!isAuthenticated) {
+        return null;
+    }
 	return (
 		<motion.div
 			className="container py-8 space-y-6"

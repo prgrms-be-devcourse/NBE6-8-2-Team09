@@ -41,8 +41,20 @@ export function Hero({
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        const checkLoginStatus = () => {
-            setIsLoggedIn(document.cookie.includes("access_token"));
+        const checkLoginStatus = async () => {
+            try {
+                const response = await fetch(
+                    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/users/me`,
+                    {
+                        method: "GET",
+                        credentials: "include",
+                    }
+                );
+                
+                setIsLoggedIn(response.ok);
+            } catch (error) {
+                setIsLoggedIn(false);
+            }
         };
         
         checkLoginStatus();
