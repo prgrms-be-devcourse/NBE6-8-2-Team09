@@ -1,5 +1,8 @@
 package com.back.back9.domain.wallet.service;
 
+import com.back.back9.domain.user.entity.User;
+import com.back.back9.domain.wallet.dto.BuyCoinRequest;
+import com.back.back9.domain.user.repository.UserRepository;
 import com.back.back9.domain.wallet.dto.ChargePointsRequest;
 import com.back.back9.domain.wallet.dto.CoinHoldingInfo;
 import com.back.back9.domain.wallet.dto.WalletResponse;
@@ -24,6 +27,31 @@ import java.util.List;
 public class WalletService {
 
     private final WalletRepository walletRepository;
+    private final UserRepository userRepository;
+
+    // 사용자 지갑 생성
+    @Transactional
+    public Wallet createWallet(Long userId) {
+        // 이미 지갑이 존재하는지 확인
+        if (walletRepository.findByUserId(userId).isPresent()) {
+            throw new ErrorException(ErrorCode.WALLET_ALREADY_EXISTS, userId);
+        }
+
+        User user = userRepository.findById(userId).orElseThrow(() -> new ErrorException(ErrorCode.USER_NOT_FOUND, userId));
+
+        // 새 지갑 생성
+        Wallet wallet = Wallet.builder()
+                .user(user)
+                .address("Wallet_address_" + userId)
+                .balance(BigDecimal.valueOf(500000000))
+                .build();
+
+        walletRepository.save(wallet);
+
+        log.info("새 지갑 생성 완료 - 사용자 ID: {}, 주소: {}", userId, wallet.getAddress());
+
+        return wallet;
+    }
 
     // 사용자 지갑 정보 조회 (모든 코인 수량 포함)
     @Transactional(readOnly = true)
@@ -151,4 +179,15 @@ public class WalletService {
 
         return true;
     }
+
+    public ResponseEntity<WalletResponse> purchaseItem(Long userId, BuyCoinRequest request) {
+        // 코인 구매 로직 연동
+        throw new UnsupportedOperationException(" 코인 구매 로직 필요");
+    }
+
+    public ResponseEntity<WalletResponse> sellItem(Long userId, BuyCoinRequest request) {
+        // 코인 판매 비즈니스 로직 구현 필요
+        throw new UnsupportedOperationException("코인 판매 로직 필요");
+    }
+
 }
