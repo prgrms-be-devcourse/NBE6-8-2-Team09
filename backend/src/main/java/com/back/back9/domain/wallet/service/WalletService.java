@@ -302,5 +302,3 @@ public class WalletService {
         return walletRepository.existsByUserId(userId);
     }
 }
-
-
