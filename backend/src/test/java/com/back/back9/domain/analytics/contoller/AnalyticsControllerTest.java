@@ -279,7 +279,7 @@ public class AnalyticsControllerTest {
 //                .andExpect(jsonPath("$.coinAnalytics[0].realizedProfitRate").value(closeTo(11.29032300, 0.000001)))
                 // 코인 2
                 .andExpect(jsonPath("$.coinAnalytics[1].coinId").value(coin2.getId()))
-                .andExpect(jsonPath("$.coinAnalytics[1].totalQuantity").value(2))
+                .andExpect(jsonPath("$.coinAnalytics[1].totalQuantity").value(2));
 //                .andExpect(jsonPath("$.coinAnalytics[1].averageBuyPrice")
 //                        .value(closeTo(205000000.00, 0.000001)))
 //                .andExpect(jsonPath("$.coinAnalytics[1].realizedProfitRate").value(closeTo(12.19512200, 0.000001)))
