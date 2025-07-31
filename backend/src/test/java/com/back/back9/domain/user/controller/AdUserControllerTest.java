@@ -89,8 +89,10 @@ public class AdUserControllerTest {
     @Test
     @DisplayName("단일 사용자 조회 - ADMIN 권한")
     void getUserById_withAdmin() throws Exception {
-        Long id = 1L;
-        User user = userService.findById(id).orElseThrow();
+        UserRegisterDto dto = new UserRegisterDto("user1", "유저1", "password", "password");
+        userService.register(dto);
+        User user = userService.findByUserLoginId("user1").orElseThrow();
+        Long id = user.getId();
 
         ResultActions resultActions = mvc.perform(get("/api/v1/adm/users/{id}", id)
                         .cookie(apiKeyCookie, accessTokenCookie))

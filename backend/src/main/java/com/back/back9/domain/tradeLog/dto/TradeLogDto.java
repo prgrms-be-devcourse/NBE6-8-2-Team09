@@ -1,7 +1,9 @@
-package com.back.back9.domain.log.tradeLog.dto;
+package com.back.back9.domain.tradeLog.dto;
 
-import com.back.back9.domain.log.tradeLog.entity.TradeLog;
-import com.back.back9.domain.log.tradeLog.entity.TradeType;
+import com.back.back9.domain.coin.entity.Coin;
+import com.back.back9.domain.tradeLog.entity.TradeLog;
+import com.back.back9.domain.tradeLog.entity.TradeType;
+import com.back.back9.domain.wallet.entity.Wallet;
 
 import java.math.BigDecimal;
 
@@ -17,9 +19,9 @@ public record TradeLogDto(
     public TradeLogDto(TradeLog tradeLog) {
         this(
                 Math.toIntExact(tradeLog.getId()),
-                tradeLog.getWalletId(),
+                tradeLog.getWallet().getId().intValue(),
                 tradeLog.getCreatedAt().toLocalDate().toString(),
-                tradeLog.getCoinId(),
+                tradeLog.getCoin().getId().intValue(),
                 tradeLog.getType(),
                 tradeLog.getQuantity(),
                 tradeLog.getPrice()
@@ -30,10 +32,10 @@ public record TradeLogDto(
         return new TradeLogDto(tradeLog);
     }
 
-    public static TradeLog toEntity(TradeLogDto dto) {
+    public static TradeLog toEntity(TradeLogDto dto, Wallet wallet, Coin coin) {
         TradeLog entity = new TradeLog();
-        entity.setWalletId(dto.walletId());
-        entity.setCoinId(dto.coinId());
+        entity.setWallet(wallet);
+        entity.setCoin(coin);
         entity.setType(dto.tradeType());
         entity.setQuantity(dto.quantity());
         entity.setPrice(dto.price());

@@ -1,11 +1,15 @@
 package com.back.back9.domain.log.tradeLog.service;
 
-import com.back.back9.domain.log.tradeLog.entity.TradeLog;
-import com.back.back9.domain.log.tradeLog.entity.TradeType;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import com.back.back9.domain.coin.entity.Coin;
+import com.back.back9.domain.tradeLog.entity.TradeLog;
+import com.back.back9.domain.tradeLog.entity.TradeType;
+import com.back.back9.domain.tradeLog.service.TradeLogService;
+import com.back.back9.domain.user.entity.User;
+import com.back.back9.domain.wallet.entity.Wallet;
+import com.back.back9.domain.wallet.repository.WalletRepository;
+import com.back.back9.domain.coin.repository.CoinRepository;
+import com.back.back9.domain.wallet.service.WalletService;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -14,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 @Tag("trade_log")
 @ActiveProfiles("test")
@@ -25,14 +30,44 @@ public class TradeLogServiceTest {
     private TradeLogService tradeLogService;
 
     @Autowired
+    private WalletRepository walletRepository;
+    @Autowired
+    private CoinRepository coinRepository;
+
+    @Autowired
     private MockMvc mock;
 
+    private Wallet wallet;
+    private Coin coin;
+
+    @BeforeEach
+    void setUp() {
+        User user = User.builder()
+                .userLoginId("user1")
+                .username("테스트유저")
+                .password("test1234")
+                .role(User.UserRole.MEMBER)
+                .build();
+
+        wallet = walletRepository.save(Wallet.builder()
+                .user(user)
+                .address("TestAddress")
+                .balance(BigDecimal.valueOf(1_000_000L))
+                .coinAmounts(new ArrayList<>())
+                .build());
+
+        coin = coinRepository.save(Coin.builder()
+                .symbol("KRW-BTC")
+                .koreanName("비트코인")
+                .englishName("Bitcoin")
+                .build());
+    }
     @Test
     @DisplayName("거래 내역 생성")
     public void createTradeLog() {
         TradeLog tradeLog = new TradeLog();
-        tradeLog.setWalletId(22);
-        tradeLog.setCoinId(22);
+        tradeLog.setWallet(wallet);
+        tradeLog.setCoin(coin);
         tradeLog.setType(TradeType.BUY);
         tradeLog.setQuantity(new BigDecimal("0.5"));
         tradeLog.setPrice(new BigDecimal("43000"));
@@ -41,7 +76,7 @@ public class TradeLogServiceTest {
 
         // then
         Assertions.assertNotNull(saved.getId());
-        Assertions.assertEquals(22, saved.getWalletId());
+        Assertions.assertEquals(22, saved.getWallet());
     }
 
 }

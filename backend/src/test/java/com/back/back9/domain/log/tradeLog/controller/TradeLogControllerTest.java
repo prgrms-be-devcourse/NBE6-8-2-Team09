@@ -1,9 +1,16 @@
 package com.back.back9.domain.log.tradeLog.controller;
 
-import com.back.back9.domain.log.tradeLog.entity.TradeLog;
-import com.back.back9.domain.log.tradeLog.entity.TradeType;
-import com.back.back9.domain.log.tradeLog.repository.TradeLogRepository;
-import com.back.back9.domain.log.tradeLog.service.TradeLogService;
+import com.back.back9.domain.coin.entity.Coin;
+import com.back.back9.domain.coin.repository.CoinRepository;
+import com.back.back9.domain.tradeLog.controller.TradeLogController;
+import com.back.back9.domain.tradeLog.entity.TradeLog;
+import com.back.back9.domain.tradeLog.entity.TradeType;
+import com.back.back9.domain.tradeLog.repository.TradeLogRepository;
+import com.back.back9.domain.tradeLog.service.TradeLogService;
+import com.back.back9.domain.user.entity.User;
+import com.back.back9.domain.user.repository.UserRepository;
+import com.back.back9.domain.wallet.entity.Wallet;
+import com.back.back9.domain.wallet.repository.WalletRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
@@ -40,7 +47,16 @@ public class TradeLogControllerTest {
     private TradeLogRepository tradeLogRepository;
 
     @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private WalletRepository walletRepository;
+    @Autowired
+    private CoinRepository coinRepository;
+    @Autowired
     private MockMvc mock;
+
+    Wallet wallet1, wallet2, wallet3;
+    Coin coin1, coin2, coin3;
     /*
      * 거래 로그 필터 테스트용
      * 생성 날짜 의도적으로 2025년 7월 25일로 설정, 일주일 마다 구매 하여 총 15번 구매
@@ -50,6 +66,20 @@ public class TradeLogControllerTest {
     @BeforeEach
     void setUp() {
         tradeLogRepository.deleteAll();
+        // 유저 3명 생성
+        User user1 = userRepository.save(User.builder().userLoginId("u1").username("user1").password("1234").role(User.UserRole.MEMBER).build());
+        User user2 = userRepository.save(User.builder().userLoginId("u2").username("user2").password("1234").role(User.UserRole.MEMBER).build());
+        User user3 = userRepository.save(User.builder().userLoginId("u3").username("user3").password("1234").role(User.UserRole.MEMBER).build());
+
+        // 지갑 3개 생성
+        wallet1 = walletRepository.save(Wallet.builder().user(user1).address("addr1").balance(BigDecimal.valueOf(1000000)).coinAmounts(new ArrayList<>()).build());
+        wallet2 = walletRepository.save(Wallet.builder().user(user2).address("addr2").balance(BigDecimal.valueOf(1000000)).coinAmounts(new ArrayList<>()).build());
+        wallet3 = walletRepository.save(Wallet.builder().user(user3).address("addr3").balance(BigDecimal.valueOf(1000000)).coinAmounts(new ArrayList<>()).build());
+
+        // 코인 3개 생성
+        coin1 = coinRepository.save(Coin.builder().symbol("KRW-BTC").koreanName("비트코인").englishName("Bitcoin").build());
+        coin2 = coinRepository.save(Coin.builder().symbol("KRW-ETH").koreanName("이더리움").englishName("Ethereum").build());
+        coin3 = coinRepository.save(Coin.builder().symbol("KRW-XRP").koreanName("리플").englishName("Ripple").build());
         tradeLogCreate();
     }
 
@@ -64,15 +94,15 @@ public class TradeLogControllerTest {
             TradeLog log = new TradeLog();
 
             if(i <= 5){
-                log.setWalletId(1);
-                log.setCoinId(1);
+                log.setWallet(wallet1);
+                log.setCoin(coin1);
 
             }else if(i <= 10){
-                log.setWalletId(1);
-                log.setCoinId(2);
+                log.setWallet(wallet2);
+                log.setCoin(coin2);
             }else{
-                log.setWalletId(1);
-                log.setCoinId(3);
+                log.setWallet(wallet3);
+                log.setCoin(coin3);
             }
             TradeType type = (i % 3 == 0) ? TradeType.SELL : TradeType.BUY;
 

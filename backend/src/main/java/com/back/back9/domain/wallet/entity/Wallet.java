@@ -1,7 +1,7 @@
 package com.back.back9.domain.wallet.entity;
 
 
-import com.back.back9.domain.log.tradeLog.entity.TradeLog;
+import com.back.back9.domain.tradeLog.entity.TradeLog;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.global.jpa.entity.BaseEntity;
 import jakarta.persistence.*;

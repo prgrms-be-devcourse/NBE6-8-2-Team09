@@ -1,10 +1,10 @@
-package com.back.back9.domain.log.tradeLog.controller;
+package com.back.back9.domain.tradeLog.controller;
 
-import com.back.back9.domain.log.tradeLog.dto.TradeLogDto;
-import com.back.back9.domain.log.tradeLog.dto.TradeLogRequest;
-import com.back.back9.domain.log.tradeLog.entity.TradeLog;
-import com.back.back9.domain.log.tradeLog.entity.TradeType;
-import com.back.back9.domain.log.tradeLog.service.TradeLogService;
+import com.back.back9.domain.tradeLog.dto.TradeLogDto;
+import com.back.back9.domain.tradeLog.dto.TradeLogRequest;
+import com.back.back9.domain.tradeLog.entity.TradeLog;
+import com.back.back9.domain.tradeLog.entity.TradeType;
+import com.back.back9.domain.tradeLog.service.TradeLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;

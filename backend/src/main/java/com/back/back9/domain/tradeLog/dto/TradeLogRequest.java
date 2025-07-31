@@ -1,4 +1,4 @@
-package com.back.back9.domain.log.tradeLog.dto;
+package com.back.back9.domain.tradeLog.dto;
 
 import org.springframework.format.annotation.DateTimeFormat;
 
