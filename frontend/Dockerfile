@@ -1,27 +1,26 @@
-# syntax=docker/dockerfile:1
+FROM node:20-bullseye-slim
 
-# 1) deps
-FROM node:20-alpine AS deps
-WORKDIR /app
-COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
-RUN npm ci --ignore-scripts
+# Nginx + dumb-init 설치
+RUN apt-get update \
+ && apt-get install -y nginx dumb-init \
+ && rm -rf /var/lib/apt/lists/* \
+ && mkdir -p /run/nginx
 
-# 2) build
-FROM node:20-alpine AS build
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-# 환경변수(NEXT_PUBLIC_*)는 Render의 Environment에 설정
-RUN npm run build
 
-# 3) runtime
-FROM node:20-alpine AS runner
-WORKDIR /app
-ENV NODE_ENV=production
-# Next.js standalone 실행 산출물을 사용
-COPY --from=build /app/.next/standalone ./
-COPY --from=build /app/public ./public
-COPY --from=build /app/.next/static ./.next/static
-ENV PORT=3000
-EXPOSE 3000
-CMD ["node", "server.js"]
+# CI에서 빌드된 .next/standalone과 public을 복사
+COPY .next/standalone ./
+COPY public ./public
+COPY .next/static ./public/_next/static
+
+# Nginx 설정 복사
+COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+
+ENV NODE_ENV=production \
+    LISTEN_PORT=80 \
+    PORT=3000
+
+EXPOSE 80
+
+ENTRYPOINT ["/usr/bin/dumb-init","--"]
+CMD ["bash","-lc","node server.js & nginx -g 'daemon off;'"]

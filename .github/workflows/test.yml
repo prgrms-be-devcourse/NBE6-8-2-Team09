@@ -1,5 +1,11 @@
 name: CI‑Test
 
+permissions:
+  contents: read       # 코드 체크아웃
+  packages: write      # GHCR Push
+  id-token: write      # OIDC (필요시)
+
+
 on:
   push:
     branches: ["**"]
@@ -73,3 +79,117 @@ jobs:
           name: test-reports-${{ matrix.os }}
           path: ${{ matrix.report_path }}
           retention-days: 7
+
+ # 2) BUILD ARTIFACTS: CI 안에서 프론트/백 빌드만 수행(이미지X)
+  build-artifacts:
+    needs: tests
+    if: ${{ needs.tests.result == 'success' }}
+    runs-on: ubuntu-latest
+    env:
+      NEXT_PUBLIC_AUTH_ENABLED: 'false'  # 인증 비활성화
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Frontend build (Next.js)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install deps (frontend)
+        working-directory: frontend
+        run: npm ci --ignore-scripts
+
+      - name: Next build (frontend)
+        working-directory: frontend
+        run: npm run build
+
+      # 산출물 업로드: standalone + static + public
+      - name: Upload frontend dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: |
+            frontend/.next/standalone/**
+            frontend/.next/static/**
+            frontend/public/**
+
+      # Backend build (Gradle bootJar)
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - name: Gradle bootJar
+        working-directory: backend
+        run: ./gradlew --no-daemon clean bootJar -x test
+
+      - name: Copy JAR to dist
+        working-directory: backend
+        run: |
+          mkdir -p dist
+          cp $(ls build/libs/*.jar | grep -v plain | head -n 1) dist/app.jar
+
+      - name: Upload backend jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/dist/app.jar
+
+  # 3) DOCKER BUILD: 런타임 전용 Dockerfile로 이미지화 & GHCR 푸시
+  docker-build:
+    needs: build-artifacts
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_PREFIX: ${{ github.repository_owner }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download frontend dist
+        uses: actions/download-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend
+
+      - name: Download backend jar
+        uses: actions/download-artifact@v4
+        with:
+          name: backend-jar
+          path: backend/dist
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push backend (runtime-only)
+        uses: docker/build-push-action@v6
+        with:
+          context: backend
+          file: backend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/back9-backend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/back9-backend:latest
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
+
+      - name: Build & push frontend (runtime-only)
+        uses: docker/build-push-action@v6
+        with:
+          context: frontend
+          file: frontend/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/back9-frontend:${{ github.sha }}
+            ${{ env.REGISTRY }}/${{ env.IMAGE_PREFIX }}/back9-frontend:latest
+          cache-from: type=gha
+          cache-to:   type=gha,mode=max
