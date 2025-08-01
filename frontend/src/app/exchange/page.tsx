@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { CoinPriceResponse } from "../../../../../websocket_test/frontend/src/types/type";
+import { CoinPriceResponse } from "@/lib/types/type";
 
 export default function ExchangePage() {
     const [isRunning, setIsRunning] = useState(false);
