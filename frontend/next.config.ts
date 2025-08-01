@@ -1,9 +1,14 @@
 const nextConfig = {
+    output: "standalone",
+
     async rewrites() {
         return [
             {
-                source: "/api/:path*",        // /api로 시작하는 모든 요청을
-                destination: "http://localhost:8080/api/:path*", // 백엔드로 프록시
+                source: "/api/:path*",
+                destination:
+                    process.env.NODE_ENV === "production"
+                        ? "/api/:path*"                  // Nginx로 프록시 설정
+                        : "http://localhost:8080/api/:path*", // dev 서버 프록시
             },
         ];
     },
