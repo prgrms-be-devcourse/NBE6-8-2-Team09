@@ -11,3 +11,8 @@ export interface CoinAddRequest {
     koreanName: string;
     englishName: string;
 }
+
+export interface CoinApiResponse {
+    coins: CoinDto[];
+    totalCount: number;
+}

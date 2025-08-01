@@ -13,9 +13,9 @@ import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { getCoins, createCoin, deleteCoin } from "@/app/api/coins/route";
+import { coinApi } from "@/lib/api/coin";
 
-// symbol 컬럼 추가
+// 스키마
 const schema = z.object({
     koreanName: z.string().min(1, "한글 이름은 필수입니다."),
     englishName: z.string().min(1, "영문 이름은 필수입니다."),
@@ -23,7 +23,7 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
-// Coin 타입을 백엔드 응답에 맞게 수정
+// Coin 타입
 type Coin = {
     id: number;
     createdAt: string;  // camelCase로 수정
@@ -68,12 +68,12 @@ export default function AdminCoinNewPage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    // 코인 목록 불러오기
+    // 코인 목록
     const fetchCoins = async () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await getCoins();
+            const data = await coinApi.getCoins();
             console.log("서버 응답:", data);
             console.log("첫 번째 코인:", data[0]); // 확인용
             console.log("첫 번째 코인의 필드들:", Object.keys(data[0] || {}));
@@ -99,7 +99,7 @@ export default function AdminCoinNewPage() {
 
     const onSubmit: SubmitHandler<FormValues> = async (values) => {
         try {
-            await createCoin(values);
+            await coinApi.createCoin(values);
             form.reset();
             fetchCoins();
         } catch (e) {
@@ -107,24 +107,25 @@ export default function AdminCoinNewPage() {
         }
     };
 
-    // 코인 삭제 함수 추가
+    // 코인 삭제
     const handleDeleteCoin = async (id: number) => {
         if (!confirm(`정말로 이 코인을 삭제하시겠습니까?`)) {
             return;
         }
 
         try {
-            await deleteCoin(id);
+            await coinApi.deleteCoin(id);
             alert("코인이 성공적으로 삭제되었습니다.");
             fetchCoins(); // 목록 새로고침
-        } catch (e) {
-            alert("코인 삭제 중 오류가 발생했습니다.");
+        } catch (e: any) { // e의 타입을 any로 명시
+            console.error("코인 삭제 중 오류 발생:", e); // 오류 내용을 콘솔에 출력
+            alert(`코인 삭제 중 오류가 발생했습니다: ${e.message || e}`); // 사용자에게도 오류 메시지 전달
         }
     };
 
     return (
         <div className="container py-8 flex flex-col lg:flex-row gap-8">
-            {/* 왼쪽: 코인 등록 폼 */}
+            {/* 코인 등록 폼 */}
             <motion.div
                 className="w-full lg:w-1/3 max-w-md"
                 variants={stagger(0.08)}
@@ -156,7 +157,7 @@ export default function AdminCoinNewPage() {
                     </motion.div>
                 </motion.form>
             </motion.div>
-            {/* 오른쪽: 코인 전체 목록 */}
+            {/* 코인 전체 목록 */}
             <motion.div
                 className="w-full lg:w-2/3"
                 variants={stagger(0.08)}
