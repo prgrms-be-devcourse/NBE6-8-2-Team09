@@ -21,7 +21,9 @@ export default function LogoutPage() {
                 console.warn('백엔드 로그아웃 실패:', error);
             } finally {
                 // 프론트엔드가 만든 중복 쿠키들 삭제
-                document.cookie = "access_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                document.cookie = "access_Token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+                document.cookie = "apiKey=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
                 
                 setTimeout(() => {
                     router.replace("/login");
