@@ -1,12 +1,12 @@
 import { getUser } from '@/lib/api/user'
 import type { User } from '@/types/user'
+import type { PageProps } from 'next'
 
-type Props = {
-    params: { id: string }   // id는 문자열 하나
-}
+type Params = { id: string }
 
-export default async function UserPage({ params }: Props) {
-    const user: User = await getUser(params.id)
+export default async function UserPage({ params }: PageProps<Params>) {
+    const { id } = await params        // params가 Promise<Params>이므로 await
+    const user: User = await getUser(id)
 
     return (
         <div>
