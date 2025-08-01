@@ -49,10 +49,11 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             walletService.createWallet(user.getId());
         }
 
-
+        String apiKey = user.getApiKey();
         String redirectUrl = String.format(
-                "http://localhost:3000/api/auth/google/callback?token=%s&role=%s",
+                "http://localhost:3000/api/auth/google/callback?token=%s&apiKey=%s&role=%s",
                 accessToken,
+                apiKey,
                 role
         );
         response.sendRedirect(redirectUrl);

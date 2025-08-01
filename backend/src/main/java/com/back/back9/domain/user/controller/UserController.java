@@ -147,6 +147,7 @@ public class UserController {
     public RsData<Void> logout() {
         rq.deleteCookie("apiKey");
         rq.deleteCookie("access_Token");
+        rq.deleteCookie("role");
         return new RsData<>("200-1", "로그아웃 되었습니다.");
     }
 
