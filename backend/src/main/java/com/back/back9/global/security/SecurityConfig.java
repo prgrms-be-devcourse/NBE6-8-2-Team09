@@ -37,7 +37,7 @@ public class SecurityConfig {
                                 "/v3/api-docs/**", "/swagger-ui.html", "/api/v1/users/logout"
                         ).permitAll()
                         .requestMatchers("/api/v1/adm/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {

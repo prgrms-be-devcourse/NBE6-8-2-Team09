@@ -139,7 +139,7 @@ public class AnalyticsService {
                 walletId,
                 coinAnalytics,
                 realizedProfitRateTotal,     // 전체 실현 수익률
-                BigDecimal.ZERO              // 평가 수익률은 이 메서드에서는 계산하지 않음
+                realizedProfitRateTotal            // 평가 수익률은 이 메서드에서는 계산하지 않음
         );
     }
     /*

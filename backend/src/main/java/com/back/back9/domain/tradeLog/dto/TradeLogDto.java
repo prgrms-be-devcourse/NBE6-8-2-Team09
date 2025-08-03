@@ -28,6 +28,8 @@ public record TradeLogDto(
         );
     }
 
+
+
     public static TradeLogDto from(TradeLog tradeLog) {
         return new TradeLogDto(tradeLog);
     }

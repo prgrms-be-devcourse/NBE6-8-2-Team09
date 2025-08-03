@@ -210,6 +210,7 @@ public class TradeLogControllerTest {
 //                .andExpect(handler().methodName("write"))
 //                .andExpect(status().isCreated());
 //    }
+
     @Test
     @DisplayName("거래 내역 전체 조회")
     void t4() throws Exception {

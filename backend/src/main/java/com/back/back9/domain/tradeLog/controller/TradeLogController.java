@@ -1,12 +1,15 @@
 package com.back.back9.domain.tradeLog.controller;
 
+import ch.qos.logback.classic.Logger;
 import com.back.back9.domain.tradeLog.dto.TradeLogDto;
 import com.back.back9.domain.tradeLog.dto.TradeLogRequest;
+import com.back.back9.domain.tradeLog.dto.TradeLogResponse;
 import com.back.back9.domain.tradeLog.entity.TradeLog;
 import com.back.back9.domain.tradeLog.entity.TradeType;
 import com.back.back9.domain.tradeLog.service.TradeLogService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+
 
 /**
  * 거래내역 컨트롤러
@@ -28,11 +32,11 @@ import java.util.List;
 //@SecurityRequirement(name = "bearerAuth")
 public class TradeLogController {
     private final TradeLogService tradeLogService;
+    private static final Logger log = (Logger) org.slf4j.LoggerFactory.getLogger(TradeLogController.class);
 
-    @GetMapping("/wallet/{wallet_id}")
-    @Transactional(readOnly = true)
     ///back9/tradeLogs?startDate=2023-10-01&endDate=2023-10-31&type=buy
-    public List<TradeLogDto> getItems(
+    @GetMapping("/wallet/{wallet_id}")
+    @Transactional(readOnly = true)    public ResponseEntity<List<TradeLogResponse>> getItems(
             @PathVariable("wallet_id") int walletId,
             @ModelAttribute TradeLogRequest request,
             Pageable pageable
@@ -58,8 +62,18 @@ public class TradeLogController {
                 pageable
         );
 
-        return items.stream()
-                .map(TradeLogDto::new)
+        List<TradeLogResponse> result = items.stream()
+                .map(TradeLogResponse::new)
                 .toList();
+
+        log.info("거래내역 조회 - 지갑 ID: {}, 거래 유형: {}, 코인 ID: {}, 시작일: {}, 종료일: {}, 페이지: {}",
+                walletId, request.type(), request.coinId(), request.startDate(), request.endDate(), pageable.getPageNumber());
+
+        return ResponseEntity.ok(result);
+    }
+    @PostMapping("/mock")
+    public ResponseEntity<?> createMockTradeLogs() {
+        tradeLogService.createMockLogs();
+        return ResponseEntity.ok("Mock trade logs created.");
     }
 }
