@@ -9,6 +9,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.List;
+
 
 @Service
 @RequiredArgsConstructor
@@ -20,32 +22,60 @@ public class UpbitRestCandleFetcher {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final int MAX_PER_REQUEST = 200;
 
-    public void fetchInterval(CandleInterval interval, int totalCount) {
-        for (String market : coinListProvider.getMarketCodes()) {
-            try {
-                for (int i = 0; i < totalCount; i += MAX_PER_REQUEST) {
-                    delaySafely();
-                    String url = String.format(
-                            "https://api.upbit.com/v1/candles/%s?market=%s&count=%d",
-                            interval.getSuffix(), market, Math.min(MAX_PER_REQUEST, totalCount - i));
-                    JsonNode arr = fetchJsonArray(url);
-                    redisService.saveCandleArray(interval, market, arr);
-                    if (interval == CandleInterval.SEC && i == 0 && !arr.isEmpty()) {
-                        redisService.saveLatestCandle(market, arr.get(0));
+    public void fetchInterval(CandleInterval interval, int count) {
+        List<String> markets = coinListProvider.getMarketCodes();
+
+        for (String market : markets) {
+            int i = 0;
+            while (i < count) {
+                delay();
+                try {
+                    int size = Math.min(MAX_PER_REQUEST, count - i);
+                    String url = String.format("https://api.upbit.com/v1/candles/%s?market=%s&count=%d",
+                            interval.getSuffix(), market, size);
+
+                    String json = rest.getForObject(url, String.class); // REST 요청
+                    JsonNode array = mapper.readTree(json);             // 파싱
+                    redisService.saveCandleArray(interval, market, array);
+
+                    if (interval == CandleInterval.SEC && i == 0 && !array.isEmpty()) {
+                        redisService.saveLatestCandle(market, array.get(0));
+                    }
+
+                    i += MAX_PER_REQUEST;
+
+                } catch (Exception e) {
+                    String message = e.getMessage() != null ? e.getMessage() : "unknown";
+                    System.err.printf("❌ [%s:%s] 데이터 수집 실패: %s%n", interval, market, message);
+
+                    if (message.contains("429") || message.toLowerCase().contains("too many request")) {
+                        System.err.println("🕒 429 Too Many Requests - 1분간 대기 후 재시도");
+                        try {
+                            Thread.sleep(60_000); // 1분 대기
+                        } catch (InterruptedException ie) {
+                            Thread.currentThread().interrupt();
+                            return; // 인터럽트 시 종료
+                        }
+                    } else {
+                        // 다른 오류는 그냥 스킵하고 다음 요청 진행
+                        i += MAX_PER_REQUEST;
                     }
                 }
-            } catch (Exception e) {
-                System.err.printf("REST fetch 실패 [%s:%s]: %s%n", interval, market, e.getMessage());
             }
         }
     }
 
-    private JsonNode fetchJsonArray(String url) throws Exception {
-        String res = rest.getForObject(url, String.class);
-        return mapper.readTree(res);
+    public void fetchUntil(CandleInterval interval, int requiredSize) {
+        for (String market : coinListProvider.getMarketCodes()) {
+            int current = redisService.countCandles(interval, market);
+            if (current >= requiredSize) continue;
+
+            int toFetch = requiredSize - current;
+            fetchInterval(interval, toFetch);
+        }
     }
 
-    private void delaySafely() {
+    private void delay() {
         try {
             Thread.sleep(150);
         } catch (InterruptedException e) {
