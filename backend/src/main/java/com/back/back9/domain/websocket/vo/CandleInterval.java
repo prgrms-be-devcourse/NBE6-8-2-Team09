@@ -33,4 +33,18 @@ public enum CandleInterval {
     public String toString() {
         return redisKeySuffix;
     }
+
+    public static CandleInterval fromWebSocketType(String websocketType) {
+        return switch (websocketType) {
+            case "candle.1s" -> SEC;
+            case "candle.1m" -> MIN_1;
+            case "candle.30m" -> MIN_30;
+            case "candle.1h" -> HOUR_1;
+            case "candle.1d" -> DAY;
+            case "candle.1w" -> WEEK;
+            case "candle.1M" -> MONTH;
+            case "candle.1y" -> YEAR;
+            default -> throw new IllegalArgumentException("Unknown WebSocket candle type: " + websocketType);
+        };
+    }
 }

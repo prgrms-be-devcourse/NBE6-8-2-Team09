@@ -11,6 +11,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,12 +29,10 @@ public class RedisService {
             ObjectNode modified = candle.deepCopy();
             long rawTimestamp = candle.get("timestamp").asLong();
 
-            // ❌ 불필요한 필드 제거
             modified.remove("candle_date_time_utc");
             modified.remove("candle_date_time_kst");
 
-            // ✅ timestamp 를 ISO LocalDateTime 문자열로 저장
-            LocalDateTime dateTime = LocalDateTime.ofEpochSecond(rawTimestamp / 1000, 0, java.time.ZoneOffset.UTC);
+            LocalDateTime dateTime = LocalDateTime.ofEpochSecond(rawTimestamp / 1000, 0, ZoneOffset.UTC);
             modified.put("timestamp", dateTime.toString());
 
             redisTemplate.opsForList().leftPush(redisKey, modified.toString());
@@ -41,8 +40,15 @@ public class RedisService {
         redisTemplate.opsForList().trim(redisKey, 0, interval.getMaxSize() - 1);
     }
 
-    public void saveLatestCandle(String symbol, JsonNode latestCandle) {
-        redisTemplate.opsForValue().set(symbol + ":Latest", latestCandle.toString());
+    public void saveCandle(CandleInterval interval, String symbol, JsonNode json) {
+        String key = interval.redisKey(symbol);
+        redisTemplate.opsForList().leftPush(key, json.toString());
+        redisTemplate.opsForList().trim(key, 0, interval.getMaxSize() - 1);
+    }
+
+    public void saveLatestCandle(String symbol, JsonNode candleNode) {
+        String key = symbol + ":Latest";
+        redisTemplate.opsForValue().set(key, candleNode.toString());
     }
 
     public List<JsonNode> getLatestCandle(CandleInterval interval, String symbol) {
@@ -62,19 +68,11 @@ public class RedisService {
         List<String> rawList = redisTemplate.opsForList().range(key, 0, REDIS_FETCH_LIMIT - 1);
         if (rawList == null || rawList.isEmpty()) return List.of();
 
-        ObjectMapper mapper = new ObjectMapper();
         List<JsonNode> parsedList = rawList.stream()
-                .map(str -> {
-                    try {
-                        return mapper.readTree(str);
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException("JSON 파싱 실패", e);
-                    }
-                })
-                .filter(node -> node.path("timestamp").asText().compareTo(String.valueOf(time)) < 0) // 기준 시간보다 과거만
+                .map(this::parseJson)
+                .filter(node -> node.path("timestamp").asText().compareTo(time.toString()) < 0)
                 .toList();
 
-        // 최신 → 과거 순서를 그대로 유지한 상태로 OFFSET부터 잘라서 반환
         int fromIndex = Math.min(OFFSET, parsedList.size());
         int toIndex = Math.min(fromIndex + PAGE_SIZE, parsedList.size());
 
@@ -93,6 +91,12 @@ public class RedisService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException("JSON 파싱 실패", e);
         }
+    }
+
+    public int countCandles(CandleInterval interval, String symbol) {
+        String key = interval.redisKey(symbol);
+        Long size = redisTemplate.opsForList().size(key);
+        return size != null ? size.intValue() : 0;
     }
 
     public void clearAll() {
