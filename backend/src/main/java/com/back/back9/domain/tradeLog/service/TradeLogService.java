@@ -68,11 +68,12 @@ public class TradeLogService {
     public int count() {
         return (int) tradeLogRepository.count();
     }
-    @Transactional(readOnly = true)
+
+    @Transactional
     public void saveAll(List<TradeLog> tradeLogs) {
         tradeLogRepository.saveAll(tradeLogs);
     }
-    @Transactional(readOnly = true)
+    @Transactional
     public TradeLogDto save(TradeLogDto tradeLogDto) {
         Wallet wallet = walletRepository.findById((long) tradeLogDto.walletId())
                 .orElseThrow(() -> new EntityNotFoundException("Wallet not found"));
@@ -85,11 +86,12 @@ public class TradeLogService {
 
         return TradeLogDto.from(savedTradeLog);
     }
-    @Transactional(readOnly = true)
+
+    @Transactional
     public TradeLog save(TradeLog tradeLog) {
         return tradeLogRepository.save(tradeLog);
     }
-    @Transactional(readOnly = true)
+    @Transactional
     public void createMockLogs() {
         if (count() > 0) return;
 
@@ -140,6 +142,7 @@ public class TradeLogService {
         }
 
         saveAll(logs);
+
     }
 
 }

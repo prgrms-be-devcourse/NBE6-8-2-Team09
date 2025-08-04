@@ -25,10 +25,7 @@ public class AnalyticsController {
 
     @GetMapping("/wallet/{walletId}/unrealized")
     public ResponseEntity<ProfitRateResponse> calculateUnRealizedProfitRates(@PathVariable int walletId) {
-        //임시
-        ProfitRateResponse response = analyticsService.calculateRealizedProfitRates(walletId);
-
-//        ProfitRateResponse response = analyticsService.calculateUnRealizedProfitRates(walletId);
+        ProfitRateResponse response = analyticsService.calculateUnRealizedProfitRates(walletId);
         return ResponseEntity.ok(response);
     }
 }

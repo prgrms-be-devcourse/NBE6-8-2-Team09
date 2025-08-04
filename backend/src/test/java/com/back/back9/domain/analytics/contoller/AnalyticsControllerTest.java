@@ -274,7 +274,8 @@ public class AnalyticsControllerTest {
 //                .andExpect(jsonPath("$.coinAnalytics[1].averageBuyPrice")
 //                        .value(closeTo(205000000.00, 0.000001)))
 //                .andExpect(jsonPath("$.coinAnalytics[1].realizedProfitRate").value(closeTo(12.19512200, 0.000001)))
-                // 총 수익률
+
+        // 총 수익률
 //                .andExpect(jsonPath("$.profitRateOnInvestment").value(closeTo(11.65048500, 0.000001)));
     }
 }

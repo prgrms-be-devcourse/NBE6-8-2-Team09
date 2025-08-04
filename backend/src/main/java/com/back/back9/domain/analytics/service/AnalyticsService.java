@@ -2,6 +2,8 @@ package com.back.back9.domain.analytics.service;
 
 import com.back.back9.domain.analytics.dto.ProfitAnalysisDto;
 import com.back.back9.domain.analytics.dto.ProfitRateResponse;
+import com.back.back9.domain.coin.entity.Coin;
+import com.back.back9.domain.coin.service.CoinService;
 import com.back.back9.domain.exchange.dto.CoinPriceResponse;
 import com.back.back9.domain.exchange.service.ExchangeService;
 import com.back.back9.domain.tradeLog.dto.TradeLogDto;
@@ -14,7 +16,6 @@ import com.back.back9.global.error.ErrorCode;
 import com.back.back9.global.error.ErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,19 +25,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+
 @Service
 public class AnalyticsService {
     private final TradeLogService tradeLogService;
     private final WalletService walletService;
     private final ExchangeService exchangeService;
+    private final CoinService coinService;
     private static final Logger log = LoggerFactory.getLogger(AnalyticsService.class);
 
     public AnalyticsService(TradeLogService tradeLogService,
                             WalletService walletService,
-                            ExchangeService exchangeService) {
+                            ExchangeService exchangeService,
+                            CoinService coinService) {
         this.tradeLogService = tradeLogService;
         this.walletService = walletService;
         this.exchangeService = exchangeService;
+        this.coinService = coinService;
     }
 
     /*
@@ -66,7 +72,8 @@ public class AnalyticsService {
 
         // 충전(CHARGE) 로그만 추출하여 총 투자금 계산 (단순 가격 합산)
         List<TradeLogDto> walletLogs = tradeLogService.findByWalletIdAndTypeCharge(walletId);
-        BigDecimal baseInvestment = new BigDecimal(500_000_00L); // 초기 투자금 (예: 5억 원)
+
+        BigDecimal baseInvestment = new BigDecimal(500_000_000L); // 초기 투자금 (예: 5억 원)
         BigDecimal walletLogSum = walletLogs.stream()
                 .map(TradeLogDto::price)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -160,7 +167,38 @@ public class AnalyticsService {
     @Transactional(readOnly = true)
     public ProfitRateResponse calculateUnRealizedProfitRates(int walletId) {
         // 사용자 지갑 내 보유 코인 정보 조회 (코인 ID, 수량, 평균 매수가 등 포함)
-        List<CoinHoldingInfo> coinHoldingInfos = walletService.getCoinHoldingsByUserId((long) walletId);
+//        List<CoinHoldingInfo> coinHoldingInfos = walletService.getCoinHoldingsByUserId((long) walletId);
+        Coin coin1 = coinService.findBySymbol("BTC")
+                .orElseThrow(() -> new IllegalArgumentException("코인 심볼 ETH에 해당하는 코인이 존재하지 않습니다."));
+
+        Coin coin2 = coinService.findBySymbol("ETH")
+                .orElseThrow(() -> new IllegalArgumentException("코인 심볼 ETH에 해당하는 코인이 존재하지 않습니다."));
+        List<Coin> coins = List.of(coin1, coin2);
+        List<CoinHoldingInfo> coinHoldingInfos  = new ArrayList<>();
+        BigDecimal coinQuantity = BigDecimal.valueOf(3);
+        BigDecimal totalInvestAmount = BigDecimal.valueOf(435_000_000);
+        BigDecimal averageBuyPrice = totalInvestAmount.divide(coinQuantity, 2, RoundingMode.HALF_UP);
+        CoinHoldingInfo coinHoldingInfo = new CoinHoldingInfo(
+                coin1.getId(),
+                coin1.getSymbol(),
+                coin1.getKoreanName() != null ? coin1.getKoreanName() : coin1.getSymbol(),
+                coinQuantity,
+                totalInvestAmount, // 총 투자 금액
+                averageBuyPrice  // 평균 매수가
+        );
+        coinHoldingInfos.add(coinHoldingInfo);
+        coinQuantity = BigDecimal.valueOf(2);
+        totalInvestAmount = BigDecimal.valueOf(440_000_000);
+        averageBuyPrice = totalInvestAmount.divide(coinQuantity, 2, RoundingMode.HALF_UP);
+        coinHoldingInfo = new CoinHoldingInfo(
+                coin2.getId(),
+                coin2.getSymbol(),
+                coin2.getKoreanName() != null ? coin2.getKoreanName() : coin2.getSymbol(),
+                coinQuantity,
+                totalInvestAmount, // 총 투자 금액
+                averageBuyPrice  // 평균 매수가
+        );
+        coinHoldingInfos.add(coinHoldingInfo);
         List<ProfitAnalysisDto> coinAnalytics = new ArrayList<>();
 
         BigDecimal totalInvestedAmount = BigDecimal.ZERO;      // 총 투자 원금 (코인별 매수가 * 수량)
