@@ -182,27 +182,27 @@ public class AnalyticsControllerTest {
     public void coinCreate() {
 
         coin1 = coinRepository.save(Coin.builder()
-                .symbol("KRW-BTC")
-                .koreanName("비트코인")
-                .englishName("Bitcoin")
+                .symbol("KRW-BTC2")
+                .koreanName("비트코인2")
+                .englishName("Bitcoin2")
                 .build());
 
         coin2 = coinRepository.save(Coin.builder()
-                .symbol("KRW-ETH")
-                .koreanName("이더리움")
-                .englishName("Ethereum")
+                .symbol("KRW-ETH2")
+                .koreanName("이더리움2")
+                .englishName("Ethereum2")
                 .build());
 
         coin3 = coinRepository.save(Coin.builder()
-                .symbol("KRW-XRP")
-                .koreanName("리플")
-                .englishName("Ripple")
+                .symbol("KRW-XRP2")
+                .koreanName("리플2")
+                .englishName("Ripple2")
                 .build());
 
         coin4 = coinRepository.save(Coin.builder()
-                .symbol("KRW-DOGE")
-                .koreanName("도지코인")
-                .englishName("Dogecoin")
+                .symbol("KRW-DOGE2")
+                .koreanName("도지코인2")
+                .englishName("Dogecoin2")
                 .build());
     }
     public void coinAmountCreate() {
@@ -239,11 +239,11 @@ public class AnalyticsControllerTest {
                 .andExpect(handler().handlerType(AnalyticsController.class))
                 .andExpect(handler().methodName("calculateRealizedProfitRates"))
                 .andExpect(jsonPath("$.coinAnalytics.length()").value(2))
-                .andExpect(jsonPath("$.coinAnalytics[0].coinId").value(coin1.getId()))
+                .andExpect(jsonPath("$.coinAnalytics[0].coinName").value(coin1.getId()))
                 .andExpect(jsonPath("$.coinAnalytics[0].totalQuantity").value(3))
                 .andExpect(jsonPath("$.coinAnalytics[0].averageBuyPrice").value(165000000.0))
 //                .andExpect(jsonPath("$.coinAnalytics[0].realizedProfitRate").value(closeTo(9.09090900, 0.000001)))
-                .andExpect(jsonPath("$.coinAnalytics[1].coinId").value(coin2.getId()))
+                .andExpect(jsonPath("$.coinAnalytics[1].coinName").value(coin2.getId()))
                 .andExpect(jsonPath("$.coinAnalytics[1].totalQuantity").value(2))
                 .andExpect(jsonPath("$.coinAnalytics[1].averageBuyPrice").value(190000000.0));
 //                .andExpect(jsonPath("$.coinAnalytics[1].realizedProfitRate").value(closeTo(7.89473600, 0.000001)))
@@ -264,17 +264,18 @@ public class AnalyticsControllerTest {
 //                .andExpect(handler().methodName("calculateUnRealizedProfitRates"))
 //                .andExpect(jsonPath("$.coinAnalytics.length()").value(2))
 //                // 코인 1
-//                .andExpect(jsonPath("$.coinAnalytics[0].coinId").value(coin1.getId()))
+//                .andExpect(jsonPath("$.coinAnalytics[0].coinName").value(coin1.getId()))
 //                .andExpect(jsonPath("$.coinAnalytics[0].totalQuantity").value(3))
 ////                .andExpect(jsonPath("$.coinAnalytics[0].averageBuyPrice").value(closeTo(206666666.66666667, 0.000001)))
 ////                .andExpect(jsonPath("$.coinAnalytics[0].realizedProfitRate").value(closeTo(11.29032300, 0.000001)))
 //                // 코인 2
-//                .andExpect(jsonPath("$.coinAnalytics[1].coinId").value(coin2.getId()))
+//                .andExpect(jsonPath("$.coinAnalytics[1].coinName").value(coin2.getId()))
 //                .andExpect(jsonPath("$.coinAnalytics[1].totalQuantity").value(2));
 ////                .andExpect(jsonPath("$.coinAnalytics[1].averageBuyPrice")
 ////                        .value(closeTo(205000000.00, 0.000001)))
 ////                .andExpect(jsonPath("$.coinAnalytics[1].realizedProfitRate").value(closeTo(12.19512200, 0.000001)))
-//                // 총 수익률
+//
+//        // 총 수익률
 ////                .andExpect(jsonPath("$.profitRateOnInvestment").value(closeTo(11.65048500, 0.000001)));
 //    }
 }

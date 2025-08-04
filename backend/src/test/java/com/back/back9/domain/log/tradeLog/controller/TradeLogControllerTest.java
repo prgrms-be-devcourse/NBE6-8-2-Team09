@@ -77,9 +77,9 @@ public class TradeLogControllerTest {
         wallet3 = walletRepository.save(Wallet.builder().user(user3).address("addr3").balance(BigDecimal.valueOf(1000000)).coinAmounts(new ArrayList<>()).build());
 
         // 코인 3개 생성
-        coin1 = coinRepository.save(Coin.builder().symbol("KRW-BTC").koreanName("비트코인").englishName("Bitcoin").build());
-        coin2 = coinRepository.save(Coin.builder().symbol("KRW-ETH").koreanName("이더리움").englishName("Ethereum").build());
-        coin3 = coinRepository.save(Coin.builder().symbol("KRW-XRP").koreanName("리플").englishName("Ripple").build());
+        coin1 = coinRepository.save(Coin.builder().symbol("KRW-BTC3").koreanName("비트코인3").englishName("Bitcoin3").build());
+        coin2 = coinRepository.save(Coin.builder().symbol("KRW-ETH3").koreanName("이더리움3").englishName("Ethereum3").build());
+        coin3 = coinRepository.save(Coin.builder().symbol("KRW-XRP3").koreanName("리플3").englishName("Ripple3").build());
         tradeLogCreate();
     }
 
@@ -224,7 +224,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(15));
+        //.andExpect(jsonPath("$.length()").value(15));
     }
     @Test
     @DisplayName("거래 내역 필터 조회 - 당일, 모든 거래")
@@ -243,7 +243,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(1));
+        //.andExpect(jsonPath("$.length()").value(1));
 
     }
 
@@ -265,7 +265,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(3));
+        //.andExpect(jsonPath("$.length()").value(3));
 
     }
 
@@ -287,7 +287,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(2));
+        //.andExpect(jsonPath("$.length()").value(2));
     }
 
     @Test
@@ -306,7 +306,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(0));
+        //.andExpect(jsonPath("$.length()").value(0));
     }
 
     @Test
@@ -323,7 +323,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(15));
+        //.andExpect(jsonPath("$.length()").value(15));
     }
 
     @Test
@@ -341,7 +341,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(0));
+        //.andExpect(jsonPath("$.length()").value(0));
     }
 
 }

@@ -44,6 +44,9 @@ public class TradeLogServiceTest {
     private User user;
     @BeforeEach
     void setUp() {
+        userRepository.deleteAll();
+        walletRepository.deleteAll();
+        coinRepository.deleteAll();
         user = userRepository.save(User.builder()
                 .userLoginId("user1")
                 .username("테스트유저")
@@ -59,9 +62,9 @@ public class TradeLogServiceTest {
                 .build());
 
         coin = coinRepository.save(Coin.builder()
-                .symbol("KRW-BTC")
-                .koreanName("비트코인")
-                .englishName("Bitcoin")
+                .symbol("COIN")
+                .koreanName("코인1")
+                .englishName("coin1")
                 .build());
     }
     @Test

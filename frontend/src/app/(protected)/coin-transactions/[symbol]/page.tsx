@@ -1,5 +1,5 @@
-import { columns, Transaction } from "@/components/transactions/columns";
-import { DataTable } from "@/components/transactions/data-table";
+import { columns, Transaction } from "@/components/ui/columns";
+import { DataTable } from "@/components/ui/data-table";
 
 const mockAll: Transaction[] = [
     { date: "2025.07.24", name: "BTC Invest reduction", type: "매수", amount: 2000, buySellAmount: 2000, qty: 0.0001 },

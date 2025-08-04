@@ -49,7 +49,7 @@ export function Footer({ className, innerClassName, ...props }: FooterProps) {
 
                 <div className="mt-10 text-xs opacity-75">
                     2025 all Right Reserved
-                    <br />Team Children
+                    <br />Team BackGoo
                 </div>
             </div>
         </footer>

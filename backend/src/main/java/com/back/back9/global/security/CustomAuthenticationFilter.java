@@ -79,7 +79,6 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         String accessToken;
 
         String headerAuthorization = rq.getHeader("Authorization", "");
-
         if (!headerAuthorization.isBlank()) {
             if (!headerAuthorization.startsWith("Bearer "))
                 throw new ServiceException("401-2", "Authorization 헤더가 Bearer 형식이 아닙니다.");
@@ -87,6 +86,7 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             String[] parts = headerAuthorization.split(" ", 3);
             apiKey = parts[1];
             accessToken = parts.length == 3 ? parts[2] : "";
+
         } else {
             apiKey = rq.getCookieValue("apiKey", "");
             accessToken = rq.getCookieValue("accessToken", "");

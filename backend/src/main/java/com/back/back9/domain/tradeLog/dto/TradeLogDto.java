@@ -6,12 +6,14 @@ import com.back.back9.domain.tradeLog.entity.TradeType;
 import com.back.back9.domain.wallet.entity.Wallet;
 
 import java.math.BigDecimal;
-
+import java.time.LocalDateTime;
+//내부용 DTO
 public record TradeLogDto(
         int id,
         int walletId,
-        String createdAt,
+        LocalDateTime createdAt,
         int coinId,
+        String coinSymbol,
         TradeType tradeType,
         BigDecimal quantity,
         BigDecimal price
@@ -20,8 +22,9 @@ public record TradeLogDto(
         this(
                 Math.toIntExact(tradeLog.getId()),
                 tradeLog.getWallet().getId().intValue(),
-                tradeLog.getCreatedAt().toLocalDate().toString(),
+                tradeLog.getCreatedAt(),
                 tradeLog.getCoin().getId().intValue(),
+                tradeLog.getCoin().getSymbol(),
                 tradeLog.getType(),
                 tradeLog.getQuantity(),
                 tradeLog.getPrice()

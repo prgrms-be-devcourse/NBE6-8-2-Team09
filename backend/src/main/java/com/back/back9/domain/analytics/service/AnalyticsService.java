@@ -2,6 +2,8 @@ package com.back.back9.domain.analytics.service;
 
 import com.back.back9.domain.analytics.dto.ProfitAnalysisDto;
 import com.back.back9.domain.analytics.dto.ProfitRateResponse;
+import com.back.back9.domain.coin.entity.Coin;
+import com.back.back9.domain.coin.service.CoinService;
 import com.back.back9.domain.exchange.dto.CoinPriceResponse;
 import com.back.back9.domain.exchange.service.ExchangeService;
 import com.back.back9.domain.tradeLog.dto.TradeLogDto;
@@ -14,8 +16,8 @@ import com.back.back9.global.error.ErrorCode;
 import com.back.back9.global.error.ErrorException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,19 +25,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+
 @Service
 public class AnalyticsService {
     private final TradeLogService tradeLogService;
     private final WalletService walletService;
     private final ExchangeService exchangeService;
+    private final CoinService coinService;
     private static final Logger log = LoggerFactory.getLogger(AnalyticsService.class);
 
     public AnalyticsService(TradeLogService tradeLogService,
                             WalletService walletService,
-                            ExchangeService exchangeService) {
+                            ExchangeService exchangeService,
+                            CoinService coinService) {
         this.tradeLogService = tradeLogService;
         this.walletService = walletService;
         this.exchangeService = exchangeService;
+        this.coinService = coinService;
     }
 
     /*
@@ -52,6 +59,7 @@ public class AnalyticsService {
      *   5-4. 실현 수익률 = (총 매도 금액 - 실현 원가) / 총 투자금 * 100
      *   5-5. 분석 결과 객체에 저장
      */
+    @Transactional(readOnly = true)
     public ProfitRateResponse calculateRealizedProfitRates(int walletId) {
         // 지갑에 해당하는 모든 트레이드 로그 조회 (매수, 매도, 충전 포함)
         List<TradeLogDto> tradeLogs = tradeLogService.findByWalletId(walletId);
@@ -64,7 +72,8 @@ public class AnalyticsService {
 
         // 충전(CHARGE) 로그만 추출하여 총 투자금 계산 (단순 가격 합산)
         List<TradeLogDto> walletLogs = tradeLogService.findByWalletIdAndTypeCharge(walletId);
-        BigDecimal baseInvestment = new BigDecimal("500000000"); // 초기 투자금 (예: 5억 원)
+
+        BigDecimal baseInvestment = new BigDecimal(500_000_000L); // 초기 투자금 (예: 5억 원)
         BigDecimal walletLogSum = walletLogs.stream()
                 .map(TradeLogDto::price)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
@@ -77,6 +86,7 @@ public class AnalyticsService {
         // 코인별 수익률 계산
         for (Map.Entry<Integer, List<TradeLogDto>> entry : tradeLogsByCoin.entrySet()) {
             int coinId = entry.getKey();
+            String coinName= String.valueOf(coinId);
             List<TradeLogDto> logs = entry.getValue();
 
             BigDecimal totalBuyQuantity = BigDecimal.ZERO;
@@ -121,7 +131,7 @@ public class AnalyticsService {
             BigDecimal currentHolding = totalBuyQuantity.subtract(totalSellQuantity);
 
             coinAnalytics.add(new ProfitAnalysisDto(
-                    coinId,
+                    coinName,
                     currentHolding,
                     averageBuyPrice,
                     realizedProfitRate
@@ -139,7 +149,7 @@ public class AnalyticsService {
                 walletId,
                 coinAnalytics,
                 realizedProfitRateTotal,     // 전체 실현 수익률
-                BigDecimal.ZERO              // 평가 수익률은 이 메서드에서는 계산하지 않음
+                realizedProfitRateTotal            // 평가 수익률은 이 메서드에서는 계산하지 않음
         );
     }
     /*
@@ -154,9 +164,11 @@ public class AnalyticsService {
      * 4. 코인 ID, 보유 수량, 평균 매입가, 수익률을 분석 결과 객체에 저장
      * 5. 전체 자산 기준 수익률 계산을 위해 총 투자금액, 총 평가금액 누적
      */
+    @Transactional(readOnly = true)
     public ProfitRateResponse calculateUnRealizedProfitRates(int walletId) {
         // 사용자 지갑 내 보유 코인 정보 조회 (코인 ID, 수량, 평균 매수가 등 포함)
         List<CoinHoldingInfo> coinHoldingInfos = walletService.getCoinHoldingsByUserId((long) walletId);
+
         List<ProfitAnalysisDto> coinAnalytics = new ArrayList<>();
 
         BigDecimal totalInvestedAmount = BigDecimal.ZERO;      // 총 투자 원금 (코인별 매수가 * 수량)
@@ -182,7 +194,7 @@ public class AnalyticsService {
 
             // 개별 코인 수익률 분석 정보 추가
             coinAnalytics.add(new ProfitAnalysisDto(
-                    (int) info.coinId(),
+                    String.valueOf(info.coinId()),
                     quantity,
                     avgBuyPrice,
                     profitRate
