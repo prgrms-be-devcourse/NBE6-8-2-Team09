@@ -6,6 +6,9 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
 @Data
 @Getter
 @AllArgsConstructor
@@ -13,6 +16,6 @@ import lombok.NoArgsConstructor;
 public class CoinPriceResponse {
     private String symbol;
     @JsonProperty("trade_price")
-    private String price;
-    private String time;
+    private BigDecimal price;
+    private LocalDateTime time;
 }

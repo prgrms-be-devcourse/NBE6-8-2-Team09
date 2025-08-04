@@ -2,12 +2,14 @@ package com.back.back9.domain.exchange.controller;
 
 import com.back.back9.domain.exchange.dto.ExchangeDTO;
 import com.back.back9.domain.exchange.service.ExchangeService;
+import com.back.back9.domain.websocket.vo.CandleInterval;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -20,7 +22,7 @@ public class ExchangeController {
 
     @GetMapping("/initial")
     public List<ExchangeDTO> getInitialCandles(
-            @RequestParam String interval,
+            @RequestParam CandleInterval interval,
             @RequestParam String market
     ) {
         return exchangeService.getInitialCandles(interval, market);
@@ -28,10 +30,10 @@ public class ExchangeController {
 
     @GetMapping("/previous")
     public List<ExchangeDTO> getPreviousCandles(
-            @RequestParam String interval,
+            @RequestParam CandleInterval interval,
             @RequestParam String market,
             @RequestParam int page,
-            @RequestParam String time
+            @RequestParam LocalDateTime time
     ) {
         return exchangeService.getPreviousCandles(interval, market, page, time);
     }

@@ -1,23 +1,37 @@
 package com.back.back9.global.redis.initializer;
 
 import com.back.back9.domain.websocket.service.UpbitRestCandleFetcher;
+import com.back.back9.domain.websocket.vo.CandleInterval;
 import com.back.back9.global.redis.service.RedisService;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.boot.ApplicationRunner;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-public class RedisInitializer implements ApplicationRunner {
+public class RedisInitializer {
 
+    private final UpbitRestCandleFetcher restCandleFetcher;
     private final RedisService redisService;
-    private final UpbitRestCandleFetcher candleFetcher;
 
-    @Override
-    public void run(ApplicationArguments args) {
+    @PostConstruct
+    public void initializeRedisWithInitialData() {
         redisService.clearAll();
-        candleFetcher.fetchInitialOneMinute();    // ✅ 우선 1분 200개 저장
-        candleFetcher.fetchAllRemainingInOrder(); // ✅ 이후 나머지 백그라운드로 저장
+        for (CandleInterval interval : CandleInterval.values()) {
+            try {
+                int count = interval.getMaxSize();
+                log.info("초기 Redis 저장 시작: [{}], size={}", interval.getSuffix(), count);
+
+                restCandleFetcher.fetchInterval(interval, count);
+
+                Thread.sleep(200);
+            } catch (Exception e) {
+                log.error("초기 Redis 저장 실패: [{}] - {}", interval.getSuffix(), e.getMessage(), e);
+            }
+        }
+
+        log.info("✅ Redis 초기화 완료");
     }
 }

@@ -1,14 +1,16 @@
 package com.back.back9.global.redis.service;
 
+import com.back.back9.domain.websocket.vo.CandleInterval;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,29 +20,46 @@ import java.util.stream.Collectors;
 public class RedisService {
 
     private final RedisTemplate<String, String> redisTemplate;
+    private static final ObjectMapper mapper = new ObjectMapper();
 
-    public List<JsonNode> getLatestCandle(String interval, String symbol) {
-        String key = symbol + ":" + interval;
-        List<String> rawList = redisTemplate.opsForList().range(key, 0, 119);
-        if (rawList == null) return List.of();
-        return rawList.stream()
-                .map(str -> {
-                    try {
-                        return new ObjectMapper().readTree(str);
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException("JSON 파싱 실패", e);
-                    }
-                })
-                .collect(Collectors.toList());
+    public void saveCandleArray(CandleInterval interval, String symbol, JsonNode candleArray) {
+        String redisKey = interval.redisKey(symbol);
+        for (JsonNode candle : candleArray) {
+            ObjectNode modified = candle.deepCopy();
+            long rawTimestamp = candle.get("timestamp").asLong();
+
+            // ❌ 불필요한 필드 제거
+            modified.remove("candle_date_time_utc");
+            modified.remove("candle_date_time_kst");
+
+            // ✅ timestamp 를 ISO LocalDateTime 문자열로 저장
+            LocalDateTime dateTime = LocalDateTime.ofEpochSecond(rawTimestamp / 1000, 0, java.time.ZoneOffset.UTC);
+            modified.put("timestamp", dateTime.toString());
+
+            redisTemplate.opsForList().leftPush(redisKey, modified.toString());
+        }
+        redisTemplate.opsForList().trim(redisKey, 0, interval.getMaxSize() - 1);
     }
 
-    public List<JsonNode> getPreviousCandlesByRange(String interval, String market, int page, String time) {
-        String key = market + ":" + interval;
-        int PAGE_SIZE = 50;
-        int SKIP_SIZE = 120 + page * PAGE_SIZE;
+    public void saveLatestCandle(String symbol, JsonNode latestCandle) {
+        redisTemplate.opsForValue().set(symbol + ":Latest", latestCandle.toString());
+    }
 
-        // 충분히 많은 데이터 가져오기 (최대 1000개까지 저장한다고 가정)
-        List<String> rawList = redisTemplate.opsForList().range(key, 0, 999);
+    public List<JsonNode> getLatestCandle(CandleInterval interval, String symbol) {
+        String key = interval.redisKey(symbol);
+        List<String> rawList = redisTemplate.opsForList().range(key, 0, 119);
+        if (rawList == null) return List.of();
+        return rawList.stream().map(this::parseJson).collect(Collectors.toList());
+    }
+
+    public List<JsonNode> getPreviousCandlesByRange(CandleInterval interval, String symbol, int page, LocalDateTime time) {
+        final int PAGE_SIZE = 50;
+        final int INITIAL_RENDER_SIZE = 120;
+        final int OFFSET = INITIAL_RENDER_SIZE + (page * PAGE_SIZE);
+        final int REDIS_FETCH_LIMIT = 1000;
+
+        String key = interval.redisKey(symbol);
+        List<String> rawList = redisTemplate.opsForList().range(key, 0, REDIS_FETCH_LIMIT - 1);
         if (rawList == null || rawList.isEmpty()) return List.of();
 
         ObjectMapper mapper = new ObjectMapper();
@@ -52,69 +71,32 @@ public class RedisService {
                         throw new RuntimeException("JSON 파싱 실패", e);
                     }
                 })
+                .filter(node -> node.path("timestamp").asText().compareTo(String.valueOf(time)) < 0) // 기준 시간보다 과거만
                 .toList();
 
-        // 기준 시간보다 이전(과거)의 데이터 필터링
-        List<JsonNode> filtered = parsedList.stream()
-                .filter(node -> {
-                    String nodeTime = node.path("timestamp").asText();
-                    return nodeTime.compareTo(time) < 0; // 입력시간보다 과거
-                })
-                .toList();
+        // 최신 → 과거 순서를 그대로 유지한 상태로 OFFSET부터 잘라서 반환
+        int fromIndex = Math.min(OFFSET, parsedList.size());
+        int toIndex = Math.min(fromIndex + PAGE_SIZE, parsedList.size());
 
-        // 120개 넘긴 다음 페이지 사이즈만큼 반환
-        int fromIndex = Math.min(SKIP_SIZE, filtered.size());
-        int toIndex = Math.min(fromIndex + PAGE_SIZE, filtered.size());
-
-        return filtered.subList(fromIndex, toIndex);
+        return parsedList.subList(fromIndex, toIndex);
     }
 
-    public JsonNode getLatest1sCandle(String coinSymbol) {
-        String key = coinSymbol + ":1s";  // 예: "KRW-BTC:1s"
-        List<String> list = redisTemplate.opsForList().range(key, 0, 0);
-        if (list == null || list.isEmpty()) {
-            return null;
-        }
+    public JsonNode getLatest1sCandle(String symbol) {
+        String key = symbol + ":Latest";
+        String value = redisTemplate.opsForValue().get(key);
+        return (value == null) ? null : parseJson(value);
+    }
+
+    private JsonNode parseJson(String str) {
         try {
-            ObjectMapper mapper = new ObjectMapper();
-            return mapper.readTree(list.getFirst());
+            return mapper.readTree(str);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException("실시간 1초 캔들 JSON 파싱 실패", e);
+            throw new RuntimeException("JSON 파싱 실패", e);
         }
-    }
-
-    public void saveCandle(String interval, String market, String candle) {
-        String key = market + ":" + interval;
-        redisTemplate.opsForList().leftPush(key, candle);
-        redisTemplate.opsForList().trim(key, 0, 999); // 최대 1000개
-    }
-
-    @SuppressWarnings("unused") // 현재 사용되지 않지만 보존
-    public void saveCandle(String msg) {
-        try {
-            JsonNode node = new ObjectMapper().readTree(msg);
-            String market = node.get("code").asText(); // 예: "KRW-BTC"
-            String type = node.get("type").asText();   // 예: "candle.1s"
-            String interval = type.replace("candle.", ""); // "1s"
-            saveCandle(interval, market, msg);
-        } catch (Exception e) {
-            throw new RuntimeException("RedisService: 실시간 캔들 저장 실패", e);
-        }
-    }
-
-    public void saveCandleArray(String interval, String market, JsonNode candles) {
-        String key = market + ":" + interval;
-        List<String> candleList = new ArrayList<>();
-        for (JsonNode node : candles) {
-            candleList.add(node.toString());
-        }
-        redisTemplate.opsForList().rightPushAll(key, candleList);
-        redisTemplate.opsForList().trim(key, 0, 999);
     }
 
     public void clearAll() {
-        var factory = redisTemplate.getConnectionFactory();
-        Optional.ofNullable(factory)
+        Optional.ofNullable(redisTemplate.getConnectionFactory())
                 .map(RedisConnectionFactory::getConnection)
                 .ifPresent(connection -> {
                     try (connection) {

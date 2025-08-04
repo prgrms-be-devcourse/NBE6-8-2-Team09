@@ -1,20 +1,22 @@
 package com.back.back9.domain.websocket.service;
 
+import com.back.back9.domain.websocket.vo.CandleInterval;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.HashSet;
+import java.util.Set;
+
 
 @Component
 public class FallbackRegistry {
-    private final Map<String, Boolean> fallbackMap = new ConcurrentHashMap<>();
 
-    @SuppressWarnings("unused")
-    public void enableFallback(String unit) {
-        fallbackMap.put(unit, true);
+    private final Set<CandleInterval> fallbackSet = new HashSet<>();
+
+    public void enableFallback(CandleInterval interval) {
+        fallbackSet.add(interval);
     }
 
-    public boolean isFallback(String unit) {
-        return fallbackMap.getOrDefault(unit, false);
+    public boolean isFallback(CandleInterval interval) {
+        return fallbackSet.contains(interval);
     }
 }
