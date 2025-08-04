@@ -3,8 +3,6 @@ package com.back.back9.domain.user.controller;
 import com.back.back9.domain.user.dto.UserDto;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.service.UserService;
-import com.back.back9.domain.wallet.service.WalletService;
-import com.back.back9.global.exception.ServiceException;
 import com.back.back9.global.rq.Rq;
 import com.back.back9.global.rsData.RsData;
 import io.swagger.v3.oas.annotations.Operation;
@@ -26,7 +24,6 @@ public class UserController {
 
     private final UserService userService;
     private final Rq rq;
-    private final WalletService walletService;
 
     public record UserRegisterReqBody(
             @NotBlank @Size(min = 2, max = 30) String userLoginId,
@@ -39,10 +36,6 @@ public class UserController {
     @Transactional
     @Operation(summary = "회원가입")
     public RsData<UserDto> register(@Valid @RequestBody UserRegisterReqBody reqBody) {
-        if (!reqBody.password().equals(reqBody.confirmPassword())) {
-            return new RsData<>("400", "비밀번호 확인이 일치하지 않습니다.");
-        }
-
         RsData<User> registerResult = userService.register(
                 new com.back.back9.domain.user.dto.UserRegisterDto(
                         reqBody.userLoginId(),
@@ -51,18 +44,10 @@ public class UserController {
                         reqBody.confirmPassword()
                 )
         );
-
         if (!registerResult.resultCode().startsWith("200")) {
             return new RsData<>(registerResult.resultCode(), registerResult.msg());
         }
-
-        User user = registerResult.data();
-
-        return new RsData<>(
-                "201",
-                "회원가입이 완료되었습니다.",
-                new UserDto(user)
-        );
+        return new RsData<>("201", registerResult.msg(), new UserDto(registerResult.data()));
     }
 
     @PostMapping("/register-admin")
@@ -77,27 +62,15 @@ public class UserController {
                         reqBody.confirmPassword()
                 )
         );
-
         if (!registerResult.resultCode().startsWith("200")) {
             return new RsData<>(registerResult.resultCode(), registerResult.msg());
         }
-
-        User user = registerResult.data();
-        return new RsData<>(
-                "201",
-                "관리자 회원가입이 완료되었습니다.",
-                new UserDto(user)
-        );
+        return new RsData<>("201", registerResult.msg(), new UserDto(registerResult.data()));
     }
 
-
     public record UserLoginReqBody(
-            @NotBlank
-            @Size(min = 2, max = 30)
-            String userLoginId,
-            @NotBlank
-            @Size(min = 2, max = 30)
-            String password
+            @NotBlank @Size(min = 2, max = 30) String userLoginId,
+            @NotBlank @Size(min = 2, max = 30) String password
     ) {}
 
     public record UserLoginResBody(
@@ -111,25 +84,16 @@ public class UserController {
     @Operation(summary = "로그인")
     public RsData<UserLoginResBody> login(@Valid @RequestBody UserLoginReqBody reqBody) {
         User actor = rq.getActor();
-        if (actor == null) {
-            String apiKey = rq.getCookieValue("apiKey", null);
-            if (apiKey != null && !apiKey.isBlank()) {
-                if (userService.findByApiKey(apiKey).isPresent()) {
-                    return new RsData<>("400", "이미 로그인된 상태입니다.");
-                }
-            }
-        } else {
+        if (actor != null || (rq.getCookieValue("apiKey", null) != null && userService.findByApiKey(rq.getCookieValue("apiKey", null)).isPresent())) {
             return new RsData<>("400", "이미 로그인된 상태입니다.");
         }
 
-        User user = userService.findByUserLoginId(reqBody.userLoginId())
-                .orElseThrow(() -> new ServiceException("401-1", "존재하지 않는 아이디입니다."));
-
-        if (!walletService.existsByUserId(user.getId())) {
-            walletService.createWallet(user.getId());
+        RsData<User> loginResult = userService.login(reqBody.userLoginId(), reqBody.password());
+        if (!loginResult.resultCode().startsWith("200")) {
+            return new RsData<>(loginResult.resultCode(), loginResult.msg());
         }
 
-        userService.checkPassword(user, reqBody.password());
+        User user = loginResult.data();
         String accessToken = userService.genAccessToken(user);
 
         rq.setCookie("apiKey", user.getApiKey());

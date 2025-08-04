@@ -22,8 +22,8 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
     private UserService userService;
 
     @Lazy
-    @Autowired
-    private WalletService walletService;
+        @Autowired
+        private WalletService walletService;
 
     @Lazy
     @Autowired

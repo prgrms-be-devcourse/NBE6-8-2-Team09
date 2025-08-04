@@ -3,9 +3,8 @@ package com.back.back9.domain.user.service;
 import com.back.back9.domain.user.dto.UserRegisterDto;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.repository.UserRepository;
-import com.back.back9.global.exception.ServiceException;
 import com.back.back9.domain.wallet.service.WalletService;
-import com.back.back9.domain.coin.repository.CoinRepository;
+import com.back.back9.global.exception.ServiceException;
 import com.back.back9.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +24,7 @@ public class UserService {
     private final AuthTokenService authTokenService;
     private final WalletService walletService;
 
-    public RsData<User> register(UserRegisterDto dto) {
+    private RsData<User> registerUser(UserRegisterDto dto, User.UserRole role) {
         if (!dto.password().equals(dto.confirmPassword())) {
             return new RsData<>("400", "비밀번호가 일치하지 않습니다.");
         }
@@ -42,7 +41,7 @@ public class UserService {
                 .userLoginId(dto.userLoginId())
                 .username(dto.username())
                 .password(passwordEncoder.encode(dto.password()))
-                .role(User.UserRole.MEMBER)
+                .role(role)
                 .apiKey(apiKey)
                 .build();
 
@@ -50,36 +49,31 @@ public class UserService {
 
         walletService.createWallet(user.getId());
 
-        return new RsData<>("200-1", "회원가입이 완료되었습니다.", user);
+        String message = role == User.UserRole.ADMIN ? "관리자 회원가입이 완료되었습니다." : "회원가입이 완료되었습니다.";
+        return new RsData<>("200-1", message, user);
+    }
+
+    public RsData<User> register(UserRegisterDto dto) {
+        return registerUser(dto, User.UserRole.MEMBER);
     }
 
     public RsData<User> registerAdmin(UserRegisterDto dto) {
-        if (!dto.password().equals(dto.confirmPassword())) {
-            return new RsData<>("400-0", "비밀번호가 일치하지 않습니다.");
+        return registerUser(dto, User.UserRole.ADMIN);
+    }
+
+    public RsData<User> login(String userLoginId, String password) {
+        Optional<User> userOpt = userRepository.findByUserLoginId(userLoginId);
+        if (userOpt.isEmpty()) {
+            return new RsData<>("401-1", "존재하지 않는 아이디입니다.");
         }
-        if (userRepository.findByUserLoginId(dto.userLoginId()).isPresent()) {
-            return new RsData<>("400-1", "이미 존재하는 아이디입니다.");
+        User user = userOpt.get();
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            return new RsData<>("401-2", "비밀번호가 일치하지 않습니다.");
         }
-
-        if (userRepository.findByUsername(dto.username()).isPresent()) {
-            return new RsData<>("400-2", "이미 존재하는 유저이름입니다.");
+        if (!walletService.existsByUserId(user.getId())) {
+            walletService.createWallet(user.getId());
         }
-
-        String apiKey = UUID.randomUUID().toString();
-
-        User user = User.builder()
-                .userLoginId(dto.userLoginId())
-                .username(dto.username())
-                .password(passwordEncoder.encode(dto.password()))
-                .role(User.UserRole.ADMIN)
-                .apiKey(apiKey)
-                .build();
-
-        user = userRepository.save(user);
-
-        walletService.createWallet(user.getId());
-
-        return new RsData<>("200-1", "관리자 회원가입이 완료되었습니다.", user);
+        return new RsData<>("200-1", "로그인 성공", user);
     }
 
     public Optional<User> findByUserLoginId(String userLoginId) {
@@ -126,5 +120,4 @@ public class UserService {
             throw new ServiceException("401-1", "비밀번호가 일치하지 않습니다.");
         }
     }
-
 }

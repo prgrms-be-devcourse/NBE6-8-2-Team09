@@ -13,14 +13,15 @@ import com.back.back9.domain.user.repository.UserRepository;
 import com.back.back9.domain.user.service.UserService;
 import com.back.back9.domain.wallet.entity.CoinAmount;
 import com.back.back9.domain.wallet.entity.Wallet;
+import com.back.back9.domain.wallet.repository.CoinAmountRepository;
 import com.back.back9.domain.wallet.repository.WalletRepository;
 import com.back.back9.domain.wallet.service.WalletService;
-import com.back.back9.domain.wallet.repository.CoinAmountRepository;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,13 +36,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.hamcrest.Matchers.closeTo;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.handler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Tag("trade_log")
 @ActiveProfiles("test")
@@ -281,3 +278,4 @@ public class AnalyticsControllerTest {
 //                .andExpect(jsonPath("$.profitRateOnInvestment").value(closeTo(11.65048500, 0.000001)));
     }
 }
+

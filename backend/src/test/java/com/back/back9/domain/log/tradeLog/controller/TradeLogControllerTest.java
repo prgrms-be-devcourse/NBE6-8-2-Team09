@@ -152,7 +152,7 @@ public class TradeLogControllerTest {
 //                .andExpect(jsonPath("$.data.updatedAt").exists());
 //    }
 
-//    @Test
+    //    @Test
 //    @DisplayName("거래 내역 생성 - 잘못된 apiKey, 유효한 accessToken")
 //    void t2() throws Exception {
 //
@@ -225,6 +225,7 @@ public class TradeLogControllerTest {
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
 //                .andExpect(jsonPath("$.length()").value(15));
+
     }
     @Test
     @DisplayName("거래 내역 필터 조회 - 당일, 모든 거래")
@@ -244,6 +245,7 @@ public class TradeLogControllerTest {
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
 //                .andExpect(jsonPath("$.length()").value(1));
+
 
     }
 
@@ -267,6 +269,7 @@ public class TradeLogControllerTest {
                 .andExpect(handler().methodName("getItems"));
 //                .andExpect(jsonPath("$.length()").value(3));
 
+
     }
 
     @Test
@@ -288,6 +291,7 @@ public class TradeLogControllerTest {
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
 //                .andExpect(jsonPath("$.length()").value(2));
+
     }
 
     @Test
@@ -307,6 +311,7 @@ public class TradeLogControllerTest {
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
 //                .andExpect(jsonPath("$.length()").value(0));
+
     }
 
     @Test
@@ -316,14 +321,15 @@ public class TradeLogControllerTest {
 
         ResultActions resultActions = mock
                 .perform(get(url)
-                .contentType(MediaType.APPLICATION_JSON)
-            )
-            .andDo(print());
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print());
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
 //                .andExpect(jsonPath("$.length()").value(15));
+
     }
 
     @Test
@@ -333,15 +339,16 @@ public class TradeLogControllerTest {
 
         ResultActions resultActions = mock
                 .perform(get(url)
-                    .param("startDate", "1999-01-01")
-                    .param("endDate", "1999-01-31")
-                    .contentType(MediaType.APPLICATION_JSON)
-            ).andDo(print());
+                        .param("startDate", "1999-01-01")
+                        .param("endDate", "1999-01-31")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print());
         resultActions
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
 //                .andExpect(jsonPath("$.length()").value(0));
+
     }
 
 }
