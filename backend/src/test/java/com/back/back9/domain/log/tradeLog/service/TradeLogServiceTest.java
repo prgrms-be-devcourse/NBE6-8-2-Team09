@@ -44,6 +44,9 @@ public class TradeLogServiceTest {
     private User user;
     @BeforeEach
     void setUp() {
+        userRepository.deleteAll();
+        walletRepository.deleteAll();
+        coinRepository.deleteAll();
         user = userRepository.save(User.builder()
                 .userLoginId("user1")
                 .username("테스트유저")
