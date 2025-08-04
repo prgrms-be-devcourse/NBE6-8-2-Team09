@@ -167,38 +167,8 @@ public class AnalyticsService {
     @Transactional(readOnly = true)
     public ProfitRateResponse calculateUnRealizedProfitRates(int walletId) {
         // 사용자 지갑 내 보유 코인 정보 조회 (코인 ID, 수량, 평균 매수가 등 포함)
-//        List<CoinHoldingInfo> coinHoldingInfos = walletService.getCoinHoldingsByUserId((long) walletId);
-        Coin coin1 = coinService.findBySymbol("BTC")
-                .orElseThrow(() -> new IllegalArgumentException("코인 심볼 ETH에 해당하는 코인이 존재하지 않습니다."));
+        List<CoinHoldingInfo> coinHoldingInfos = walletService.getCoinHoldingsByUserId((long) walletId);
 
-        Coin coin2 = coinService.findBySymbol("ETH")
-                .orElseThrow(() -> new IllegalArgumentException("코인 심볼 ETH에 해당하는 코인이 존재하지 않습니다."));
-        List<Coin> coins = List.of(coin1, coin2);
-        List<CoinHoldingInfo> coinHoldingInfos  = new ArrayList<>();
-        BigDecimal coinQuantity = BigDecimal.valueOf(3);
-        BigDecimal totalInvestAmount = BigDecimal.valueOf(435_000_000);
-        BigDecimal averageBuyPrice = totalInvestAmount.divide(coinQuantity, 2, RoundingMode.HALF_UP);
-        CoinHoldingInfo coinHoldingInfo = new CoinHoldingInfo(
-                coin1.getId(),
-                coin1.getSymbol(),
-                coin1.getKoreanName() != null ? coin1.getKoreanName() : coin1.getSymbol(),
-                coinQuantity,
-                totalInvestAmount, // 총 투자 금액
-                averageBuyPrice  // 평균 매수가
-        );
-        coinHoldingInfos.add(coinHoldingInfo);
-        coinQuantity = BigDecimal.valueOf(2);
-        totalInvestAmount = BigDecimal.valueOf(440_000_000);
-        averageBuyPrice = totalInvestAmount.divide(coinQuantity, 2, RoundingMode.HALF_UP);
-        coinHoldingInfo = new CoinHoldingInfo(
-                coin2.getId(),
-                coin2.getSymbol(),
-                coin2.getKoreanName() != null ? coin2.getKoreanName() : coin2.getSymbol(),
-                coinQuantity,
-                totalInvestAmount, // 총 투자 금액
-                averageBuyPrice  // 평균 매수가
-        );
-        coinHoldingInfos.add(coinHoldingInfo);
         List<ProfitAnalysisDto> coinAnalytics = new ArrayList<>();
 
         BigDecimal totalInvestedAmount = BigDecimal.ZERO;      // 총 투자 원금 (코인별 매수가 * 수량)
