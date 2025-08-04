@@ -94,7 +94,7 @@ public class TradeLogService {
     @Transactional
     public void createMockLogs() {
         if (count() > 0) return;
-
+        coinRepository.deleteAll();
         Wallet wallet = walletRepository.findById(1L)
                 .orElseThrow(() -> new RuntimeException("wallet not found"));
         Coin coin1 = coinRepository.save(
