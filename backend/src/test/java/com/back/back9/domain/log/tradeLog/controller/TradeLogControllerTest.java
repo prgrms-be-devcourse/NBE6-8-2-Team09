@@ -67,7 +67,9 @@ public class TradeLogControllerTest {
     void setUp() {
 
         tradeLogRepository.deleteAll();
-
+        coinRepository.deleteAll();
+        walletRepository.deleteAll();
+        userRepository.deleteAll();
         // 유저 3명 생성
         User user1 = userRepository.save(User.builder().userLoginId("u1").username("user1").password("1234").role(User.UserRole.MEMBER).build());
         User user2 = userRepository.save(User.builder().userLoginId("u2").username("user2").password("1234").role(User.UserRole.MEMBER).build());
