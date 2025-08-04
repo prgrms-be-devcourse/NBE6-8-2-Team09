@@ -182,27 +182,27 @@ public class AnalyticsControllerTest {
     public void coinCreate() {
 
         coin1 = coinRepository.save(Coin.builder()
-                .symbol("KRW-BTC")
-                .koreanName("비트코인")
-                .englishName("Bitcoin")
+                .symbol("KRW-BTC2")
+                .koreanName("비트코인2")
+                .englishName("Bitcoin2")
                 .build());
 
         coin2 = coinRepository.save(Coin.builder()
-                .symbol("KRW-ETH")
-                .koreanName("이더리움")
-                .englishName("Ethereum")
+                .symbol("KRW-ETH2")
+                .koreanName("이더리움2")
+                .englishName("Ethereum2")
                 .build());
 
         coin3 = coinRepository.save(Coin.builder()
-                .symbol("KRW-XRP")
-                .koreanName("리플")
-                .englishName("Ripple")
+                .symbol("KRW-XRP2")
+                .koreanName("리플2")
+                .englishName("Ripple2")
                 .build());
 
         coin4 = coinRepository.save(Coin.builder()
-                .symbol("KRW-DOGE")
-                .koreanName("도지코인")
-                .englishName("Dogecoin")
+                .symbol("KRW-DOGE2")
+                .koreanName("도지코인2")
+                .englishName("Dogecoin2")
                 .build());
     }
     public void coinAmountCreate() {
