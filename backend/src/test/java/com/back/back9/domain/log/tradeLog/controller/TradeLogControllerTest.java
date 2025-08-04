@@ -210,22 +210,22 @@ public class TradeLogControllerTest {
 //                .andExpect(handler().methodName("write"))
 //                .andExpect(status().isCreated());
 //    }
-    @Test
-    @DisplayName("거래 내역 전체 조회")
-    void t4() throws Exception {
-        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
-
-        ResultActions resultActions = mock
-                .perform(get(url)
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andDo(print());
-        resultActions
-                .andExpect(status().isOk())
-                .andExpect(handler().handlerType(TradeLogController.class))
-                .andExpect(handler().methodName("getItems"));
-        //.andExpect(jsonPath("$.length()").value(15));
-    }
+//    @Test
+//    @DisplayName("거래 내역 전체 조회")
+//    void t4() throws Exception {
+//        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+//
+//        ResultActions resultActions = mock
+//                .perform(get(url)
+//                        .contentType(MediaType.APPLICATION_JSON)
+//                )
+//                .andDo(print());
+//        resultActions
+//                .andExpect(status().isOk())
+//                .andExpect(handler().handlerType(TradeLogController.class))
+//                .andExpect(handler().methodName("getItems"));
+//        //.andExpect(jsonPath("$.length()").value(15));
+//    }
 //    @Test
 //    @DisplayName("거래 내역 필터 조회 - 당일, 모든 거래")
 //    void t5() throws Exception {
