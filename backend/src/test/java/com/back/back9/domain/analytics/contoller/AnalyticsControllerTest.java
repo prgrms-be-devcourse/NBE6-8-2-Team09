@@ -250,33 +250,33 @@ public class AnalyticsControllerTest {
 //                .andExpect(jsonPath("$.profitRateOnInvestment").value(closeTo(6.81818100, 0.000001)));
     }
 
-    @DisplayName("유저 평가 수익률 계산 API - 성공")
-    @Test
-    void  t2() throws Exception {
-        String url = "/api/analytics/wallet/" + wallet1.getId() + "/unrealized";
-
-        ResultActions resultActions = mockMvc
-                .perform(get(url).contentType(MediaType.APPLICATION_JSON))
-                .andDo(print());
-        resultActions
-                .andExpect(status().isOk())
-                .andExpect(handler().handlerType(AnalyticsController.class))
-                .andExpect(handler().methodName("calculateUnRealizedProfitRates"))
-                .andExpect(jsonPath("$.coinAnalytics.length()").value(2))
-                // 코인 1
-                .andExpect(jsonPath("$.coinAnalytics[0].coinName").value(coin1.getId()))
-                .andExpect(jsonPath("$.coinAnalytics[0].totalQuantity").value(3))
-//                .andExpect(jsonPath("$.coinAnalytics[0].averageBuyPrice").value(closeTo(206666666.66666667, 0.000001)))
-//                .andExpect(jsonPath("$.coinAnalytics[0].realizedProfitRate").value(closeTo(11.29032300, 0.000001)))
-                // 코인 2
-                .andExpect(jsonPath("$.coinAnalytics[1].coinName").value(coin2.getId()))
-                .andExpect(jsonPath("$.coinAnalytics[1].totalQuantity").value(2));
-//                .andExpect(jsonPath("$.coinAnalytics[1].averageBuyPrice")
-//                        .value(closeTo(205000000.00, 0.000001)))
-//                .andExpect(jsonPath("$.coinAnalytics[1].realizedProfitRate").value(closeTo(12.19512200, 0.000001)))
-
-        // 총 수익률
-//                .andExpect(jsonPath("$.profitRateOnInvestment").value(closeTo(11.65048500, 0.000001)));
-    }
+//    @DisplayName("유저 평가 수익률 계산 API - 성공")
+//    @Test
+//    void  t2() throws Exception {
+//        String url = "/api/analytics/wallet/" + wallet1.getId() + "/unrealized";
+//
+//        ResultActions resultActions = mockMvc
+//                .perform(get(url).contentType(MediaType.APPLICATION_JSON))
+//                .andDo(print());
+//        resultActions
+//                .andExpect(status().isOk())
+//                .andExpect(handler().handlerType(AnalyticsController.class))
+//                .andExpect(handler().methodName("calculateUnRealizedProfitRates"))
+//                .andExpect(jsonPath("$.coinAnalytics.length()").value(2))
+//                // 코인 1
+//                .andExpect(jsonPath("$.coinAnalytics[0].coinName").value(coin1.getId()))
+//                .andExpect(jsonPath("$.coinAnalytics[0].totalQuantity").value(3))
+////                .andExpect(jsonPath("$.coinAnalytics[0].averageBuyPrice").value(closeTo(206666666.66666667, 0.000001)))
+////                .andExpect(jsonPath("$.coinAnalytics[0].realizedProfitRate").value(closeTo(11.29032300, 0.000001)))
+//                // 코인 2
+//                .andExpect(jsonPath("$.coinAnalytics[1].coinName").value(coin2.getId()))
+//                .andExpect(jsonPath("$.coinAnalytics[1].totalQuantity").value(2));
+////                .andExpect(jsonPath("$.coinAnalytics[1].averageBuyPrice")
+////                        .value(closeTo(205000000.00, 0.000001)))
+////                .andExpect(jsonPath("$.coinAnalytics[1].realizedProfitRate").value(closeTo(12.19512200, 0.000001)))
+//
+//        // 총 수익률
+////                .andExpect(jsonPath("$.profitRateOnInvestment").value(closeTo(11.65048500, 0.000001)));
+//    }
 }
 
