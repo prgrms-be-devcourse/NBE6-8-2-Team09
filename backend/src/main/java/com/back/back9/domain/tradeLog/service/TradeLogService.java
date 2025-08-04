@@ -99,25 +99,25 @@ public class TradeLogService {
                 .orElseThrow(() -> new RuntimeException("wallet not found"));
         Coin coin1 = coinRepository.save(
                 Coin.builder()
-                        .koreanName("비트코인")
-                        .englishName("Bitcoin")
-                        .symbol("BTC")
+                        .koreanName("비트코인1")
+                        .englishName("Bitcoin1")
+                        .symbol("BTC1")
                         .build()
         );
 
         Coin coin2 = coinRepository.save(
                 Coin.builder()
-                        .koreanName("이더리움")
-                        .englishName("Ethereum")
-                        .symbol("ETH")
+                        .koreanName("이더리움1")
+                        .englishName("Ethereum1")
+                        .symbol("ETH1")
                         .build()
         );
 
         Coin coin3 = coinRepository.save(
                 Coin.builder()
-                        .koreanName("리플")
-                        .englishName("Ripple")
-                        .symbol("XRP")
+                        .koreanName("리플1")
+                        .englishName("Ripple1")
+                        .symbol("XRP1")
                         .build()
         );
         List<TradeLog> logs = new ArrayList<>();
