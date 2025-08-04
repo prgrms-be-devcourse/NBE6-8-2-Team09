@@ -97,24 +97,18 @@ public class TradeLogControllerTest {
 
             if(i <= 5){
                 log.setCoin(coin1);
-
-            }else if(i <= 10){
+            } else if(i <= 10){
                 log.setCoin(coin2);
-            }else{
+            } else {
                 log.setCoin(coin3);
             }
-            TradeType type = (i % 3 == 0) ? TradeType.SELL : TradeType.BUY;
 
             log.setType(i % 3 == 0 ? TradeType.SELL : TradeType.BUY);
-
             log.setCreatedAt(baseDate.plusDays((i - 1) * 7));
-            logs.add(log);
-
             log.setQuantity(BigDecimal.valueOf(1));
+            log.setPrice(BigDecimal.valueOf(1000 + (i * 1000)));
 
-            BigDecimal price = BigDecimal.valueOf(1000 + (i * 1000));
-            log.setPrice(price);
-
+            logs.add(log); // ✅ 모든 필드가 세팅된 이후에 리스트에 추가
         }
 
         tradeLogService.saveAll(logs);
