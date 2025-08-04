@@ -62,9 +62,9 @@ public class TradeLogServiceTest {
                 .build());
 
         coin = coinRepository.save(Coin.builder()
-                .symbol("KRW-BTC")
-                .koreanName("비트코인")
-                .englishName("Bitcoin")
+                .symbol("COIN")
+                .koreanName("코인1")
+                .englishName("coin1")
                 .build());
     }
     @Test
