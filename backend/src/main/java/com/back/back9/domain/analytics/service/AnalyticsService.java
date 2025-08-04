@@ -168,7 +168,7 @@ public class AnalyticsService {
 
             BigDecimal quantity = info.quantity();               // 현재 보유 수량
             BigDecimal avgBuyPrice = info.averageBuyPrice();     // 평균 매수가
-            BigDecimal currentPrice = new BigDecimal(coinPriceResponse.getPrice()); // 현재가
+            BigDecimal currentPrice = coinPriceResponse.getPrice(); // 현재가
 
             log.info("코인: {}, 현재가: {}, 수량: {}, 평균단가: {}",
                     info.coinName(), currentPrice, quantity, avgBuyPrice);
