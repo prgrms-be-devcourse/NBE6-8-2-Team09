@@ -95,21 +95,21 @@ tasks.withType<Test>().configureEach {
 
     useJUnitPlatform()
 
-    // 테스트 타임아웃 설정 (전체 테스트 실행 시간 제한)
-    timeout.set(Duration.ofMinutes(10))
-
-    // JVM 설정 - 메모리 최적화 (병렬 제한으로 메모리 사용량 감소)
-    jvmArgs(
-        "-Xmx1g",  // 메모리를 1GB로 줄임
-        "-XX:+UseG1GC"
-    )
-
-    // 테스트 병렬 실행 제한 - CI 환경을 고려한 안전한 설정
-    systemProperty("junit.jupiter.execution.parallel.enabled", "true")
-    systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
-    systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
-    systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "2")  // 최대 2개 병렬
-    systemProperty("junit.jupiter.execution.parallel.config.fixed.max-pool-size", "2")
+//    // 테스트 타임아웃 설정 (전체 테스트 실행 시간 제한)
+//    timeout.set(Duration.ofMinutes(10))
+//
+//    // JVM 설정 - 메모리 최적화 (병렬 제한으로 메모리 사용량 감소)
+//    jvmArgs(
+//        "-Xmx1g",  // 메모리를 1GB로 줄임
+//        "-XX:+UseG1GC"
+//    )
+//
+//    // 테스트 병렬 실행 제한 - CI 환경을 고려한 안전한 설정
+//    systemProperty("junit.jupiter.execution.parallel.enabled", "true")
+//    systemProperty("junit.jupiter.execution.parallel.mode.default", "concurrent")
+//    systemProperty("junit.jupiter.execution.parallel.config.strategy", "fixed")
+//    systemProperty("junit.jupiter.execution.parallel.config.fixed.parallelism", "2")  // 최대 2개 병렬
+//    systemProperty("junit.jupiter.execution.parallel.config.fixed.max-pool-size", "2")
 
     // 실패 테스트만 모아 마지막에 요약 출력
     val failed = mutableListOf<Pair<TestDescriptor, TestResult>>()
