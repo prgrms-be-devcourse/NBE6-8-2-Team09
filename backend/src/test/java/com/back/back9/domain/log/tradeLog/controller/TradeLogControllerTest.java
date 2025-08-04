@@ -67,20 +67,7 @@ public class TradeLogControllerTest {
     void setUp() {
 
         tradeLogRepository.deleteAll();
-        coinRepository.deleteAll();
-        walletRepository.deleteAll();
-        userRepository.deleteAll();
-        User user1 = userRepository.save(User.builder().userLoginId("u1").username("user1").password("1234").role(User.UserRole.MEMBER).build());
-        User user2 = userRepository.save(User.builder().userLoginId("u2").username("user2").password("1234").role(User.UserRole.MEMBER).build());
-        User user3 = userRepository.save(User.builder().userLoginId("u3").username("user3").password("1234").role(User.UserRole.MEMBER).build());
 
-        this.wallet1 = walletRepository.save(Wallet.builder().user(user1).address("addr1").balance(BigDecimal.valueOf(1000000)).coinAmounts(new ArrayList<>()).build());
-        this.wallet2 = walletRepository.save(Wallet.builder().user(user2).address("addr2").balance(BigDecimal.valueOf(1000000)).coinAmounts(new ArrayList<>()).build());
-        this.wallet3 = walletRepository.save(Wallet.builder().user(user3).address("addr3").balance(BigDecimal.valueOf(1000000)).coinAmounts(new ArrayList<>()).build());
-
-        this.coin1 = coinRepository.save(Coin.builder().symbol("KRW-BTC").koreanName("비트코인").englishName("Bitcoin").build());
-        this.coin2 = coinRepository.save(Coin.builder().symbol("KRW-ETH").koreanName("이더리움").englishName("Ethereum").build());
-        this.coin3 = coinRepository.save(Coin.builder().symbol("KRW-XRP").koreanName("리플").englishName("Ripple").build());
         tradeLogCreate();
     }
 
@@ -119,98 +106,7 @@ public class TradeLogControllerTest {
 
         tradeLogService.saveAll(logs);
     }
-//    @Test
-//    @DisplayName("거래 내역 생성")
-//    void t1() throws Exception {
-//        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
-//
-//        ResultActions resultActions = mock
-//                .perform(get(url)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content("""
-//                                {
-//                                    "walletId": 1,
-//                                    "siteId": 1,
-//                                    "coinId": 1,
-//                                    "type": "BUY",
-//                                    "quantity": 2.5,
-//                                    "price": 30000.0
-//                                }
-//                                """.stripIndent())
-//                        )
-//                        .andDo(print());
-//        TradeLog tradeLog = tradeLogService.findLatest().get();
-//        resultActions
-//                .andExpect(status().isCreated())
-//                .andExpect(jsonPath("$.data.id").exists())
-//                .andExpect(jsonPath("$.data.walletId").value(1))
-//                .andExpect(jsonPath("$.data.siteId").value(1))
-//                .andExpect(jsonPath("$.data.coinId").value(1))
-//                .andExpect(jsonPath("$.data.type").value("BUY"))
-//                .andExpect(jsonPath("$.data.quantity").value(2.5))
-//                .andExpect(jsonPath("$.data.price").value(30000.0))
-//                .andExpect(jsonPath("$.data.createdAt").exists())
-//                .andExpect(jsonPath("$.data.updatedAt").exists());
-//    }
 
-    //    @Test
-//    @DisplayName("거래 내역 생성 - 잘못된 apiKey, 유효한 accessToken")
-//    void t2() throws Exception {
-//
-//        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
-//
-//        ResultActions resultActions = mock
-//                .perform(get(url)
-//                        .header("Authorization", "Bearer wrong-api-key " + actorAccessToken)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content("""
-//                            {
-//                                "walletId": 1,
-//                                "siteId": 1,
-//                                "coinId": 1,
-//                                "type": "BUY",
-//                                "quantity": 2.5,
-//                                "price": 30000.0
-//                            }
-//                            """.stripIndent())
-//                )
-//                .andDo(print());
-//
-//        resultActions
-//                .andExpect(handler().handlerType(TradeLogController.class))
-//                .andExpect(handler().methodName("write"))
-//                .andExpect(status().isCreated());
-//    }
-//    @Test
-//    @DisplayName("거래 내역 생성 - 잘못된 apiKey 쿠키, 유효한 accessToken 쿠키")
-//    void t3() throws Exception {
-//        User user = userService.findByUsername("user1").get();
-//        String actorAccessToken = userService.genAccessToken(user);
-//
-//        ResultActions resultActions = mock
-//                .perform(post("/api/tradeLog/wallet/1")
-//                        .cookie(
-//                                new Cookie("apiKey", "wrong-api-key"),
-//                                new Cookie("accessToken", actorAccessToken)
-//                        )                        .contentType(MediaType.APPLICATION_JSON)
-//                        .content("""
-//                            {
-//                                "walletId": 1,
-//                                "siteId": 1,
-//                                "coinId": 1,
-//                                "type": "BUY",
-//                                "quantity": 2.5,
-//                                "price": 30000.0
-//                            }
-//                            """.stripIndent())
-//                )
-//                .andDo(print());
-//
-//        resultActions
-//                .andExpect(handler().handlerType(TradeLogController.class))
-//                .andExpect(handler().methodName("write"))
-//                .andExpect(status().isCreated());
-//    }
     @Test
     @DisplayName("거래 내역 전체 조회")
     void t4() throws Exception {
