@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,7 +30,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ActiveProfiles("test")
 @DisplayName("WalletController 통합 테스트")
 @Transactional
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @Tag("wallet")
 public class IntegrationWalletControllerTest {
 
@@ -52,24 +50,17 @@ public class IntegrationWalletControllerTest {
 
     @BeforeEach
     void setUp() {
-        // 트랜잭션 내에서는 deleteAll 대신 @Sql 사용하거나
-        // 각 테스트 메서드에서 독립적인 데이터 생성
-        try {
-            // 기존 데이터 정리 (트랜잭션이 롤백되므로 실제로는 영향 없음)
-            walletRepository.deleteAll();
-            coinRepository.deleteAll();
-            userRepository.deleteAll();
-        } catch (Exception e) {
-            // 무시하고 계속 진행
-        }
+        walletRepository.deleteAll();
+        userRepository.deleteAll();
+        coinRepository.deleteAll(); // CoinRepository 초기화 추가
 
-        // 테스트용 사용자 생성
         User user = User.builder()
                 .userLoginId("testuser")
                 .username("testuser")
                 .password("password")
                 .role(User.UserRole.ADMIN)
                 .build();
+        // 사용자 데이터 저장
         userRepository.save(user);
 
     }
