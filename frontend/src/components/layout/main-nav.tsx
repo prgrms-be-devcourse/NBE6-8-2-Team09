@@ -13,6 +13,7 @@ const defaultLinks: NavLink[] = [
     { href: "/dashboard", label: "Dashboard" },
     { href: "/wallet", label: "Wallet" },
     { href: "/transactions", label: "Transactions" },
+    { href: "/analytics", label: "Analytics" },
     { href: "/admin/coins/new", label: "Admin" },
 ];
 

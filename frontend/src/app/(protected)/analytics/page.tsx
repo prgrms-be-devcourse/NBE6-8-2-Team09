@@ -13,7 +13,7 @@ import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 
 const columns: ColumnDef<ProfitAnalysisDto>[] = [
-    { accessorKey: "coinId", header: "코인 ID" },
+    { accessorKey: "coinName", header: "코인 이름" },
     {
         accessorKey: "totalQuantity",
         header: "보유 수량",

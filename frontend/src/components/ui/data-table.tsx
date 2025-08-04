@@ -45,7 +45,7 @@ export function DataTable<TData, TValue>({
                         {table.getHeaderGroups().map((hg) => (
                             <TableRow key={hg.id}>
                                 {hg.headers.map((h) => (
-                                    <TableHead key={h.id}>
+                                    <TableHead key={h.id} className="text-center">
                                         {h.isPlaceholder
                                             ? null
                                             : flexRender(h.column.columnDef.header, h.getContext())}
