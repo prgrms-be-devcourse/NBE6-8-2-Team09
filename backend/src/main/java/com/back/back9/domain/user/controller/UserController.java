@@ -12,7 +12,6 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,7 +32,6 @@ public class UserController {
     ) {}
 
     @PostMapping("/register")
-    @Transactional
     @Operation(summary = "회원가입")
     public RsData<UserDto> register(@Valid @RequestBody UserRegisterReqBody reqBody) {
         RsData<User> registerResult = userService.register(
@@ -51,7 +49,6 @@ public class UserController {
     }
 
     @PostMapping("/register-admin")
-    @Transactional
     @Operation(summary = "관리자 회원가입")
     public RsData<UserDto> registerAdmin(@Valid @RequestBody UserRegisterReqBody reqBody) {
         RsData<User> registerResult = userService.registerAdmin(
@@ -80,7 +77,6 @@ public class UserController {
     ) {}
 
     @PostMapping("/login")
-    @Transactional(readOnly = true)
     @Operation(summary = "로그인")
     public RsData<UserLoginResBody> login(@Valid @RequestBody UserLoginReqBody reqBody) {
         User actor = rq.getActor();
@@ -116,7 +112,6 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    @Transactional(readOnly = true)
     @Operation(summary = "내 정보 조회")
     public RsData<UserDto> me() {
         User actor = rq.getActor();
