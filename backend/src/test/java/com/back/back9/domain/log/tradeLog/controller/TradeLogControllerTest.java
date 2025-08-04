@@ -78,9 +78,9 @@ public class TradeLogControllerTest {
         this.wallet2 = walletRepository.save(Wallet.builder().user(user2).address("addr2").balance(BigDecimal.valueOf(1000000)).coinAmounts(new ArrayList<>()).build());
         this.wallet3 = walletRepository.save(Wallet.builder().user(user3).address("addr3").balance(BigDecimal.valueOf(1000000)).coinAmounts(new ArrayList<>()).build());
 
-        this.coin1 = coinRepository.save(Coin.builder().symbol("KRW-BTC").koreanName("비트코인").englishName("Bitcoin").build());
-        this.coin2 = coinRepository.save(Coin.builder().symbol("KRW-ETH").koreanName("이더리움").englishName("Ethereum").build());
-        this.coin3 = coinRepository.save(Coin.builder().symbol("KRW-XRP").koreanName("리플").englishName("Ripple").build());
+        this.coin1 = coinRepository.save(Coin.builder().symbol("Coin1").koreanName("코인1").englishName("Coin1").build());
+        this.coin2 = coinRepository.save(Coin.builder().symbol("Coin2").koreanName("코인2").englishName("Coin2").build());
+        this.coin3 = coinRepository.save(Coin.builder().symbol("Coin3").koreanName("코인3").englishName("Coin3").build());
         tradeLogCreate();
     }
 
