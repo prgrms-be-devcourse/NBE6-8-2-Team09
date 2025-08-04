@@ -136,122 +136,122 @@ public class TradeLogControllerTest {
                 .andExpect(handler().methodName("getItems"));
 
     }
-//    @Test
-//    @DisplayName("거래 내역 필터 조회 - 당일, 모든 거래")
-//    void t5() throws Exception {
-//        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
-//
-//        ResultActions resultActions = mock
-//                .perform(get(url)
-//                        .param("startDate", "2025-07-25")
-//                        .param("endDate", "2025-07-25")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                )
-//                .andDo(print());
-//
-//        resultActions
-//                .andExpect(status().isOk())
-//                .andExpect(handler().handlerType(TradeLogController.class))
-//                .andExpect(handler().methodName("getItems"));
-//
-//
-//    }
-//
-//    @Test
-//    @DisplayName("거래 내역 조회 - 일별, 매수 거래")
-//    void t6() throws Exception {
-//        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
-//
-//        ResultActions resultActions = mock
-//                .perform(get(url)
-//                        .param("startDate", "2025-07-27")
-//                        .param("endDate", "2025-08-27")
-//                        .param("type", "BUY")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                )
-//                .andDo(print());
-//
-//        resultActions
-//                .andExpect(status().isOk())
-//                .andExpect(handler().handlerType(TradeLogController.class))
-//                .andExpect(handler().methodName("getItems"));
-//
-//
-//    }
-//
-//    @Test
-//    @DisplayName("거래 내역 조회 - 월별, 매도 거래")
-//    void t7() throws Exception {
-//        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
-//
-//        ResultActions resultActions = mock
-//                .perform(get(url)
-//                        .param("startDate", "2025-07-01")
-//                        .param("endDate", "2025-08-31")
-//                        .param("type", "SELL")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                )
-//                .andDo(print());
-//
-//        resultActions
-//                .andExpect(status().isOk())
-//                .andExpect(handler().handlerType(TradeLogController.class))
-//                .andExpect(handler().methodName("getItems"));
-//
-//    }
-//
-//    @Test
-//    @DisplayName("시작일이 종료일보다 이후일 때")
-//    void t8() throws Exception {
-//        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
-//
-//        ResultActions resultActions = mock
-//                .perform(get(url)
-//                        .param("startDate", "2025-03-01")
-//                        .param("endDate", "2025-01-01")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                )
-//                .andDo(print());
-//        resultActions
-//                .andExpect(status().isOk())
-//                .andExpect(handler().handlerType(TradeLogController.class))
-//                .andExpect(handler().methodName("getItems"));
-//
-//    }
-//
-//    @Test
-//    @DisplayName("모든 필터 없음 (파라미터 없음)")
-//    void t9() throws Exception {
-//        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
-//
-//        ResultActions resultActions = mock
-//                .perform(get(url)
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                )
-//                .andDo(print());
-//        resultActions
-//                .andExpect(status().isOk())
-//                .andExpect(handler().handlerType(TradeLogController.class))
-//                .andExpect(handler().methodName("getItems"));
-//
-//    }
-//
-//    @Test
-//    @DisplayName("거래 없음")
-//    void t10() throws Exception {
-//        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
-//
-//        ResultActions resultActions = mock
-//                .perform(get(url)
-//                        .param("startDate", "1999-01-01")
-//                        .param("endDate", "1999-01-31")
-//                        .contentType(MediaType.APPLICATION_JSON)
-//                ).andDo(print());
-//        resultActions
-//                .andExpect(status().isOk())
-//                .andExpect(handler().handlerType(TradeLogController.class))
-//                .andExpect(handler().methodName("getItems"));
-//
-//    }
+    @Test
+    @DisplayName("거래 내역 필터 조회 - 당일, 모든 거래")
+    void t5() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
+        ResultActions resultActions = mock
+                .perform(get(url)
+                        .param("startDate", "2025-07-25")
+                        .param("endDate", "2025-07-25")
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(TradeLogController.class))
+                .andExpect(handler().methodName("getItems"));
+
+
+    }
+
+    @Test
+    @DisplayName("거래 내역 조회 - 일별, 매수 거래")
+    void t6() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
+        ResultActions resultActions = mock
+                .perform(get(url)
+                        .param("startDate", "2025-07-27")
+                        .param("endDate", "2025-08-27")
+                        .param("type", "BUY")
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(TradeLogController.class))
+                .andExpect(handler().methodName("getItems"));
+
+
+    }
+
+    @Test
+    @DisplayName("거래 내역 조회 - 월별, 매도 거래")
+    void t7() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
+        ResultActions resultActions = mock
+                .perform(get(url)
+                        .param("startDate", "2025-07-01")
+                        .param("endDate", "2025-08-31")
+                        .param("type", "SELL")
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print());
+
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(TradeLogController.class))
+                .andExpect(handler().methodName("getItems"));
+
+    }
+
+    @Test
+    @DisplayName("시작일이 종료일보다 이후일 때")
+    void t8() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
+        ResultActions resultActions = mock
+                .perform(get(url)
+                        .param("startDate", "2025-03-01")
+                        .param("endDate", "2025-01-01")
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print());
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(TradeLogController.class))
+                .andExpect(handler().methodName("getItems"));
+
+    }
+
+    @Test
+    @DisplayName("모든 필터 없음 (파라미터 없음)")
+    void t9() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
+        ResultActions resultActions = mock
+                .perform(get(url)
+                        .contentType(MediaType.APPLICATION_JSON)
+                )
+                .andDo(print());
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(TradeLogController.class))
+                .andExpect(handler().methodName("getItems"));
+
+    }
+
+    @Test
+    @DisplayName("거래 없음")
+    void t10() throws Exception {
+        String url = "/api/tradeLog/wallet/" + wallet1.getId() ;
+
+        ResultActions resultActions = mock
+                .perform(get(url)
+                        .param("startDate", "1999-01-01")
+                        .param("endDate", "1999-01-31")
+                        .contentType(MediaType.APPLICATION_JSON)
+                ).andDo(print());
+        resultActions
+                .andExpect(status().isOk())
+                .andExpect(handler().handlerType(TradeLogController.class))
+                .andExpect(handler().methodName("getItems"));
+
+    }
 
 }
