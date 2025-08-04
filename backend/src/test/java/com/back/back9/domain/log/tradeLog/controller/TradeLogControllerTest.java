@@ -65,7 +65,9 @@ public class TradeLogControllerTest {
      */
     @BeforeEach
     void setUp() {
+
         tradeLogRepository.deleteAll();
+
         // 유저 3명 생성
         User user1 = userRepository.save(User.builder().userLoginId("u1").username("user1").password("1234").role(User.UserRole.MEMBER).build());
         User user2 = userRepository.save(User.builder().userLoginId("u2").username("user2").password("1234").role(User.UserRole.MEMBER).build());
@@ -224,7 +226,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(15));
+
     }
     @Test
     @DisplayName("거래 내역 필터 조회 - 당일, 모든 거래")
@@ -243,7 +245,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(1));
+
 
     }
 
@@ -265,7 +267,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(3));
+
 
     }
 
@@ -287,7 +289,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(2));
+
     }
 
     @Test
@@ -306,7 +308,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(0));
+
     }
 
     @Test
@@ -323,7 +325,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(15));
+
     }
 
     @Test
@@ -341,7 +343,7 @@ public class TradeLogControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(handler().handlerType(TradeLogController.class))
                 .andExpect(handler().methodName("getItems"));
-                //.andExpect(jsonPath("$.length()").value(0));
+
     }
 
 }
