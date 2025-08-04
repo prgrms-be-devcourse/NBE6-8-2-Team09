@@ -1,5 +1,6 @@
 package com.back.back9.global.security;
 
+import ch.qos.logback.classic.Logger;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -21,7 +22,7 @@ public class SecurityConfig {
 
     private final CustomAuthenticationFilter customAuthenticationFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
-
+    private final Logger log = (Logger) org.slf4j.LoggerFactory.getLogger(SecurityConfig.class);
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
         http
@@ -41,6 +42,8 @@ public class SecurityConfig {
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
+                            log.warn("🔥 인증 실패 - 요청 URI: {}", request.getRequestURI());  // ← 여기에 추가
+
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
                             response.getWriter().write("{\"status\":\"fail\",\"code\":401,\"message\":\"인증이 필요합니다.\",\"result\":null}");
