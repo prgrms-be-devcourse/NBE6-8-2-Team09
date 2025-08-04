@@ -40,7 +40,6 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        logger.info(" [CustomAuthFilter] 요청 URI: {}" + request.getRequestURI());
         logger.debug("Processing request for " + request.getRequestURI());
 
         Rq rq = getRq(request, response);
@@ -72,7 +71,6 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                 "/api/v1/users/register-admin"
         );
         if (openApiUris.contains(request.getRequestURI())) {
-            logger.info("🟢 [CustomAuthFilter] 인증 예외 URI 요청: {}"+ request.getRequestURI());
             filterChain.doFilter(request, response);
             return;
         }
@@ -81,7 +79,6 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
         String accessToken;
 
         String headerAuthorization = rq.getHeader("Authorization", "");
-        logger.info("🔑 Authorization 헤더: {}"+ headerAuthorization);
         if (!headerAuthorization.isBlank()) {
             if (!headerAuthorization.startsWith("Bearer "))
                 throw new ServiceException("401-2", "Authorization 헤더가 Bearer 형식이 아닙니다.");
@@ -89,7 +86,6 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             String[] parts = headerAuthorization.split(" ", 3);
             apiKey = parts[1];
             accessToken = parts.length == 3 ? parts[2] : "";
-            logger.info("🔑 쿠키 기반 apiKey={}, accessToken={}"+ apiKey + " Token : " + accessToken);
 
         } else {
             apiKey = rq.getCookieValue("apiKey", "");
