@@ -91,29 +91,22 @@ public class TradeLogControllerTest {
         LocalDateTime baseDate = LocalDateTime.of(2025, 7, 25, 0, 0);
 
         for (int i = 1; i <= 15; i++) {
-            TradeLog log = new TradeLog();
-            log.setWallet(wallet1);
-
-            if(i <= 5){
-                log.setCoin(coin1);
-
-            }else if(i <= 10){
-                log.setCoin(coin2);
-            }else{
-                log.setCoin(coin3);
-            }
             TradeType type = (i % 3 == 0) ? TradeType.SELL : TradeType.BUY;
-
-            log.setType(i % 3 == 0 ? TradeType.SELL : TradeType.BUY);
-
-            log.setCreatedAt(baseDate.plusDays((i - 1) * 7));
-            logs.add(log);
-
-            log.setQuantity(BigDecimal.valueOf(1));
-
+            Coin coin = (i <= 5) ? coin1 : (i <= 10) ? coin2 : coin3;
             BigDecimal price = BigDecimal.valueOf(1000 + (i * 1000));
-            log.setPrice(price);
 
+            TradeLog log = TradeLog.builder()
+                    .wallet(wallet1)
+                    .coin(coin)
+                    .type(type)
+                    .quantity(BigDecimal.ONE)
+                    .price(price)
+                    .build();
+
+            // createdAt은 따로 세팅
+            log.setCreatedAt(baseDate.plusDays((i - 1) * 7));
+
+            logs.add(log);
         }
 
         tradeLogService.saveAll(logs);
