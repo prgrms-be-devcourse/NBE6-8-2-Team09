@@ -16,6 +16,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import { PageShell } from "@/components/layout/page-shell";
 import { tradeLogApi } from "@/lib/api/tradelog";
+import { apiCall } from "@/lib/api/client";
 import type { TradeLogResponse } from "@/lib/types/tradelog";
 
 const columns: ColumnDef<TradeLogResponse>[] = [
@@ -79,14 +80,9 @@ export default function TransactionsPage() {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/users/me`,
-                    {
-                        method: "GET",
-                        credentials: "include",
-                    }
-                );
-                if (response.ok) {
+                // API 클라이언트를 사용하여 일관된 URL과 설정으로 인증 확인
+                const response = await apiCall('/v1/users/me');
+                if (response) {
                     setIsAuthenticated(true);
                 } else {
                     router.replace("/login");

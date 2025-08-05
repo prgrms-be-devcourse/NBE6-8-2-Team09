@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { apiCall } from "@/lib/api/client";
 import * as React from "react";
 
 type NavLink = { href: string; label: string };
@@ -34,16 +35,11 @@ export function MainNav({
     React.useEffect(() => {
         const checkLoginStatus = async () => {
             try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/users/me`,
-                    {
-                        method: "GET",
-                        credentials: "include", // HttpOnly 쿠키 전송
-                    }
-                );
-                
-                setIsLoggedIn(response.ok);
-                console.log('🔐 로그인 상태:', response.ok);
+                // API 클라이언트를 사용하여 일관된 URL과 설정으로 로그인 상태 확인
+                const response = await apiCall('/v1/users/me');
+
+                setIsLoggedIn(!!response);
+                console.log('🔐 로그인 상태:', !!response);
             } catch (error) {
                 console.error('로그인 상태 확인 실패:', error);
                 setIsLoggedIn(false);
