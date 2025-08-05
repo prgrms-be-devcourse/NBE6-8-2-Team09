@@ -219,7 +219,7 @@ public class UserControllerTest {
     @Test
     @DisplayName("구글 OAuth2 로그인 엔드포인트 접근 시 구글 로그인 창으로 리다이렉트된다")
     void t6() throws Exception {
-        mvc.perform(get("/oauth2/authorization/google"))
+        mvc.perform(get("/oauth2/authorize/google"))
                 .andDo(print())
                 .andExpect(status().is3xxRedirection())
                 .andExpect(header().string("Location", org.hamcrest.Matchers.startsWith("https://accounts.google.com/")));
