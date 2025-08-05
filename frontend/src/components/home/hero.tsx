@@ -70,7 +70,7 @@ export function Hero({
             className={cn("relative overflow-hidden w-full", className)}
         >
             {/* full-bleed 배경 */}
-            <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-blue-50 to-white" />
+            <div className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-orange-50 to-white" />
 
             {/* 가운데 정렬 & max-width는 PageShell로 통일 */}
             <PageShell
@@ -84,14 +84,14 @@ export function Hero({
                 <motion.div variants={stagger(0.1)} initial="hidden" animate="show">
                     <motion.div
                         variants={fadeInUp}
-                        className="flex flex-col items-center space-y-4"
+                        className="flex items-center justify-center gap-4"
                     >
                         <img 
                             src="/images/back9-coin-logo.PNG" 
                             alt="BACK9 Coin Logo" 
-                            className="w-24 h-24 md:w-32 md:h-32 object-contain"
+                            className="w-16 h-16 md:w-20 md:h-20 object-contain"
                         />
-                        <h1 className="text-4xl md:text-5xl font-bold text-blue-600">
+                        <h1 className="text-4xl md:text-5xl font-bold text-amber-600">
                             {title}
                         </h1>
                     </motion.div>
@@ -109,7 +109,7 @@ export function Hero({
                     >
                         <Link
                             href={primaryCta.href}
-                            className="inline-flex items-center px-4 py-2 rounded-md bg-blue-600 text-white transition
+                            className="inline-flex items-center px-4 py-2 rounded-md bg-amber-600 text-white transition
                          hover:opacity-90 hover:scale-[1.02] active:scale-[0.99]"
                         >
                             {primaryCta.label}

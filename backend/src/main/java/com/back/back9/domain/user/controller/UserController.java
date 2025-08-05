@@ -93,7 +93,9 @@ public class UserController {
         String accessToken = userService.genAccessToken(user);
 
         rq.setCookie("apiKey", user.getApiKey());
+
         rq.setCookie("accessToken", accessToken);
+
         rq.setCookie("role", user.getRole().name());
 
         return new RsData<>(
