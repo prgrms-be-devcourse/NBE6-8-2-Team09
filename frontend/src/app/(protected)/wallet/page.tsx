@@ -222,14 +222,14 @@ export default function WalletPage() {
                         >
                             <h2 className="text-lg font-semibold mb-4">투자 분석</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="bg-blue-50 p-4 rounded-lg">
-                                    <div className="text-sm text-blue-600 font-medium">가장 많이 투자한 코인</div>
-                                    <div className="text-lg font-bold text-blue-800">
+                                <div className="bg-amber-50 p-4 rounded-lg">
+                                    <div className="text-sm text-amber-600 font-medium">가장 많이 투자한 코인</div>
+                                    <div className="text-lg font-bold text-amber-800">
                                         {walletData.coinAmounts.reduce((max, coin) =>
                                             coin.totalAmount > max.totalAmount ? coin : max
                                         ).coinSymbol}
                                     </div>
-                                    <div className="text-sm text-blue-600">
+                                    <div className="text-sm text-amber-600">
                                         ${walletData.coinAmounts.reduce((max, coin) =>
                                         coin.totalAmount > max.totalAmount ? coin : max
                                     ).totalAmount.toLocaleString()}
@@ -254,13 +254,13 @@ export default function WalletPage() {
                     {/* 지갑 요약 */}
                     <motion.div
                         variants={fadeInUp}
-                        className="border rounded-lg p-6 bg-gradient-to-br from-blue-50 to-indigo-50"
+                        className="border rounded-lg p-6 bg-gradient-to-br from-amber-50 to-orange-50"
                     >
                         <h2 className="text-lg font-semibold mb-4">지갑 정보</h2>
                         <div className="space-y-3">
                             <div>
                                 <div className="text-sm text-muted-foreground">총 자산</div>
-                                <div className="text-2xl font-bold text-blue-600">
+                                <div className="text-2xl font-bold text-amber-600">
                                     ${totalValue.toLocaleString()}
                                 </div>
                             </div>

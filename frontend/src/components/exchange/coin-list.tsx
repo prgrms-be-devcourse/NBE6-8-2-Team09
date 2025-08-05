@@ -77,7 +77,7 @@ export default function CoinList({ coins, selectedCoin, onCoinSelect, userRole =
                         <div
                             key={coin.code}
                             className={`p-3 cursor-pointer hover:bg-gray-50 border-l-4 transition-colors ${
-                                selectedCoin === coin.code ? "border-l-blue-500 bg-blue-50" : "border-l-transparent"
+                                selectedCoin === coin.code ? "border-l-amber-500 bg-amber-50" : "border-l-transparent"
                             }`}
                             onClick={() => onCoinSelect(coin)}
                         >
