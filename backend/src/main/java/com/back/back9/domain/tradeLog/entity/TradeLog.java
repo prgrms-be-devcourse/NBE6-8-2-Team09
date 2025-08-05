@@ -28,7 +28,6 @@ public class TradeLog extends BaseEntity {
 //    private int exchangeId;
 
     //거래한 코인
-    @NotNull
     @ManyToOne
     @JoinColumn(name = "coin_id")
     private Coin coin;
