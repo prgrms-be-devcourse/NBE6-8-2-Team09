@@ -301,29 +301,29 @@ export default function TransactionsPage() {
                     <DataTable columns={columns} data={tradeLogData} pageSize={10} />
                 </motion.div>
             </motion.div>
-            <Button
-                size="sm"
-                className="bg-green-600 hover:bg-green-700"
-                onClick={async () => {
-                    try {
-                        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tradeLog/mock`, {
-                            method: "POST",
-                            credentials : "include",
-                        });
-                        if (res.ok) {
-                            alert("거래 내역 15개 생성 완료!");
-                            fetchTradeLog(); // 다시 불러오기
-                        } else {
-                            alert("생성 실패");
-                        }
-                    } catch (err) {
-                        console.error("Mock 생성 실패:", err);
-                        alert("에러 발생");
-                    }
-                }}
-            >
-                거래내역 생성
-            </Button>
+            {/*<Button*/}
+            {/*    size="sm"*/}
+            {/*    className="bg-green-600 hover:bg-green-700"*/}
+            {/*    onClick={async () => {*/}
+            {/*        try {*/}
+            {/*            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/tradeLog/mock`, {*/}
+            {/*                method: "POST",*/}
+            {/*                credentials : "include",*/}
+            {/*            });*/}
+            {/*            if (res.ok) {*/}
+            {/*                alert("거래 내역 15개 생성 완료!");*/}
+            {/*                fetchTradeLog(); // 다시 불러오기*/}
+            {/*            } else {*/}
+            {/*                alert("생성 실패");*/}
+            {/*            }*/}
+            {/*        } catch (err) {*/}
+            {/*            console.error("Mock 생성 실패:", err);*/}
+            {/*            alert("에러 발생");*/}
+            {/*        }*/}
+            {/*    }}*/}
+            {/*>*/}
+            {/*    거래내역 생성*/}
+            {/*</Button>*/}
         </PageShell>
     );
 }

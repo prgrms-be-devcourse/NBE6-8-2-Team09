@@ -32,9 +32,20 @@ public record TradeLogDto(
     }
 
     public static TradeLogDto from(TradeLog tradeLog) {
-        return new TradeLogDto(tradeLog);
-    }
+        Long coinId = tradeLog.getCoin() != null ? tradeLog.getCoin().getId() : null;
+        String coinSymbol = tradeLog.getCoin() != null ? tradeLog.getCoin().getSymbol() : null;
 
+        return new TradeLogDto(
+                Math.toIntExact(tradeLog.getId()),
+                tradeLog.getWallet().getId().intValue(),
+                tradeLog.getCreatedAt(),
+                coinId != null ? coinId.intValue() : -1, // -1 또는 다른 기본값, 혹은 wrapper 타입으로 바꾸기
+                coinSymbol,
+                tradeLog.getType(),
+                tradeLog.getQuantity(),
+                tradeLog.getPrice()
+        );
+    }
     public static TradeLog toEntity(TradeLogDto dto, Wallet wallet, Coin coin) {
         return TradeLog.builder()
                 .wallet(wallet)

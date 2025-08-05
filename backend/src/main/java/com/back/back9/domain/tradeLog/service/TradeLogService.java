@@ -9,6 +9,7 @@ import com.back.back9.domain.tradeLog.repository.TradeLogRepository;
 import com.back.back9.domain.wallet.entity.Wallet;
 import com.back.back9.domain.wallet.repository.WalletRepository;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
 
 @Service
 public class TradeLogService {
@@ -52,8 +54,9 @@ public class TradeLogService {
     }
     @Transactional(readOnly = true)
     public List<TradeLogDto> findByFilter(int walletId, TradeType type, Integer coinId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
-        return tradeLogRepository.findByWalletId(walletId)
-                .stream()
+        Page<TradeLog> logs = tradeLogRepository.findByWalletIdFilter(walletId, type, coinId, startDate, endDate, pageable);
+
+        return logs.stream()
                 .map(TradeLogDto::from)
                 .collect(Collectors.toList());
     }
@@ -89,6 +92,7 @@ public class TradeLogService {
 
     @Transactional
     public TradeLog save(TradeLog tradeLog) {
+
         return tradeLogRepository.save(tradeLog);
     }
     @Transactional
