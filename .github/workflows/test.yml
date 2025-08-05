@@ -60,6 +60,9 @@ jobs:
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
           echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
           echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+          echo "OAUTH2_REDIRECT_URI=http://localhost:8888/oauth2/callback/google" >> .env
+          echo "OAUTH2_COOKIE_DOMAIN=" >> .env
+          echo "FRONTEND_URL=http://localhost:8888" >> .env
 
       # Ubuntu에서는 services.redis로 자동 실행
       - name: Set up Redis on Ubuntu
