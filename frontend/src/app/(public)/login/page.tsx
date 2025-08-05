@@ -21,20 +21,31 @@ export default function LoginPage() {
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(true); // 추가
+    const [isLoading, setIsLoading] = useState(true);
 
     // 이미 로그인된 사용자 체크 추가
     useEffect(() => {
         const checkAlreadyLoggedIn = async () => {
             try {
+                // 먼저 쿠키에서 토큰이 있는지 확인
+                const cookies = document.cookie.split(';');
+                const accessTokenCookie = cookies.find(cookie => cookie.trim().startsWith('accessToken='));
+                const apiKeyCookie = cookies.find(cookie => cookie.trim().startsWith('apiKey='));
+
+                if (!accessTokenCookie || !apiKeyCookie) {
+                    console.log('인증 쿠키가 없음 - 로그인 필요');
+                    setIsLoading(false);
+                    return;
+                }
+
                 const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/users/me`,
+                    `/api/v1/users/me`,
                     {
                         method: "GET",
                         credentials: "include",
                     }
                 );
-                
+
                 if (response.ok) {
                     // 이미 로그인되어 있으면 대시보드로 리다이렉트
                     router.replace("/dashboard");
@@ -54,7 +65,7 @@ export default function LoginPage() {
         const oauthError = searchParams.get('error');
         const message = searchParams.get('message');
         const details = searchParams.get('details');
-        
+
         if (oauthError) {
             const errorMessages: { [key: string]: string } = {
                 'oauth_error': 'OAuth 인증 중 오류가 발생했습니다.',
@@ -62,9 +73,9 @@ export default function LoginPage() {
                 'auth_failed': '인증에 실패했습니다.',
                 'server_error': '서버 오류가 발생했습니다.'
             };
-            
+
             let errorMsg = errorMessages[oauthError] || '알 수 없는 오류가 발생했습니다.';
-            
+
             if (details) {
                 try {
                     const errorDetails = JSON.parse(decodeURIComponent(details));
@@ -75,10 +86,10 @@ export default function LoginPage() {
                     console.error('에러 상세 정보 파싱 실패:', e);
                 }
             }
-            
+
             setError(errorMsg);
         }
-        
+
         if (message === 'register_success') {
             setSuccessMessage('회원가입이 완료되었습니다. 로그인해주세요.');
         }
@@ -90,7 +101,7 @@ export default function LoginPage() {
     });
 
     const onSubmit = async (values: any) => {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/login`, {
+        const res = await fetch(`/api/v1/users/login`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(values),
@@ -101,6 +112,27 @@ export default function LoginPage() {
             router.replace("/dashboard");
         } else {
             setError(data.message || "로그인 실패");
+        }
+    };
+
+    const handleGoogleLogin = () => {
+        try {
+            const backendUrl = process.env.NODE_ENV === 'production'
+                ? 'https://back9-backend-latest.onrender.com'
+                : 'http://localhost:8080';
+
+            console.log('백엔드 URL:', backendUrl);
+            console.log('현재 환경:', process.env.NODE_ENV);
+
+            // OAuth2 요청 URL 확인
+            const oauthUrl = `${backendUrl}/oauth2/authorize/google`;
+            console.log('OAuth2 요청 URL:', oauthUrl);
+
+            // OAuth2 요청을 백엔드로 직접 리다이렉트
+            window.location.href = oauthUrl;
+        } catch (error) {
+            console.error('Google OAuth 초기화 실패:', error);
+            setError('Google 로그인을 시작할 수 없습니다.');
         }
     };
 
@@ -123,7 +155,6 @@ export default function LoginPage() {
             >
                 <h1 className="text-2xl font-bold mb-6 text-center">로그인</h1>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    {/* 기존 폼 내용... */}
                     <div className="space-y-2">
                         <Label htmlFor="userLoginId">아이디</Label>
                         <Input id="userLoginId" type="text" {...form.register("userLoginId")} />
@@ -150,8 +181,7 @@ export default function LoginPage() {
                     <Button type="submit" className="w-full">
                         로그인
                     </Button>
-                    
-                    {/* 기존 Google 로그인 버튼... */}
+
                     <div className="relative">
                         <div className="absolute inset-0 flex items-center">
                             <span className="w-full border-t" />
@@ -163,15 +193,11 @@ export default function LoginPage() {
                         </div>
                     </div>
 
-                    <Button 
-                        type="button" 
-                        variant="outline" 
+                    <Button
+                        type="button"
+                        variant="outline"
                         className="w-full"
-                        onClick={() => {
-                            const redirectUri = encodeURIComponent("http://localhost:3000/api/auth/callback/google");
-                            const googleAuthUrl = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080'}/oauth2/authorization/google?redirect_uri=${redirectUri}`;
-                            window.location.href = googleAuthUrl;
-                        }}
+                        onClick={handleGoogleLogin}
                     >
                         {/* Google 아이콘 SVG */}
                         <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -183,12 +209,12 @@ export default function LoginPage() {
                         Google로 로그인
                     </Button>
                 </form>
-                
+
                 <div className="mt-6 text-center">
                     <p className="text-sm text-muted-foreground">
                         계정이 없으신가요?{" "}
-                        <Button 
-                            variant="link" 
+                        <Button
+                            variant="link"
                             className="p-0 h-auto font-normal text-primary"
                             onClick={() => router.push('/register')}
                         >

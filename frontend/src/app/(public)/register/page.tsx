@@ -26,13 +26,13 @@ export default function RegisterPage() {
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
-    
+
     // 회원가입 에러 메시지 설정
     useEffect(() => {
         // URL 파라미터에서 에러 확인
         const searchParams = new URLSearchParams(window.location.search);
         const registerError = searchParams.get('error');
-        
+
         if (registerError) {
             const errorMessages: { [key: string]: string } = {
                 'duplicate_id': '이미 사용 중인 아이디입니다.',
@@ -46,9 +46,9 @@ export default function RegisterPage() {
 
     const form = useForm<FormValues>({
         resolver: zodResolver(schema),
-        defaultValues: { 
-            userLoginId: "", 
-            password: "", 
+        defaultValues: {
+            userLoginId: "",
+            password: "",
             confirmPassword: "",
             username: ""
         },
@@ -56,14 +56,14 @@ export default function RegisterPage() {
     //(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/register`
     const onRegister = async (values: any) => {
         setIsLoading(true);
-        setError(null); 
-        
+        setError(null);
+
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/register`, {
+            const res = await fetch(`/api/v1/users/register`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(values),
-            }); 
+            });
 
             const data = await res.json();
 
@@ -83,7 +83,7 @@ export default function RegisterPage() {
                 } else if (data.resultCode === "400-2" || data.message?.includes('유저이름')) {
                     // 유저이름 중복 에러
                     form.setError("username", {
-                        type: "server", 
+                        type: "server",
                         message: data.message || "이미 존재하는 유저이름입니다."
                     });
                 } else if (data.resultCode === "400" || data.message?.includes('비밀번호 확인')) {
@@ -163,12 +163,12 @@ export default function RegisterPage() {
                         {isLoading ? "가입 중..." : "회원가입"}
                     </Button>
                 </form>
-                
+
                 <div className="mt-6 text-center">
                     <p className="text-sm text-muted-foreground">
                         이미 계정이 있으신가요?{" "}
-                        <Button 
-                            variant="link" 
+                        <Button
+                            variant="link"
                             className="p-0 h-auto font-normal text-primary"
                             onClick={() => router.push('/login')}
                         >
@@ -179,4 +179,4 @@ export default function RegisterPage() {
             </motion.div>
         </div>
     );
-} 
+}

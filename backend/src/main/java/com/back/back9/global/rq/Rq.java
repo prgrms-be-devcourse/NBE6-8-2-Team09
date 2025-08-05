@@ -67,16 +67,23 @@ public class Rq {
 
         Cookie cookie = new Cookie(name, value);
         cookie.setPath("/");
-        cookie.setHttpOnly(true);
+        cookie.setHttpOnly(true); // 보안을 위해 true로 설정
         cookie.setSecure(false); // 개발환경
         cookie.setAttribute("SameSite", "Lax"); // Strict 대신 Lax
 
-        if (value.isBlank()) cookie.setMaxAge(0);
-        else cookie.setMaxAge(60 * 60 * 24 * 365);
+        if (value.isBlank()) {
+            cookie.setMaxAge(0);
+            // 추가적으로 과거 날짜로 설정하여 확실한 삭제
+            cookie.setAttribute("Expires", "Thu, 01 Jan 1970 00:00:00 GMT");
+        } else {
+            cookie.setMaxAge(60 * 60 * 24 * 365);
+        }
 
         resp.addCookie(cookie);
-    }
 
+        // 디버깅용 로그 추가
+        System.out.println("쿠키 설정: " + name + "=" + value + ", MaxAge=" + cookie.getMaxAge());
+    }
 
 
     public void deleteCookie(String name) {

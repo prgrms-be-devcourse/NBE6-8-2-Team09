@@ -112,7 +112,7 @@ public class UserControllerTest {
         resultActions.andExpect(
                 result -> {
                     Cookie apiKeyCookie = result.getResponse().getCookie("apiKey");
-                    Cookie accessTokenCookie = result.getResponse().getCookie("access_Token");
+                    Cookie accessTokenCookie = result.getResponse().getCookie("accessToken");
                     assertThat(apiKeyCookie).isNotNull(); // Null 체크
                     assertThat(accessTokenCookie).isNotNull();
 
@@ -144,7 +144,7 @@ public class UserControllerTest {
                 .andDo(print());
 
         Cookie apiKeyCookie = loginResult.andReturn().getResponse().getCookie("apiKey");
-        Cookie accessTokenCookie = loginResult.andReturn().getResponse().getCookie("access_Token");
+        Cookie accessTokenCookie = loginResult.andReturn().getResponse().getCookie("accessToken");
 
         assertThat(apiKeyCookie).isNotNull(); // Null 체크
         assertThat(accessTokenCookie).isNotNull();
@@ -185,7 +185,7 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.message").value("로그아웃 되었습니다."))
                 .andExpect(result -> {
                     Cookie apiKey = result.getResponse().getCookie("apiKey");
-                    Cookie accessToken = result.getResponse().getCookie("access_Token");
+                    Cookie accessToken = result.getResponse().getCookie("accessToken");
                     assertThat(apiKey).isNotNull(); // Null 체크
                     assertThat(accessToken).isNotNull();
 
@@ -239,7 +239,7 @@ public class UserControllerTest {
                 .andDo(print());
 
         Cookie apiKeyCookie = resultActions.andReturn().getResponse().getCookie("apiKey");
-        Cookie accessTokenCookie = resultActions.andReturn().getResponse().getCookie("access_Token");
+        Cookie accessTokenCookie = resultActions.andReturn().getResponse().getCookie("accessToken");
 
         assertThat(apiKeyCookie).isNotNull();
         assertThat(accessTokenCookie).isNotNull();

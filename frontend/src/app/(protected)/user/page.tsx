@@ -24,7 +24,7 @@ export default function MyPage() {
         const fetchMyInfo = async () => {
             try {
                 const res = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/users/me`,
+                    `/api/v1/users/me`,
                     { credentials: "include" }
                 );
                 const data = await res.json();

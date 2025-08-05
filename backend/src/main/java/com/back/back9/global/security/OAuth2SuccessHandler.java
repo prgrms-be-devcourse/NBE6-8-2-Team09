@@ -85,17 +85,17 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             System.out.println("로컬 환경 - 일반 쿠키 설정");
 
             String accessTokenCookie = String.format(
-                    "accessToken=%s; Path=/; HttpOnly=false; SameSite=Lax; Max-Age=3600",
+                    "accessToken=%s; Path=/; HttpOnly=true; SameSite=Lax; Max-Age=3600",
                     accessToken
             );
 
             String apiKeyCookie = String.format(
-                    "apiKey=%s; Path=/; HttpOnly=false; SameSite=Lax; Max-Age=3600",
+                    "apiKey=%s; Path=/; HttpOnly=true; SameSite=Lax; Max-Age=3600",
                     apiKey
             );
 
             String roleCookie = String.format(
-                    "role=%s; Path=/; HttpOnly=false; SameSite=Lax; Max-Age=3600",
+                    "role=%s; Path=/; HttpOnly=true; SameSite=Lax; Max-Age=3600",
                     role
             );
 
@@ -107,17 +107,17 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
             System.out.println("프로덕션 환경 - 크로스 도메인 쿠키 설정");
 
             String accessTokenCookie = String.format(
-                    "accessToken=%s; Path=/; HttpOnly=false; Secure=true; SameSite=None; Domain=%s",
+                    "accessToken=%s; Path=/; HttpOnly=true; Secure=true; SameSite=None; Domain=%s",
                     accessToken, cookieDomain
             );
 
             String apiKeyCookie = String.format(
-                    "apiKey=%s; Path=/; HttpOnly=false; Secure=true; SameSite=None; Domain=%s",
+                    "apiKey=%s; Path=/; HttpOnly=true; Secure=true; SameSite=None; Domain=%s",
                     apiKey, cookieDomain
             );
 
             String roleCookie = String.format(
-                    "role=%s; Path=/; HttpOnly=false; Secure=true; SameSite=None; Domain=%s",
+                    "role=%s; Path=/; HttpOnly=true; Secure=true; SameSite=None; Domain=%s",
                     role, cookieDomain
             );
 
@@ -127,6 +127,16 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         }
 
         System.out.println("Set-Cookie 헤더 추가 완료");
+
+        // 실제 응답 헤더 확인
+        System.out.println("=== 응답 헤더 확인 ===");
+        response.getHeaderNames().forEach(headerName -> {
+            if (headerName.equalsIgnoreCase("Set-Cookie")) {
+                response.getHeaders(headerName).forEach(headerValue -> {
+                    System.out.println("Set-Cookie: " + headerValue);
+                });
+            }
+        });
 
         // 환경별 리다이렉트 URL 설정
         String redirectUrl;
