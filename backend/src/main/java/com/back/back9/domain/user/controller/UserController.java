@@ -94,6 +94,7 @@ public class UserController {
 
         rq.setCookie("apiKey", user.getApiKey());
         rq.setCookie("access_Token", accessToken);
+        rq.setCookie("role", user.getRole().name());
 
         return new RsData<>(
                 "200-1",

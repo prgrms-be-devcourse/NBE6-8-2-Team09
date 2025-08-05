@@ -20,6 +20,8 @@ public class AuthTokenService {
         Long id = user.getId();
         String userLoginId = user.getUserLoginId();
         String username = user.getUsername();
+        String role = user.getRole().name();
+
 
         return Ut.jwt.toString(
                 jwtSecretKey,
@@ -27,7 +29,8 @@ public class AuthTokenService {
                 Map.of(
                         "id", id,
                         "userLoginId", userLoginId,
-                        "username", username
+                        "username", username,
+                        "role", role
                 )
         );
     }
@@ -43,11 +46,13 @@ public class AuthTokenService {
 
         String userLoginId = (String) parsedPayload.get("userLoginId");
         String username = (String) parsedPayload.get("username");
+        String role = (String) parsedPayload.get("role");
 
         return Map.of(
                 "id", id,
                 "userLoginId", userLoginId,
-                "username", username
+                "username", username,
+                "role", role
         );
     }
 }
