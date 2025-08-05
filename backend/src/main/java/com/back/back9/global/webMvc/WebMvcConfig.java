@@ -9,10 +9,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry
-                .addMapping("/api/**")
-                .allowedOrigins("https://cdpn.io", "http://localhost:3000")
-                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH")
+                .addMapping("/**")  // 모든 경로에 대해 CORS 허용
+                .allowedOrigins("https://cdpn.io", "http://localhost:8888","https://peuronteuendeu.onrender.com")
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
-                .allowCredentials(true);
+                .allowCredentials(true)
+                .maxAge(3600);  // preflight 캐시 시간 설정
     }
 }

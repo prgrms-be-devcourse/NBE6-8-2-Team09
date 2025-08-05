@@ -4,3 +4,46 @@ spring:
     username: sa
     password:
     driver-class-name: org.h2.Driver
+    hikari:
+      auto-commit: false
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      username: default
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID:1017218402748-d5dd60n54002saejbfsma5r4tjnkrk1o.apps.googleusercontent.com}
+            client-secret: ${GOOGLE_CLIENT_SECRET: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}
+            scope: profile, email
+            redirect-uri: ${OAUTH2_REDIRECT_URI:http://localhost:8888/oauth2/callback/google}
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+logging:
+  level:
+    org.hibernate.orm.jdbc.bind: TRACE
+    org.hibernate.orm.jdbc.extract: TRACE
+    org.springframework.transaction.interceptor: TRACE
+    root: INFO
+
+# 로컬 개발용 OAuth2 쿠키 설정 (도메인 없음)
+app:
+  oauth2:
+    cookie-domain: ${OAUTH2_COOKIE_DOMAIN:}
+    frontend-url: ${FRONTEND_URL:http://localhost:8888}

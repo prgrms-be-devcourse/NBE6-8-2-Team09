@@ -59,7 +59,18 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void doFilterLogic(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain, Rq rq) throws ServletException, IOException {
-        if (!request.getRequestURI().startsWith("/api/")) {
+        String requestURI = request.getRequestURI();
+
+        System.out.println("=== CustomAuthenticationFilter 요청 처리 ===");
+        System.out.println("요청 URI: " + requestURI);
+        System.out.println("요청 메소드: " + request.getMethod());
+
+        // OAuth2 관련 경로는 필터를 건너뛰도록 수정
+        if (!requestURI.startsWith("/api/") ||
+                requestURI.startsWith("/oauth2/") ||
+                requestURI.startsWith("/login/oauth2/") ||
+                requestURI.startsWith("/api/auth/")) { // 모든 auth 경로 허용
+            System.out.println("인증 필터 건너뛰기: " + requestURI);
             filterChain.doFilter(request, response);
             return;
         }
@@ -70,15 +81,19 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
                 "/api/v1/users/logout",
                 "/api/v1/users/register-admin"
         );
-        if (openApiUris.contains(request.getRequestURI())) {
+        if (openApiUris.contains(requestURI)) {
+            System.out.println("공개 API 경로: " + requestURI);
             filterChain.doFilter(request, response);
             return;
         }
+
+        System.out.println("인증 필터 처리 시작: " + requestURI);
 
         String apiKey;
         String accessToken;
 
         String headerAuthorization = rq.getHeader("Authorization", "");
+
         if (!headerAuthorization.isBlank()) {
             if (!headerAuthorization.startsWith("Bearer "))
                 throw new ServiceException("401-2", "Authorization 헤더가 Bearer 형식이 아닙니다.");
@@ -86,19 +101,23 @@ public class CustomAuthenticationFilter extends OncePerRequestFilter {
             String[] parts = headerAuthorization.split(" ", 3);
             apiKey = parts[1];
             accessToken = parts.length == 3 ? parts[2] : "";
-
         } else {
             apiKey = rq.getCookieValue("apiKey", "");
             accessToken = rq.getCookieValue("accessToken", "");
         }
 
-        logger.debug("apiKey: " + apiKey);
-        logger.debug("accessToken: " + accessToken);
+        System.out.println("=== 쿠키/헤더 확인 ===");
+        System.out.println("Authorization 헤더: " + (headerAuthorization.isBlank() ? "없음" : "존재"));
+        System.out.println("apiKey 쿠키: " + (apiKey.isBlank() ? "없음" : "존재 - " + apiKey));
+        System.out.println("accessToken 쿠키: " + (accessToken.isBlank() ? "없음" : "존재 - 길이: " + accessToken.length()));
 
         boolean hasApiKey = !apiKey.isBlank();
         boolean hasAccessToken = !accessToken.isBlank();
 
+        System.out.println("hasApiKey: " + hasApiKey + ", hasAccessToken: " + hasAccessToken);
+
         if (!hasApiKey && !hasAccessToken) {
+            System.out.println("토큰이 없어서 필터 통과 - 401 오류 발생 예상");
             filterChain.doFilter(request, response);
             return;
         }

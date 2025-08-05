@@ -1,10 +1,13 @@
 spring:
+  config:
+    activate:
+      on-profile: render
   datasource:
     # Render 'External URL'을 분해해서 넣거나, 직접 JDBC URL로 지정
     # host, port, db, user, password는 Render 대시보드에서 확인
-    url: ${RENDER_INTERNAL_URL}
-    username: ${RENDER_INTERNAL_DATABASE_USER}
-    password: ${RENDER_INTERNAL_DATABASE_PASSWORD}
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USER}
+    password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
     hikari:
       maximum-pool-size: 10   # 무료/저사양 시작은 5~10 권장
@@ -12,15 +15,58 @@ spring:
       connection-timeout: 30000
       max-lifetime: 1800000
 
+  data:
+    redis:
+      host: ${REDIS_PRODUCTION_HOST}
+      username: default
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD}
+
   jpa:
     hibernate:
-      ddl-auto: update      # 스키마는 마이그레이션 도구로 관리 권장
+      ddl-auto: update
     open-in-view: false
-    properties:
-      hibernate:
-        format_sql: true
-        jdbc.time_zone: Asia/Seoul
+    show-sql: false
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope: profile, email
+            redirect-uri: "https://back9-backend-latest.onrender.com/oauth2/callback/google"
+        provider:
+          google:
+            authorization-uri: https://accounts.google.com/o/oauth2/auth
+            token-uri: https://oauth2.googleapis.com/token
+            user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
+            user-name-attribute: sub
+
+  # 에러 페이지 설정
+  web:
+    resources:
+      add-mappings: true
 
 logging:
   level:
-    org.hibernate.SQL: debug
+    org.hibernate.orm.jdbc.bind: WARN
+    org.hibernate.orm.jdbc.extract: WARN
+    org.springframework.transaction.interceptor: WARN
+    org.springframework.security.oauth2: DEBUG
+    org.springframework.security.web: DEBUG
+    root: INFO
+
+# 프로덕션용 OAuth2 쿠키 설정 (크로스 도메인 설정)
+app:
+  oauth2:
+    cookie-domain: ${OAUTH2_COOKIE_DOMAIN:}
+    frontend-url: ${FRONTEND_URL:https://peuronteuendeu.onrender.com}
+
+server:
+  error:
+    whitelabel:
+      enabled: false
+    include-stacktrace: always
+    include-message: always
