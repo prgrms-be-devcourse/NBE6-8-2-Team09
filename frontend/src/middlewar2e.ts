@@ -9,7 +9,7 @@ export function middlewar2e(req: NextRequest) {
     if (!AUTH_ENABLED) return NextResponse.next();
 
     const { pathname } = req.nextUrl;
-    const token = req.cookies.get("access_token")?.value;
+    const token = req.cookies.get("accessToken")?.value; // access_token → accessToken으로 변경
     const role = req.cookies.get("role")?.value;
 
     // ADMIN 전용

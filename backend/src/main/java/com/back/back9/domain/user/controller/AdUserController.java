@@ -11,7 +11,6 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,7 +26,6 @@ public class AdUserController {
     private final UserService userService;
 
     @GetMapping
-    @Transactional(readOnly = true)
     @Operation(summary = "전체 사용자 조회")
     public RsData<List<UserWithUsernameDto>> getUsers() {
         List<User> users = userService.findAll();
@@ -42,7 +40,6 @@ public class AdUserController {
     }
 
     @GetMapping("/{id}")
-    @Transactional(readOnly = true)
     @Operation(summary = "id로 사용자 조회")
     public RsData<UserWithUsernameDto> getUser(@PathVariable Long id) {
         User user = userService.findById(id)
@@ -56,7 +53,6 @@ public class AdUserController {
     }
 
     @GetMapping("/search")
-    @Transactional(readOnly = true)
     @Operation(summary = "username으로 사용자 검색")
     public RsData<List<UserWithUsernameDto>> searchUsersByUsername(@RequestParam String keyword) {
         List<User> users = userService.searchByUsername(keyword);

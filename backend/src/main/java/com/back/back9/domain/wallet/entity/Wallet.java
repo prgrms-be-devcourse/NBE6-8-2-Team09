@@ -28,9 +28,9 @@ public class Wallet extends BaseEntity {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @OneToOne
+    @OneToMany
     @JoinColumn(name = "tradelog_id")
-    private TradeLog tradeLog;
+    private List<TradeLog> tradeLog;
 
 
 
