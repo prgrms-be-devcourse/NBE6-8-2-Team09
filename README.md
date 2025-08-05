@@ -1,7 +1,7 @@
 # 가상화폐 모의 투자 시스템
 <br>
 
-[![BACKGOOCoin.png](https://i.postimg.cc/SxXSxdyk/BACKGOOCoin.png)](https://postimg.cc/18QhWpnj)
+[![Back9-Home.png](https://i.postimg.cc/1tVrwQXC/Back9-Home.png)](https://postimg.cc/9RV9HsGZ)
 
 [`가상회폐 모의투자 시스템 링크`](https://peuronteuendeu.onrender.com/)
 
