@@ -102,7 +102,6 @@ public class WalletService {
                 .type(TradeType.CHARGE)
                 .quantity(BigDecimal.ONE)
                 .price(request.getAmount())
-                .coin(null)
                 .build();
 
         tradeLogRepository.save(chargeLog);

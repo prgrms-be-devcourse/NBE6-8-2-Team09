@@ -28,7 +28,7 @@ public class TradeLog extends BaseEntity {
 
     //거래한 코인
     @ManyToOne
-    @JoinColumn(name = "coin_id")
+    @JoinColumn(name = "coin_id", nullable = true)
     private Coin coin;
 
     //거래 타입 : BUY, SELL,CHARGE

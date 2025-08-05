@@ -32,11 +32,16 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     env:
+      SPRING_PROFILES_ACTIVE: test
       JWT_SECRET_KEY: ${{ secrets.JWT_SECRET_KEY }}
       GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
       GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
       REDIS_PORT: ${{ secrets.REDIS_PORT }}
       REDIS_HOST: ${{ secrets.REDIS_HOST }}
+      # OAuth2 관련 추가 환경변수
+      OAUTH2_REDIRECT_URI: "http://localhost:8888/oauth2/callback/google"
+      OAUTH2_COOKIE_DOMAIN: ""
+      FRONTEND_URL: "http://localhost:8888"
 
     steps:
       - uses: actions/checkout@v4
@@ -55,6 +60,9 @@ jobs:
           echo "JWT_SECRET_KEY=${{ secrets.JWT_SECRET_KEY }}" >> .env
           echo "GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }}" >> .env
           echo "GOOGLE_CLIENT_SECRET=${{ secrets.GOOGLE_CLIENT_SECRET }}" >> .env
+          echo "OAUTH2_REDIRECT_URI=http://localhost:8888/oauth2/callback/google" >> .env
+          echo "OAUTH2_COOKIE_DOMAIN=" >> .env
+          echo "FRONTEND_URL=http://localhost:8888" >> .env
 
       # Ubuntu에서는 services.redis로 자동 실행
       - name: Set up Redis on Ubuntu
@@ -88,10 +96,7 @@ jobs:
           path: ${{ matrix.report_path }}
           retention-days: 7
 
- # 2) BUILD ARTIFACTS: CI 안에서 프론트/백 빌드만 수행(이미지X)
   build-artifacts:
-    needs: tests
-    if: ${{ needs.tests.result == 'success' }}
     runs-on: ubuntu-latest
     env:
       NEXT_PUBLIC_AUTH_ENABLED: 'false'  # 인증 비활성화
@@ -114,15 +119,17 @@ jobs:
         working-directory: frontend
         run: npm run build
 
+
       # 산출물 업로드: standalone + static + public
       - name: Upload frontend dist
         uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
           path: |
-            frontend/.next/standalone/**
-            frontend/.next/static/**
-            frontend/public/**
+            frontend/.next
+            frontend/public
+          include-hidden-files: true
+          if-no-files-found: error
 
       # Backend build (Gradle bootJar)
       - uses: actions/setup-java@v4
@@ -163,6 +170,10 @@ jobs:
         with:
           name: frontend-dist
           path: frontend
+
+
+      - name: Debug frontend folder
+        run: ls -Ra frontend
 
       - name: Download backend jar
         uses: actions/download-artifact@v4

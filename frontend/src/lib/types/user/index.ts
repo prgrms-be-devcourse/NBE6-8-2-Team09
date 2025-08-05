@@ -4,7 +4,7 @@ export interface UserDto {
     id: number;
     username: string;
     userLoginId: string;
-    role: 'ADMIN' | 'USER';
+    role: 'ADMIN' | 'MEMBER';
     createdAt: string;
     modifiedAt: string;
 }
@@ -13,7 +13,7 @@ export interface userWithUsernameDto {
     id: number;
     username: string;
     userLoginId: string;
-    role: 'ADMIN' | 'USER';
+    role: 'ADMIN' | 'MEMBER';
     createdAt: string;
     modifiedAt: string;
 }

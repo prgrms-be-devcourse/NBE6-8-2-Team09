@@ -12,6 +12,8 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -21,11 +23,13 @@ public class SecurityConfig {
 
     private final CustomAuthenticationFilter customAuthenticationFilter;
     private final OAuth2SuccessHandler oAuth2SuccessHandler;
+    private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(Customizer.withDefaults())  // WebMvcConfig의 CORS 설정을 자동으로 사용
+                .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
@@ -34,7 +38,9 @@ public class SecurityConfig {
                                 "/", "/api/v1/users/login", "/api/v1/users/register",
                                 "/api/v1/users/register-admin", "/swagger-ui/**",
                                 "/v3/api-docs/**", "/swagger-ui.html", "/api/v1/users/logout",
-                                "/api/exchange/**"
+                                "/oauth2/**", "/login/oauth2/**", "/login", "/error",
+                                "/favicon.ico", "/robots.txt", "/sitemap.xml",
+                                "/css/**", "/js/**", "/images/**", "/static/**"
                         ).permitAll()
                         .requestMatchers("/api/v1/adm/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
@@ -47,8 +53,43 @@ public class SecurityConfig {
                         })
                 )
                 .oauth2Login(oauth2 -> oauth2
-                        .loginPage("/login")
+                        .authorizationEndpoint(authz ->
+                                authz
+                                        .baseUri("/oauth2/authorize")
+                                        .authorizationRequestRepository(cookieAuthorizationRequestRepository)
+                        )
+                        .redirectionEndpoint(redir ->
+                                redir.baseUri("/oauth2/callback/*")
+                        )
+                        .userInfoEndpoint(userInfo ->
+                                userInfo.userService(customOAuth2UserService)
+                        )
                         .successHandler(oAuth2SuccessHandler)
+                        .failureHandler((req, res, ex) -> {
+                            ex.printStackTrace();
+
+                            String errorMsg;
+                            if (ex instanceof OAuth2AuthenticationException oae) {
+                                OAuth2Error err = oae.getError();
+                                errorMsg = err.getErrorCode()
+                                        + (err.getDescription() != null ? ": " + err.getDescription() : "");
+                            } else {
+                                errorMsg = ex.getMessage();
+                            }
+
+                            res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                            res.setContentType("application/json");
+                            try {
+                                res.getWriter().write(
+                                        String.format(
+                                                "{\"status\":\"fail\",\"code\":401,\"message\":\"%s\"}",
+                                                errorMsg.replace("\"", "\\\"")
+                                        )
+                                );
+                            } catch (Exception e) {
+                                System.out.println("OAuth2 실패 응답 작성 중 오류: " + e.getMessage());
+                            }
+                        })
                 )
                 .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

@@ -11,7 +11,7 @@ export default function LogoutPage() {
             try {
                 // 백엔드 로그아웃 (accessToken, apiKey 삭제)
                 await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/users/logout`,
+                    `/api/v1/users/logout`,
                     {
                         method: "DELETE",
                         credentials: "include",
@@ -24,7 +24,7 @@ export default function LogoutPage() {
                 document.cookie = "access_Token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
                 document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
                 document.cookie = "apiKey=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-                
+
                 setTimeout(() => {
                     router.replace("/login");
                 }, 500);

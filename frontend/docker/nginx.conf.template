@@ -1,0 +1,81 @@
+upstream app {
+    server 127.0.0.1:${APP_PORT};
+}
+
+server {
+    listen        ${PORT};
+    server_name  _;
+
+    # Google OAuth 콜백을 프론트엔드로 처리
+    location = /api/auth/google/callback {
+        proxy_pass         http://app;
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+
+    # OAuth2 시작 엔드포인트
+    location /oauth2/ {
+        proxy_pass             https://back9-backend-latest.onrender.com;
+        proxy_http_version     1.1;
+        proxy_set_header       Host                   back9-backend-latest.onrender.com;
+        proxy_set_header       X-Real-IP              $remote_addr;
+        proxy_set_header       X-Forwarded-For        $proxy_add_x_forwarded_for;
+        proxy_set_header       X-Forwarded-Proto      $scheme;
+        proxy_ssl_server_name  on;
+        proxy_ssl_protocols    TLSv1.2 TLSv1.3;
+        proxy_ssl_ciphers      HIGH:!aNULL:!MD5;
+        proxy_read_timeout     60s;       
+        proxy_connect_timeout  5s;             
+        proxy_redirect         off; 
+    }
+
+    location /api/ {
+        proxy_pass             https://back9-backend-latest.onrender.com;
+        proxy_http_version     1.1;
+        proxy_set_header       Host back9-backend-latest.onrender.com;
+        proxy_set_header       X-Real-IP $remote_addr;
+        proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header       X-Forwarded-Proto $scheme;
+        proxy_ssl_server_name  on;
+        proxy_ssl_protocols    TLSv1.2 TLSv1.3;
+        proxy_ssl_ciphers      HIGH:!aNULL:!MD5;
+        proxy_read_timeout     60s;       
+        proxy_connect_timeout  5s;             
+        proxy_redirect         off;           
+    }
+
+    location / {
+        proxy_pass         http://app;
+        proxy_http_version 1.1;
+        proxy_set_header   Upgrade $http_upgrade;
+        proxy_set_header   Connection "upgrade";
+        proxy_set_header   Host $host;
+        proxy_set_header   X-Real-IP $remote_addr;
+        proxy_set_header   X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+    }
+
+
+    location /_next/static/ {
+        alias /app/.next/static/;              
+        access_log off;
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+    }
+
+
+    location /public/ {
+        alias /app/public/;                    
+        access_log off;
+        expires 1h;                            
+    }
+
+
+    location = /healthz {                     
+        return 200 'ok';
+        add_header Content-Type text/plain;
+    }
+}
