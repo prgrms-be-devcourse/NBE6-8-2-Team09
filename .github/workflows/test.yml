@@ -64,6 +64,17 @@ jobs:
           echo "OAUTH2_COOKIE_DOMAIN=" >> .env
           echo "FRONTEND_URL=http://localhost:8888" >> .env
 
+      - name: Debug environment variables (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          Write-Output "=== Environment Variables ==="
+          Write-Output "REDIS_HOST: $env:REDIS_HOST"
+          Write-Output "REDIS_PORT: $env:REDIS_PORT"
+          Write-Output "JWT_SECRET_KEY: $env:JWT_SECRET_KEY"
+          Write-Output "=== .env file content ==="
+          Get-Content .env -ErrorAction SilentlyContinue
+
       # Ubuntu에서는 services.redis로 자동 실행
       - name: Set up Redis on Ubuntu
         if: matrix.os == 'ubuntu-latest'
@@ -77,7 +88,42 @@ jobs:
           $url = "https://raw.githubusercontent.com/ServiceStack/redis-windows/master/downloads/redis-64.3.0.503.zip"
           Invoke-WebRequest -Uri $url -OutFile redis.zip
           Expand-Archive redis.zip -DestinationPath redis
-          Start-Process -FilePath redis\\redis-server.exe
+          # Redis 설정 파일 생성 (포트 6379 고정)
+          @"
+          port 6379
+          bind 127.0.0.1
+          protected-mode no
+          save ""
+          "@ | Out-File -FilePath redis\redis.conf -Encoding ascii
+          # Redis 서버를 설정 파일과 함께 시작
+          Start-Process -FilePath redis\redis-server.exe -ArgumentList "redis\redis.conf" -WindowStyle Hidden
+          Start-Sleep -Seconds 10
+          
+      - name: Wait for Redis to be ready (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          $timeout = 30
+          $count = 0
+          do {
+            try {
+              Test-NetConnection -ComputerName localhost -Port 6379 -InformationLevel Quiet
+              if ($?) {
+                Write-Output "Redis is ready!"
+                break
+              }
+            }
+            catch {
+              Write-Output "Waiting for Redis... ($count/$timeout)"
+            }
+            Start-Sleep -Seconds 1
+            $count++
+          } while ($count -lt $timeout)
+          
+          if ($count -eq $timeout) {
+            Write-Error "Redis failed to start within timeout"
+            exit 1
+          }
 
       - name: Grant execute permission to gradlew.bat
         if: matrix.os == 'windows-latest'
