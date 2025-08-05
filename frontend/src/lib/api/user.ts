@@ -1,19 +1,17 @@
 import type { User, CreateUserRequest } from '@/types/user';
-
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+import { apiCall } from './client';
 
 export async function getUser(id: string): Promise<User> {
-  const res = await fetch(`${API_BASE_URL}/user/${id}`);
-  if (!res.ok) throw new Error('유저 조회 실패');
-  return res.json();
+  const response = await apiCall<User>(`/user/${id}`);
+  if (!response) throw new Error('유저 조회 실패');
+  return response;
 }
 
 export async function createUser(user: CreateUserRequest): Promise<User> {
-  const res = await fetch(`${API_BASE_URL}/user`, {
+  const response = await apiCall<User>('/user', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(user),
   });
-  if (!res.ok) throw new Error('유저 생성 실패');
-  return res.json();
-} 
+  if (!response) throw new Error('유저 생성 실패');
+  return response;
+}
