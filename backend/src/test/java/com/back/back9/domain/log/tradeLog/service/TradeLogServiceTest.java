@@ -70,16 +70,16 @@ public class TradeLogServiceTest {
     @Test
     @DisplayName("거래 내역 생성")
     public void createTradeLog() {
-        TradeLog tradeLog = new TradeLog();
-        tradeLog.setWallet(wallet);
-        tradeLog.setCoin(coin);
-        tradeLog.setType(TradeType.BUY);
-        tradeLog.setQuantity(new BigDecimal("0.5"));
-        tradeLog.setPrice(new BigDecimal("43000"));
-        // when
+        TradeLog tradeLog = TradeLog.builder()
+                .wallet(wallet)
+                .coin(coin)
+                .type(TradeType.BUY)
+                .quantity(new BigDecimal("0.5"))
+                .price(new BigDecimal("43000"))
+                .build();
+
         TradeLog saved = tradeLogService.save(tradeLog);
 
-        // then
         Assertions.assertNotNull(saved.getId());
         Assertions.assertEquals(wallet.getId(), saved.getWallet().getId());
     }
