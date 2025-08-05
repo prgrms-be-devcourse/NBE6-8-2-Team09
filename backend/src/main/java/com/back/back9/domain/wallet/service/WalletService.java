@@ -95,12 +95,17 @@ public class WalletService {
 
         // 지갑 정보 저장
         walletRepository.save(wallet);
-        tradeLogRepository.save(
-                TradeLog.builder()
-                        .wallet(wallet)
-                        .type(TradeType.CHARGE)
-                        .build()
-        );
+
+        // 거래 로그 저장 (충전)
+        TradeLog chargeLog = TradeLog.builder()
+                .wallet(wallet)
+                .type(TradeType.CHARGE)
+                .quantity(BigDecimal.ONE)
+                .price(request.getAmount())
+                .coin(null)
+                .build();
+
+        tradeLogRepository.save(chargeLog);
 
         log.info("지갑 잔액 충전 완료 - 사용자 ID: {}, 충전 금액: {}, 현재 잔액: {}",
                 userId, request.getAmount(), wallet.getBalance());

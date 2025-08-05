@@ -2,6 +2,7 @@ package com.back.back9.domain.wallet.controller;
 
 import com.back.back9.domain.coin.entity.Coin;
 import com.back.back9.domain.coin.repository.CoinRepository;
+import com.back.back9.domain.tradeLog.repository.TradeLogRepository;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.repository.UserRepository;
 import com.back.back9.domain.wallet.dto.BuyCoinRequest;
@@ -44,10 +45,15 @@ public class WalletControllerTest {
     private CoinRepository coinRepository;
 
     @Autowired
+    private TradeLogRepository tradeLogRepository;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     @BeforeEach
     void setUp() {
+
+        tradeLogRepository.deleteAll();
         walletRepository.deleteAll();
         userRepository.deleteAll();
         coinRepository.deleteAll();
