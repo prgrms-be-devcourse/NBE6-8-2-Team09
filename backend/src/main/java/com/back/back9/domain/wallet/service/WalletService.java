@@ -2,6 +2,9 @@ package com.back.back9.domain.wallet.service;
 
 import com.back.back9.domain.coin.entity.Coin;
 import com.back.back9.domain.coin.repository.CoinRepository;
+import com.back.back9.domain.tradeLog.entity.TradeLog;
+import com.back.back9.domain.tradeLog.entity.TradeType;
+import com.back.back9.domain.tradeLog.repository.TradeLogRepository;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.repository.UserRepository;
 import com.back.back9.domain.wallet.dto.*;
@@ -29,6 +32,7 @@ public class WalletService {
     private final CoinAmountRepository coinAmountRepository;
     private final CoinRepository coinRepository; // 추가된 부분
     private final UserRepository userRepository; // 사용자 정보 조회를 위한 리포지토리
+    private final TradeLogRepository tradeLogRepository;
 
 
     // 사용자 지갑 생성
@@ -91,6 +95,17 @@ public class WalletService {
 
         // 지갑 정보 저장
         walletRepository.save(wallet);
+
+        // 거래 로그 저장 (충전)
+        TradeLog chargeLog = TradeLog.builder()
+                .wallet(wallet)
+                .type(TradeType.CHARGE)
+                .quantity(BigDecimal.ONE)
+                .price(request.getAmount())
+                .coin(null)
+                .build();
+
+        tradeLogRepository.save(chargeLog);
 
         log.info("지갑 잔액 충전 완료 - 사용자 ID: {}, 충전 금액: {}, 현재 잔액: {}",
                 userId, request.getAmount(), wallet.getBalance());
