@@ -9,6 +9,7 @@ import com.back.back9.global.rsData.RsData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -52,15 +53,17 @@ public class UserService {
         String message = role == User.UserRole.ADMIN ? "관리자 회원가입이 완료되었습니다." : "회원가입이 완료되었습니다.";
         return new RsData<>("200-1", message, user);
     }
-
+    @Transactional
     public RsData<User> register(UserRegisterDto dto) {
         return registerUser(dto, User.UserRole.MEMBER);
     }
 
+    @Transactional
     public RsData<User> registerAdmin(UserRegisterDto dto) {
         return registerUser(dto, User.UserRole.ADMIN);
     }
 
+    @Transactional(readOnly = true)
     public RsData<User> login(String userLoginId, String password) {
         Optional<User> userOpt = userRepository.findByUserLoginId(userLoginId);
         if (userOpt.isEmpty()) {
@@ -76,10 +79,12 @@ public class UserService {
         return new RsData<>("200-1", "로그인 성공", user);
     }
 
+    @Transactional(readOnly = true)
     public Optional<User> findByUserLoginId(String userLoginId) {
         return userRepository.findByUserLoginId(userLoginId);
     }
 
+    @Transactional
     public void deleteByUserLoginId(String userLoginId) {
         User user = userRepository.findByUserLoginId(userLoginId)
                 .orElseThrow(() -> new ServiceException("404", "해당 아이디의 사용자가 없습니다."));
@@ -87,18 +92,22 @@ public class UserService {
         userRepository.delete(user);
     }
 
+    @Transactional(readOnly = true)
     public Optional<User> findByApiKey(String apiKey) {
         return userRepository.findByApiKey(apiKey);
     }
 
+    @Transactional(readOnly = true)
     public List<User> searchByUsername(String keyword) {
         return userRepository.findByUsernameContaining(keyword);
     }
 
+    @Transactional(readOnly = true)
     public List<User> findAll() {
         return userRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Optional<User> findById(Long id) {
         return userRepository.findById(id);
     }
@@ -115,9 +124,4 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public void checkPassword(User user, String rawPassword) {
-        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
-            throw new ServiceException("401-1", "비밀번호가 일치하지 않습니다.");
-        }
-    }
 }

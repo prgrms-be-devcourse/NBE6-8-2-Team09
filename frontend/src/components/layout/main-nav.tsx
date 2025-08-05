@@ -74,7 +74,12 @@ export function MainNav({
                     innerClassName
                 )}
             >
-                <Link href="/" className="font-bold text-blue-600">
+                <Link href="/" className="flex items-center gap-2 font-bold text-blue-600">
+                    <img 
+                        src="/images/back9-coin-logo.PNG" 
+                        alt="BACK9 Coin Logo" 
+                        className="w-8 h-8 object-contain"
+                    />
                     Back9 Coin
                 </Link>
 

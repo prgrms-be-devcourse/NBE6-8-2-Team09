@@ -82,12 +82,19 @@ export function Hero({
                 )}
             >
                 <motion.div variants={stagger(0.1)} initial="hidden" animate="show">
-                    <motion.h1
+                    <motion.div
                         variants={fadeInUp}
-                        className="text-4xl md:text-5xl font-bold text-blue-600"
+                        className="flex flex-col items-center space-y-4"
                     >
-                        {title}
-                    </motion.h1>
+                        <img 
+                            src="/images/back9-coin-logo.PNG" 
+                            alt="BACK9 Coin Logo" 
+                            className="w-24 h-24 md:w-32 md:h-32 object-contain"
+                        />
+                        <h1 className="text-4xl md:text-5xl font-bold text-blue-600">
+                            {title}
+                        </h1>
+                    </motion.div>
 
                     <motion.p
                         variants={fadeInUp}
