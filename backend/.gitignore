@@ -43,3 +43,4 @@ db_dev.trace.db
 ### SECRET KEY ###
 .env
 
+log.txt

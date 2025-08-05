@@ -32,21 +32,28 @@ public record TradeLogDto(
     }
 
     public static TradeLogDto from(TradeLog tradeLog) {
-        return new TradeLogDto(tradeLog);
+        Long coinId = tradeLog.getCoin() != null ? tradeLog.getCoin().getId() : null;
+        String coinSymbol = tradeLog.getCoin() != null ? tradeLog.getCoin().getSymbol() : null;
+
+        return new TradeLogDto(
+                Math.toIntExact(tradeLog.getId()),
+                tradeLog.getWallet().getId().intValue(),
+                tradeLog.getCreatedAt(),
+                coinId != null ? coinId.intValue() : -1, // -1 또는 다른 기본값, 혹은 wrapper 타입으로 바꾸기
+                coinSymbol,
+                tradeLog.getType(),
+                tradeLog.getQuantity(),
+                tradeLog.getPrice()
+        );
     }
-
     public static TradeLog toEntity(TradeLogDto dto, Wallet wallet, Coin coin) {
-        TradeLog entity = new TradeLog();
-        entity.setWallet(wallet);
-        entity.setCoin(coin);
-        entity.setType(dto.tradeType());
-        entity.setQuantity(dto.quantity());
-        entity.setPrice(dto.price());
+        return TradeLog.builder()
+                .wallet(wallet)
+                .coin(coin)
+                .type(dto.tradeType())
+                .quantity(dto.quantity())
+                .price(dto.price())
+                .build();
 
-        // createdAt은 BaseEntity에 존재 (protected)
-        // BaseEntity의 setCreatedAt(LocalDateTime) 메서드가 있으면 사용
-        // entity.setCreatedAt(LocalDateTime.parse(dto.createdAt())); // 예시
-
-        return entity;
     }
 }

@@ -93,7 +93,9 @@ public class UserController {
         String accessToken = userService.genAccessToken(user);
 
         rq.setCookie("apiKey", user.getApiKey());
-        rq.setCookie("access_Token", accessToken);
+
+        rq.setCookie("accessToken", accessToken);
+
         rq.setCookie("role", user.getRole().name());
 
         return new RsData<>(
@@ -107,7 +109,7 @@ public class UserController {
     @Operation(summary = "로그아웃")
     public RsData<Void> logout() {
         rq.deleteCookie("apiKey");
-        rq.deleteCookie("access_Token");
+        rq.deleteCookie("accessToken");
         rq.deleteCookie("role");
         return new RsData<>("200-1", "로그아웃 되었습니다.");
     }

@@ -5,14 +5,14 @@ const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 
 export async function requireAuth() {
     if (!AUTH_ENABLED) {
-        return { isAuthenticated: false, role: "USER" as const, user: null };
+        return { isAuthenticated: false, role: "MEMBER" as const, user: null };
     }
     const session = await getSessionFromCookie();
     if (!session.isAuthenticated) redirect("/login");
     return session;
 }
 
-export async function requireRole(roles: ("ADMIN" | "USER")[]) {
+export async function requireRole(roles: ("ADMIN" | "MEMBER")[]) {
     const session = await requireAuth();
     if (!roles.includes(session.role)) {
         redirect("/dashboard");

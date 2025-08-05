@@ -3,62 +3,29 @@ spring:
     import: optional:file:.env[.properties]
   application:
     name: back
+
   profiles:
-    active: dev
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
   output:
     ansi:
       enabled: always
 
-  datasource:
-    url: jdbc:h2:./db_dev;MODE=MySQL
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-    hikari:
-      auto-commit: false
-
-  data:
-    redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-
-  thymeleaf:
-    cache: false
-    prefix: file:src/main/resources/templates/
-
   jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: update
     properties:
       hibernate:
         use_sql_comments: true
         format_sql: true
         highlight_sql: true
 
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_CLIENT_SECRET}
-            scope: profile, email
-      provider:
-        google:
-          authorization-uri: https://accounts.google.com/o/oauth2/auth
-          token-uri: https://oauth2.googleapis.com/token
-          user-info-uri: https://www.googleapis.com/oauth2/v3/userinfo
-          user-name-attribute: sub
-
-logging:
-  level:
-    org.hibernate.orm.jdbc.bind: TRACE
-    org.hibernate.orm.jdbc.extract: TRACE
-    org.springframework.transaction.interceptor: TRACE
-
+# JWT 공통 설정 (환경별로 기본값 제공)
 custom:
   jwt:
-    secretKey: ${JWT_SECRET_KEY}
+    secretKey: ${JWT_SECRET_KEY:defaultSecretKeyForDevelopment1234567890}
     accessToken:
-      expirationSeconds: 3600
+      expirationSeconds: ${JWT_EXPIRATION_SECONDS:3600}
+
+# OAuth2 쿠키 설정 기본값
+app:
+  oauth2:
+    cookie-domain: ${OAUTH2_COOKIE_DOMAIN:}

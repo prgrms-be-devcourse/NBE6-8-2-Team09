@@ -8,8 +8,11 @@ export interface ErrorResponse {
     timestamp?: string;
 }
 
-// API 기본 설정
-const API_BASE_URL = '/api';
+// API 기본 설정 - 환경별 구분
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL ||
+    (process.env.NODE_ENV === 'production'
+        ? '/api'  // 프로덕션에서는 nginx 프록시 사용하므로 /api 접두사
+        : '/api');  // 로컬에서도 nginx 프록시 사용하므로 /api 접두사
 
 
 /**
