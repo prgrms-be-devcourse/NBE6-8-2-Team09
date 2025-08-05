@@ -94,35 +94,29 @@ jobs:
           bind 127.0.0.1
           protected-mode no
           save ""
+          timeout 0
+          tcp-keepalive 0
           "@ | Out-File -FilePath redis\redis.conf -Encoding ascii
           # Redis 서버를 설정 파일과 함께 시작
-          Start-Process -FilePath redis\redis-server.exe -ArgumentList "redis\redis.conf" -WindowStyle Hidden
-          Start-Sleep -Seconds 10
-          
-      - name: Wait for Redis to be ready (Windows)
+          Start-Process -FilePath redis\redis-server.exe -ArgumentList "redis\redis.conf" -WindowStyle Hidden -PassThru
+          Start-Sleep -Seconds 15
+
+      - name: Debug Redis process (Windows)
         if: matrix.os == 'windows-latest'
         shell: pwsh
         run: |
-          $timeout = 30
-          $count = 0
-          do {
-            try {
-              Test-NetConnection -ComputerName localhost -Port 6379 -InformationLevel Quiet
-              if ($?) {
-                Write-Output "Redis is ready!"
-                break
-              }
-            }
-            catch {
-              Write-Output "Waiting for Redis... ($count/$timeout)"
-            }
-            Start-Sleep -Seconds 1
-            $count++
-          } while ($count -lt $timeout)
-          
-          if ($count -eq $timeout) {
-            Write-Error "Redis failed to start within timeout"
-            exit 1
+          Write-Output "=== Redis Process Check ==="
+          Get-Process redis-server -ErrorAction SilentlyContinue
+          Write-Output "=== Network Connections ==="
+          netstat -an | findstr :6379
+          Write-Output "=== Redis Connection Test ==="
+          try {
+            $socket = New-Object System.Net.Sockets.TcpClient
+            $socket.Connect("127.0.0.1", 6379)
+            Write-Output "Redis TCP connection: SUCCESS"
+            $socket.Close()
+          } catch {
+            Write-Output "Redis TCP connection: FAILED - $($_.Exception.Message)"
           }
 
       - name: Grant execute permission to gradlew.bat
