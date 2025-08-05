@@ -36,17 +36,13 @@ public record TradeLogDto(
     }
 
     public static TradeLog toEntity(TradeLogDto dto, Wallet wallet, Coin coin) {
-        TradeLog entity = new TradeLog();
-        entity.setWallet(wallet);
-        entity.setCoin(coin);
-        entity.setType(dto.tradeType());
-        entity.setQuantity(dto.quantity());
-        entity.setPrice(dto.price());
+        return TradeLog.builder()
+                .wallet(wallet)
+                .coin(coin)
+                .type(dto.tradeType())
+                .quantity(dto.quantity())
+                .price(dto.price())
+                .build();
 
-        // createdAt은 BaseEntity에 존재 (protected)
-        // BaseEntity의 setCreatedAt(LocalDateTime) 메서드가 있으면 사용
-        // entity.setCreatedAt(LocalDateTime.parse(dto.createdAt())); // 예시
-
-        return entity;
     }
 }

@@ -124,20 +124,17 @@ public class TradeLogService {
         LocalDateTime baseDate = LocalDateTime.of(2025, 7, 25, 0, 0);
 
         for (int i = 1; i <= 15; i++) {
-            TradeLog log = new TradeLog();
-            log.setWallet(wallet);
-
-//            if (i <= 5) log.setCoin(coin1);
-//            else if (i <= 10) log.setCoin(coin2);
-//            else log.setCoin(coin3);
-            if (i <= 9) log.setCoin(coin1);
-            else log.setCoin(coin2);
+            Coin coin = (i <= 9) ? coin1 : coin2;
             TradeType type = (i % 3 == 0) ? TradeType.SELL : TradeType.BUY;
-            log.setType(type);
-            log.setCreatedAt(baseDate.plusDays((i - 1) * 7));
-            log.setQuantity(BigDecimal.valueOf(1));
-            log.setPrice(BigDecimal.valueOf(100_000_000L + (i * 10_000_000L)));
 
+            TradeLog log = TradeLog.builder()
+                    .wallet(wallet)
+                    .coin(coin)
+                    .type(type)
+                    .quantity(BigDecimal.valueOf(1))
+                    .price(BigDecimal.valueOf(100_000_000L + (i * 10_000_000L)))
+                    .build();
+            log.setCreatedAt(baseDate.plusDays((i - 1) * 7));
             logs.add(log);
         }
 
