@@ -44,9 +44,18 @@ location = /logout {
     proxy_cookie_domain  back9-backend-latest.onrender.com    .peuronteuendeu.onrender.com;
     proxy_cookie_domain  .back9-backend-latest.onrender.com   .peuronteuendeu.onrender.com;
 
-    # 4) Secure 및 SameSite=None 플래그 강제
-    proxy_cookie_flags   ~*^(accessToken|apiKey|role)$        Secure;
-    proxy_cookie_flags   ~*^(accessToken|apiKey|role)$        samesite=None;
+    # accessToken
+    proxy_cookie_flags accessToken secure;
+    proxy_cookie_flags accessToken samesite=None;
+
+# apiKey
+    proxy_cookie_flags apiKey    secure;
+    proxy_cookie_flags apiKey    samesite=None;
+
+# role
+    proxy_cookie_flags role      secure;
+    proxy_cookie_flags role      samesite=None;
+    
 
     # 5) Nginx 레이어에서 단일값 CORS 헤더 설정
     add_header           Access-Control-Allow-Origin    $http_origin    always;
