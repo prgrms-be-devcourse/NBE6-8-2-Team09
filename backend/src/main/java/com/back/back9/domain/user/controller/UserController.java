@@ -14,8 +14,11 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -116,23 +119,23 @@ public class UserController {
             new SecurityContextLogoutHandler().logout(request, response, authentication);
             log.info("OAuth 세션 사용자 로그아웃 처리 완료");
         }
-    
+
         // 1) JSESSIONID 만료
         ResponseCookie jsession = ResponseCookie.from("JSESSIONID", "")
-            .path("/")
-            .maxAge(0)
-            .domain(".peuronteuendeu.onrender.com") 
-            .sameSite("None")
-            .secure(true)
-            .httpOnly(true)
-            .build();
+                .path("/")
+                .maxAge(0)
+                .domain(".peuronteuendeu.onrender.com")
+                .sameSite("None")
+                .secure(true)
+                .httpOnly(true)
+                .build();
         response.addHeader(HttpHeaders.SET_COOKIE, jsession.toString());
-    
+
         // 2) JWT 쿠키들 삭제
         rq.deleteCookie("apiKey");
         rq.deleteCookie("accessToken");
         rq.deleteCookie("role");
-    
+
         SecurityContextHolder.clearContext();
         log.info("통합 로그아웃 처리 완료");
         return new RsData<>("200-1", "로그아웃 되었습니다.");
