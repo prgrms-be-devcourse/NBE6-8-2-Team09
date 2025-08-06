@@ -10,7 +10,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
     public void addCorsMappings(CorsRegistry registry) {
         registry
                 .addMapping("/**")  // 모든 경로에 대해 CORS 허용
-                .allowedOrigins("https://cdpn.io", "http://localhost:8888","https://peuronteuendeu.onrender.com")
+                .allowedOrigins("https://cdpn.io", "http://localhost:8888","https://peuronteuendeu.onrender.com","http://localhost:3000")
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true)

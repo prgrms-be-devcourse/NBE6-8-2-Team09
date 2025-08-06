@@ -1,7 +1,5 @@
 package com.back.back9.domain.tradeLog.dto;
 
-import com.back.back9.domain.tradeLog.entity.TradeLog;
-
 import java.time.format.DateTimeFormatter;
 //프론트 응답 DTO
 public record TradeLogResponse(

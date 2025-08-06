@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiCall } from "@/lib/api/client"; // apiCall import 추가
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 16 },
@@ -10,80 +11,67 @@ const fadeInUp = {
 
 const stagger = (delay = 0.1) => ({
     hidden: {},
-    show: {
-        transition: {
-            staggerChildren: delay,
-        },
-    },
+    show: { transition: { staggerChildren: delay } },
 });
 
+type MeResponse = {
+    result: {
+        id: number;
+        userLoginId: string;
+        username: string;
+        // 필요한 필드만 추가
+    };
+};
+
 export default function DashboardPage() {
-    const [userInfo, setUserInfo] = useState<any>(null);
+    const [userInfo, setUserInfo] = useState<MeResponse["result"] | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
 
     useEffect(() => {
-        const checkAuthAndLoadUser = async () => {
+        const ctrl = new AbortController();
+
+        const loadMe = async () => {
             try {
-                console.log('=== 대시보드 인증 확인 시작 ===');
+                console.log("=== 대시보드: /v1/users/me 호출 ===");
 
-                // 먼저 쿠키 확인
-                const cookies = document.cookie.split(';');
-                const accessTokenCookie = cookies.find(cookie => cookie.trim().startsWith('accessToken='));
-                const apiKeyCookie = cookies.find(cookie => cookie.trim().startsWith('apiKey='));
+                // fetch 대신 apiCall 사용
+                const response = await apiCall<{
+                    result: {
+                        id: number;
+                        userLoginId: string;
+                        username: string;
+                    };
+                    message?: string;
+                }>("/v1/users/me");
+                console.log("API 응답:", response);
 
-                console.log('=== 대시보드 쿠키 확인 ===');
-                console.log('accessToken 쿠키:', accessTokenCookie ? '존재' : '없음');
-                console.log('apiKey 쿠키:', apiKeyCookie ? '존재' : '없음');
-
-                // 쿠키가 없으면 한 번만 로그인 페이지로 이동
-                if (!accessTokenCookie || !apiKeyCookie) {
-                    console.log('인증 쿠키 없음 - 로그인 페이지로 이동');
-                    setIsLoading(false);
-                    // 즉시 리다이렉트하지 말고 사용자에게 선택권 제공
-                    setTimeout(() => {
-                        if (window.location.pathname === '/dashboard') {
-                            router.replace('/login');
-                        }
-                    }, 2000);
+                if (response && response.result) {
+                    setUserInfo(response.result);
+                } else {
+                    console.error("잘못된 응답 형태:", response);
+                    router.replace("/login");
+                }
+            } catch (e) {
+                // AbortError는 정상적인 취소이므로 무시
+                if (e instanceof Error && e.name === 'AbortError') {
+                    console.log("API 요청이 취소되었습니다 (정상)");
                     return;
                 }
-
-                // 쿠키가 있으면 API 호출
-                console.log('쿠키 존재 - 사용자 정보 API 호출');
-
-                const response = await fetch('/api/v1/users/me', {
-                    method: 'GET',
-                    credentials: 'include',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-
-                console.log('사용자 정보 API 응답 상태:', response.status);
-
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('사용자 정보 로드 성공');
-                    setUserInfo(data.result);
-                } else {
-                    console.log('사용자 정보 로드 실패 - 로그인 페이지로 이동');
-                    setTimeout(() => {
-                        router.replace('/login');
-                    }, 1000);
+                console.error("me 호출 중 오류:", e);
+                if (!ctrl.signal.aborted) {
+                    router.replace("/login");
                 }
-            } catch (error) {
-                console.error('대시보드 로드 중 오류:', error);
-                setTimeout(() => {
-                    router.replace('/login');
-                }, 1000);
             } finally {
-                setIsLoading(false);
+                if (!ctrl.signal.aborted) {
+                    setIsLoading(false);
+                }
             }
         };
 
-        checkAuthAndLoadUser();
-    }, []); // router 의존성 제거 - 무한 루프 방지
+        loadMe();
+        return () => ctrl.abort();
+    }, [router]);
 
     if (isLoading) {
         return (
@@ -96,7 +84,6 @@ export default function DashboardPage() {
         );
     }
 
-    // 쿠키가 없을 때 표시할 메시지
     if (!userInfo) {
         return (
             <div className="container py-8 flex items-center justify-center">
@@ -114,22 +101,16 @@ export default function DashboardPage() {
             variants={stagger(0.1)}
             initial="hidden"
             animate="show"
+            suppressHydrationWarning
         >
-            <motion.h1
-                variants={fadeInUp}
-                className="text-2xl font-bold mb-4"
-            >
+            <motion.h1 variants={fadeInUp} className="text-2xl font-bold mb-4" suppressHydrationWarning>
                 Dashboard
             </motion.h1>
 
-            {userInfo && (
-                <motion.div variants={fadeInUp} className="mb-6">
-                    <p className="text-lg">안녕하세요, {userInfo.username}님!</p>
-                    <p className="text-gray-600">{userInfo.userLoginId}</p>
-                </motion.div>
-            )}
-
-            {/* ...existing dashboard content... */}
+            <motion.div variants={fadeInUp} className="mb-6" suppressHydrationWarning>
+                <p className="text-lg">안녕하세요, {userInfo.username}님!</p>
+                <p className="text-gray-600">{userInfo.userLoginId}</p>
+            </motion.div>
         </motion.div>
     );
 }

@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { apiCall } from "@/lib/api/client"; // apiCall import 추가
 
 export default function LogoutPage() {
     const router = useRouter();
@@ -9,22 +10,14 @@ export default function LogoutPage() {
     useEffect(() => {
         const logout = async () => {
             try {
-                // 백엔드 로그아웃 (accessToken, apiKey 삭제)
-                await fetch(
-                    `/api/v1/users/logout`,
-                    {
-                        method: "DELETE",
-                        credentials: "include",
-                    }
-                );
+                // fetch 대신 apiCall 사용
+                await apiCall("/v1/users/logout", {
+                    method: "DELETE",
+                });
             } catch (error) {
                 console.warn('백엔드 로그아웃 실패:', error);
             } finally {
-                // 프론트엔드가 만든 중복 쿠키들 삭제
-                document.cookie = "access_Token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-                document.cookie = "role=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-                document.cookie = "apiKey=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-
+                // 백엔드에서 쿠키 삭제를 처리하므로 프론트엔드에서는 바로 리다이렉트
                 setTimeout(() => {
                     router.replace("/login");
                 }, 500);
@@ -35,9 +28,10 @@ export default function LogoutPage() {
     }, [router]);
 
     return (
-        <div className="flex items-center justify-center min-h-screen">
+        <div className="container py-8 flex items-center justify-center">
             <div className="text-center">
-                <p className="text-lg">로그아웃 중...</p>
+                <p>로그아웃 중...</p>
+                <p className="text-sm text-gray-500 mt-2">잠시만 기다려주세요.</p>
             </div>
         </div>
     );

@@ -16,6 +16,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { cn } from "@/lib/utils";
 import { PageShell } from "@/components/layout/page-shell";
 import { tradeLogApi } from "@/lib/api/tradelog";
+import { apiCall } from "@/lib/api/client";
+import { walletApi } from "@/lib/api/wallet";
 import type { TradeLogResponse } from "@/lib/types/tradelog";
 
 const columns: ColumnDef<TradeLogResponse>[] = [
@@ -74,20 +76,29 @@ export default function TransactionsPage() {
     const [dateError, setDateError] = useState("");
     const [isStartOpen, setIsStartOpen] = useState(false);
     const [isEndOpen, setIsEndOpen] = useState(false);
-    const userId = 1;
+    const [userId, setUserId] = useState<number | null>(null);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const checkAuth = async () => {
+        const checkAuthAndFetchData = async () => {
             try {
-                const response = await fetch(
-                    `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080"}/api/v1/users/me`,
-                    {
-                        method: "GET",
-                        credentials: "include",
-                    }
-                );
-                if (response.ok) {
+                // API 클라이언트를 사용하여 일관된 URL과 설정으로 인증 확인
+                const response = await apiCall<{
+                    result: {
+                        id: number;
+                        userLoginId: string;
+                        username: string;
+                    };
+                    message?: string;
+                }>('/v1/users/me');
+                if (response && (response as any).result?.id) {
+                    const currentUserId = (response as any).result.id;
                     setIsAuthenticated(true);
+                    setUserId(currentUserId);
+                    console.log('현재 사용자 ID:', currentUserId);
+
+                    // userId로 직접 거래 내역 조회 (지갑 조회 과정 생략)
+                    await fetchTradeLogWithUserId(currentUserId);
                 } else {
                     router.replace("/login");
                     return;
@@ -100,18 +111,15 @@ export default function TransactionsPage() {
                 setIsLoading(false);
             }
         };
-        checkAuth();
+
+        checkAuthAndFetchData();
     }, [router]);
 
-    useEffect(() => {
-        if (isAuthenticated) {
-           fetchTradeLog();
-        }
-    }, [isAuthenticated]);
-
-    const fetchTradeLog = async () => {
+    // userId로 직접 거래 내역 조회하는 함수
+    const fetchTradeLogWithUserId = async (userId: number) => {
         try {
             setIsLoading(true);
+            console.log('거래 내역 조회 시작 - userId:', userId);
             const response = await tradeLogApi.getUserTradeLogs(userId);
             console.log("거래 내역 응답:", response);
 
@@ -123,9 +131,15 @@ export default function TransactionsPage() {
             }
         } catch (error) {
             console.error("거래 내역 조회 실패:", error);
+            setError("거래 내역을 불러오는데 실패했습니다: " + (error as any)?.message);
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const fetchTradeLog = async () => {
+        if (!userId) return;
+        await fetchTradeLogWithUserId(userId);
     };
 
     const handleFilterChange = (key: keyof FilterState, value: any) => {
@@ -151,6 +165,8 @@ export default function TransactionsPage() {
     };
 
     const handleFilter = async () => {
+        if (!userId) return;
+        
         const params: Record<string, any> = {};
 
         if (filters.startDate) {
@@ -197,13 +213,13 @@ export default function TransactionsPage() {
             padded
             innerClassName={cn("min-h-[60vh] flex flex-col items-center justify-center text-center space-y-6")}
         >
-            <motion.div className="container py-8 space-y-6" variants={stagger(0.1)} initial="hidden" animate="show">
-                <motion.h1 variants={fadeInUp} className="text-2xl font-bold w-full text-left">
+            <motion.div className="container py-8 space-y-6" variants={stagger(0.1)} initial="hidden" animate="show" suppressHydrationWarning>
+                <motion.h1 variants={fadeInUp} className="text-2xl font-bold w-full text-left" suppressHydrationWarning>
                     가상화폐 주문 내역 페이지
                 </motion.h1>
 
                 {/* 필터 */}
-                <motion.div variants={fadeInUp}>
+                <motion.div variants={fadeInUp} suppressHydrationWarning>
                     <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
                         <div className="flex flex-wrap items-center justify-around gap-4">
                             {/* 날짜 선택 */}

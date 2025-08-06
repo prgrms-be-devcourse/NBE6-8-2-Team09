@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 //내부용 DTO
 public record TradeLogDto(
         int id,
-        int walletId,
+        Long walletId,
         LocalDateTime createdAt,
         int coinId,
         String coinSymbol,
@@ -21,7 +21,7 @@ public record TradeLogDto(
     public TradeLogDto(TradeLog tradeLog) {
         this(
                 Math.toIntExact(tradeLog.getId()),
-                tradeLog.getWallet().getId().intValue(),
+                tradeLog.getWallet().getId(),
                 tradeLog.getCreatedAt(),
                 tradeLog.getCoin().getId().intValue(),
                 tradeLog.getCoin().getSymbol(),
@@ -37,7 +37,7 @@ public record TradeLogDto(
 
         return new TradeLogDto(
                 Math.toIntExact(tradeLog.getId()),
-                tradeLog.getWallet().getId().intValue(),
+                tradeLog.getWallet().getId(),
                 tradeLog.getCreatedAt(),
                 coinId != null ? coinId.intValue() : -1, // -1 또는 다른 기본값, 혹은 wrapper 타입으로 바꾸기
                 coinSymbol,

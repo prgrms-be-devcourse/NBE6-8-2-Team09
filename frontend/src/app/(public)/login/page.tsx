@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { fadeInUp } from "@/lib/motion";
+import { apiCall } from "@/lib/api/client";
 
 const schema = z.object({
     userLoginId: z.string().min(1, "아이디를 입력해주세요."),
@@ -27,30 +28,17 @@ export default function LoginPage() {
     useEffect(() => {
         const checkAlreadyLoggedIn = async () => {
             try {
-                // 먼저 쿠키에서 토큰이 있는지 확인
-                const cookies = document.cookie.split(';');
-                const accessTokenCookie = cookies.find(cookie => cookie.trim().startsWith('accessToken='));
-                const apiKeyCookie = cookies.find(cookie => cookie.trim().startsWith('apiKey='));
+                // API 클라이언트를 사용하여 일관된 URL과 설정으로 인증 확인
+                const response = await apiCall('/v1/users/me');
 
-                if (!accessTokenCookie || !apiKeyCookie) {
-                    console.log('인증 쿠키가 없음 - 로그인 필요');
-                    setIsLoading(false);
-                    return;
-                }
-
-                const response = await fetch(
-                    `/api/v1/users/me`,
-                    {
-                        method: "GET",
-                        credentials: "include",
-                    }
-                );
-
-                if (response.ok) {
+                if (response) {
                     // 이미 로그인되어 있으면 대시보드로 리다이렉트
+                    console.log('이미 로그인됨 - 대시보드로 이동');
                     router.replace("/dashboard");
                     return;
                 }
+
+                console.log('로그인되지 않음 - 로그인 페이지 유지');
             } catch (error) {
                 console.log('로그인 체크 실패 (정상):', error);
             } finally {
@@ -101,17 +89,28 @@ export default function LoginPage() {
     });
 
     const onSubmit = async (values: any) => {
-        const res = await fetch(`/api/v1/users/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(values),
-            credentials: "include",
-        });
-        const data = await res.json();
-        if (res.ok && data.result?.accessToken) {
-            router.replace("/dashboard");
-        } else {
-            setError(data.message || "로그인 실패");
+        try {
+            console.log('로그인 시도:', values.userLoginId);
+
+            // API 클라이언트를 사용하여 일관된 설정으로 로그인 요청
+            const data = await apiCall<any>('/v1/users/login', {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(values),
+            });
+
+            console.log('로그인 응답:', data);
+
+            if (data && (data as any).result?.accessToken) {
+                console.log('로그인 성공 - 대시보드로 이동');
+                router.replace("/dashboard");
+            } else {
+                console.log('로그인 실패 - 토큰 없음:', data);
+                setError((data as any)?.message || "로그인 실패");
+            }
+        } catch (error) {
+            console.error('로그인 오류:', error);
+            setError("로그인 중 오류가 발생했습니다.");
         }
     };
 
