@@ -87,14 +87,9 @@ public class SecurityConfig {
                             );
                         })
                 )
-                .logout(logout -> logout
-                        .logoutUrl("/api/v1/users/logout")
-                        .deleteCookies("accessToken", "apiKey", "role")
-                        .logoutSuccessHandler((req, res, auth) -> {
-                            res.setStatus(HttpServletResponse.SC_OK);
-                        })
-                        .permitAll()
-                )
+                // Spring Security 기본 로그아웃 비활성화 (커스텀 컨트롤러 사용)
+                .logout(AbstractHttpConfigurer::disable)
+                // 커스텀 인증 필터 등록
                 .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
