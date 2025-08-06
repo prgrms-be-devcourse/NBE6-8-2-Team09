@@ -33,7 +33,7 @@ server {
     }
 
     location /api/ {
-        proxy_pass             https://back9-backend-latest.onrender.com;
+        proxy_pass             https://back9-backend-latest.onrender.com/;
         proxy_http_version     1.1;
         proxy_set_header       Host back9-backend-latest.onrender.com;
         proxy_set_header       X-Real-IP $remote_addr;
