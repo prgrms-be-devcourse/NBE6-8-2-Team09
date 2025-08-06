@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { PageShell } from "@/components/layout/page-shell";
+import { apiCall } from "@/lib/api/client"; // apiCall import 추가
 
 type HeroProps = {
     title?: string;
@@ -25,23 +26,10 @@ const stagger = (delay = 0.08) => ({
     show: { transition: { staggerChildren: delay } },
 });
 
-/** 안전한 API 베이스 선택 */
-function resolveApiBase(): string {
-    // 클라이언트일 때
-    if (typeof window !== "undefined") {
-        // 프로덕션: 동일 도메인 프록시 사용 권장 (/api)
-        if (location.protocol === "https:") return "/api";
-        // 개발: 환경변수 우선, 없으면 로컬 백엔드
-        return process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";
-    }
-    // 서버 측 렌더링 시점에선 빌드타임 주입값만 접근 가능
-    return process.env.NEXT_PUBLIC_API_URL || "";
-}
-
 export function Hero({
                          title = "Back9 Coin",
                          subtitle = "투자의 기준을 바꾸다. 실시간 지갑, 거래 내역, 관리자 전용 코인 등록까지.",
-                         primaryCta = { href: "/exchange", label: "거래소 보러가기" },
+                         primaryCta = { href: "/dashboard", label: "대시보드 보러가기" },
                          secondaryCta = { href: "/register", label: "회원가입" },
                          className,
                          innerClassName,
@@ -54,27 +42,14 @@ export function Hero({
         if (fetchingRef.current) return;
         fetchingRef.current = true;
 
-        const controller = new AbortController();
         try {
-            const base = resolveApiBase();
-            const url =
-                base
-                    ? `${base.replace(/\/$/, "")}/api/v1/users/me`
-                    : `/api/v1/users/me`; // base가 비어도 프록시 경로 시도
-
-            const res = await fetch(url, {
-                method: "GET",
-                credentials: "include",
-                cache: "no-store",
-                signal: controller.signal,
-            });
-
-            setIsLoggedIn(res.ok);
+            // apiCall 함수를 사용하여 일관된 API 호출
+            await apiCall('/v1/users/me');
+            setIsLoggedIn(true);
         } catch (e) {
             setIsLoggedIn(false);
         } finally {
             fetchingRef.current = false;
-            controller.abort();
         }
     }, []);
 
