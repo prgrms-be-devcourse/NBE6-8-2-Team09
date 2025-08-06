@@ -10,8 +10,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { fadeInUp } from "@/lib/motion";
-import { createUser } from '@/lib/api/user';
-import type { CreateUserRequest } from '@/types/user';
+import { apiCall } from "@/lib/api/client";
 
 const schema = z.object({
     userLoginId: z.string().min(1, "아이디를 입력해주세요."),
@@ -59,21 +58,23 @@ export default function RegisterPage() {
         setError(null);
 
         try {
-            const res = await fetch(`/api/v1/users/register`, {
+            // apiCall에 적절한 타입 지정
+            const data = await apiCall<{
+                result?: any;
+                message?: string;
+                resultCode?: string;
+            }>("/v1/users/register", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(values),
             });
 
-            const data = await res.json();
-
-            if (res.ok && data.result) {
+            if (data && data.result) {
                 alert('회원가입이 완료되었습니다!');
                 setTimeout(() => {
                     router.replace("/login?message=register_success");
                 }, 500);
-            } else {
-                // 백엔드 에러 코드에 따라 특정 필드에 에러 설정
+            } else if (data) {
+                // 백엔드 에러 코드에 따라 특정 필드에 에러 설정 (data가 null이 아닐 때만)
                 if (data.resultCode === "400-1" || data.message?.includes('아이디')) {
                     // 아이디 중복 에러
                     form.setError("userLoginId", {
@@ -96,6 +97,9 @@ export default function RegisterPage() {
                     // 기타 에러는 전체 에러로 표시
                     setError(data.message || "회원가입에 실패했습니다. 다시 시도해주세요.");
                 }
+            } else {
+                // data가 null인 경우
+                setError("서버 응답이 없습니다. 다시 시도해주세요.");
             }
         } catch (error) {
             console.error('회원가입 요청 에러:', error);

@@ -3,13 +3,13 @@ import type { ApiResponse } from '@/lib/types/common'
 import type { TradeLogResponse, TradeGetItems } from '@/lib/types/tradelog'
 
 export const tradeLogApi = {
-  // 사용자의 거래 내역 조회
+  // 사용자의 거래 내역 조회 - 새로운 userId 기반 API 사용
   getUserTradeLogs: (userId: number) =>
-      apiCall<TradeLogResponse[]>(`/tradeLog/wallet/${userId}`),
+      apiCall<TradeLogResponse[]>(`/tradeLog/user/${userId}`),
 
   // 특정 코인의 거래 내역 조회
   getCoinTradeLogs: (userId: number, coinId: number) =>
-      apiCall<ApiResponse<TradeLogResponse[]>>(`/tradeLog/wallet/${userId}/coins/${coinId}`),
+      apiCall<ApiResponse<TradeLogResponse[]>>(`/tradeLog/user/${userId}?coinId=${coinId}`),
 
   // 특정 거래 내역 상세 조회
   getTradeLogById: (id: number) =>
@@ -27,10 +27,10 @@ export const tradeLogApi = {
       }
     });
 
-    return (
-        await apiCall<TradeLogResponse[]>(
-            `/tradeLog/wallet/${userId}?${query.toString()}`
-        )
-    ) ?? []; // null이면 빈 배열 반환
+    const result = await apiCall<TradeLogResponse[]>(
+        `/tradeLog/user/${userId}?${query.toString()}`
+    );
+
+    return result ?? []; // null이면 빈 배열 반환
   },
 }

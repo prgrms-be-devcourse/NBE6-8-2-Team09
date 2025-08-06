@@ -100,8 +100,9 @@ export default function TransactionsPage() {
                 variants={stagger(0.1)}
                 initial="hidden"
                 animate="show"
+                suppressHydrationWarning
             >
-                <motion.h1 variants={fadeInUp} className="text-2xl font-bold w-full text-left">
+                <motion.h1 variants={fadeInUp} className="text-2xl font-bold w-full text-left" suppressHydrationWarning>
                     분석 페이지
                 </motion.h1>
 
@@ -110,7 +111,7 @@ export default function TransactionsPage() {
                     variants={fadeInUp}
                     initial="hidden"
                     animate="show"
-                    exit="hidden"
+                    suppressHydrationWarning
                 >                    {/* 탭 메뉴 */}
                     <div className="flex gap-6 text-sm font-medium">
                         <button

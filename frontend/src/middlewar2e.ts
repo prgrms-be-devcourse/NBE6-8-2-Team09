@@ -2,39 +2,14 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
-const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
+// HttpOnly 쿠키 사용 시 middleware에서 인증 확인 불가능하므로 비활성화
+const AUTH_ENABLED = false; // process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
 
 export function middlewar2e(req: NextRequest) {
-    // 인증 끄고 싶을 때는 그냥 통과
-    if (!AUTH_ENABLED) return NextResponse.next();
-
-    const { pathname } = req.nextUrl;
-    const token = req.cookies.get("accessToken")?.value; // access_token → accessToken으로 변경
-    const role = req.cookies.get("role")?.value;
-
-    // ADMIN 전용
-    if (pathname.startsWith("/admin")) {
-        if (!token || role !== "ADMIN") {
-            return NextResponse.redirect(new URL("/login", req.url));
-        }
-        return NextResponse.next();
-    }
-
-    // 보호가 필요한 경로
-    const needAuth = [
-        "/dashboard",
-        "/wallet",
-        "/transactions",
-        "/coin-transactions",
-    ].some((p) => pathname.startsWith(p));
-
-    if (needAuth && !token) {
-        return NextResponse.redirect(new URL("/login", req.url));
-    }
-
+    // HttpOnly 쿠키는 middleware에서 읽을 수 없으므로 항상 통과
+    // 실제 인증은 각 페이지에서 API 호출로 처리
     return NextResponse.next();
 }
-
 
 export const config = {
     matcher: [

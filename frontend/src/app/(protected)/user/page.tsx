@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { fadeInUp } from "@/lib/motion";
+import { apiCall } from "@/lib/api/client";
 
 type UserInfo = {
     userLoginId: string;
@@ -23,24 +24,29 @@ export default function MyPage() {
     useEffect(() => {
         const fetchMyInfo = async () => {
             try {
-                const res = await fetch(
-                    `/api/v1/users/me`,
-                    { credentials: "include" }
-                );
-                const data = await res.json();
-                if (res.ok && data.result) {
+                // 백엔드 API 응답 구조에 맞는 타입 정의
+                const data = await apiCall<{
+                    result: UserInfo;
+                    message?: string;
+                }>(`/v1/users/me`);
+
+                if (data && data.result) {
                     setUser(data.result);
-                } else if (res.status === 401) {
+                } else {
+                    setError(data?.message || "유저 정보를 불러올 수 없습니다.");
+                }
+            } catch (error: any) {
+                console.error("유저 정보 조회 실패:", error);
+                if (error.status === 401) {
                     router.replace("/login");
                 } else {
-                    setError(data.message || "유저 정보를 불러올 수 없습니다.");
+                    setError(error.message || "유저 정보를 불러올 수 없습니다.");
                 }
-            } catch (e) {
-                setError("서버 연결에 실패했습니다.");
             } finally {
                 setLoading(false);
             }
         };
+
         fetchMyInfo();
     }, [router]);
 
