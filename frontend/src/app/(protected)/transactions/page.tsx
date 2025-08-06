@@ -44,7 +44,15 @@ const columns: ColumnDef<TradeLogResponse>[] = [
     {
         accessorKey: "quantity",
         header: () => <div className="text-center">구매/판매 수</div>,
-        cell: ({ getValue }) => <div className="text-center">{getValue() as string}</div>,
+        cell: ({ row, getValue }) => {
+            const tradeType = row.getValue("tradeType") as string;
+            const quantity = getValue() as string;
+            return (
+                <div className="text-center">
+                    {tradeType === "CHARGE" ? "-" : quantity}
+                </div>
+            );
+        },
     },
 ];
 
