@@ -20,6 +20,8 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
         implements AuthorizationRequestRepository<OAuth2AuthorizationRequest> {
 
     public static final String OAUTH2_AUTH_REQUEST_COOKIE_NAME = "oauth2_auth_request";
+    public static final String REDIRECT_URI_PARAM_COOKIE_NAME       = "frontend-url"; // ← 변경
+
     private static final int COOKIE_EXPIRE_SECONDS = 180;
 
     @Value("${app.oauth2.cookie-domain:}")
@@ -60,47 +62,37 @@ public class HttpCookieOAuth2AuthorizationRequestRepository
     public void saveAuthorizationRequest(OAuth2AuthorizationRequest authorizationRequest,
                                          HttpServletRequest request,
                                          HttpServletResponse response) {
-        System.out.println("=== OAuth2 쿠키 저장 시도 ===");
-        System.out.println("요청 URI: " + request.getRequestURI());
-        System.out.println("인증 요청 존재 여부: " + (authorizationRequest != null));
-
         if (authorizationRequest == null) {
-            System.out.println("인증 요청이 null이므로 쿠키 삭제");
             removeAuthorizationRequestCookies(request, response);
             return;
         }
 
-        try {
-            String serialized = serialize(authorizationRequest);
-            System.out.println("직렬화 성공, 길이: " + serialized.length());
+        String serialized = serialize(authorizationRequest);
 
-            Cookie cookie = new Cookie(OAUTH2_AUTH_REQUEST_COOKIE_NAME, serialized);
-            cookie.setPath("/");
-            cookie.setHttpOnly(true);
-            cookie.setMaxAge(COOKIE_EXPIRE_SECONDS);
+        // 1) OAuth2 인가 요청 쿠키 (SameSite=None; Secure 추가)
+        String authCookieHeader = String.format(
+                "%s=%s; Path=/; HttpOnly; Max-Age=%d; SameSite=None; Secure%s",
+                OAUTH2_AUTH_REQUEST_COOKIE_NAME,
+                serialized,
+                COOKIE_EXPIRE_SECONDS,
+                cookieDomain.isEmpty() ? "" : "; Domain=" + cookieDomain
+        );
+        response.addHeader("Set-Cookie", authCookieHeader);
 
-            // 크로스 도메인 환경을 위한 설정
-            if (!cookieDomain.isEmpty()) {
-                cookie.setDomain(cookieDomain);
-                System.out.println("쿠키 도메인 설정: " + cookieDomain);
-            }
-
-            // SameSite 속성 설정을 위해 헤더로 직접 설정
-            String cookieHeader = String.format("%s=%s; Path=/; HttpOnly; Max-Age=%d; SameSite=Lax",
-                    OAUTH2_AUTH_REQUEST_COOKIE_NAME, serialized, COOKIE_EXPIRE_SECONDS);
-
-            if (!cookieDomain.isEmpty()) {
-                cookieHeader += "; Domain=" + cookieDomain;
-            }
-
-            System.out.println("쿠키 헤더: " + cookieHeader);
-            response.addHeader("Set-Cookie", cookieHeader);
-            System.out.println("쿠키 저장 완료");
-        } catch (Exception e) {
-            System.out.println("쿠키 저장 실패: " + e.getMessage());
-            e.printStackTrace();
+        // 2) (선택) 리다이렉트 URI 쿠키도 같은 플래그로
+        String redirectUri = request.getParameter("frontend-url");
+        if (redirectUri != null && !redirectUri.isBlank()) {
+            String redirectCookieHeader = String.format(
+                    "%s=%s; Path=/; Max-Age=%d; SameSite=None; Secure%s",
+                    REDIRECT_URI_PARAM_COOKIE_NAME,
+                    redirectUri,
+                    COOKIE_EXPIRE_SECONDS,
+                    cookieDomain.isEmpty() ? "" : "; Domain=" + cookieDomain
+            );
+            response.addHeader("Set-Cookie", redirectCookieHeader);
         }
     }
+
 
 
     public OAuth2AuthorizationRequest removeAuthorizationRequest(HttpServletRequest request) {
