@@ -26,36 +26,38 @@ public class SecurityConfig {
     private final HttpCookieOAuth2AuthorizationRequestRepository cookieAuthorizationRequestRepository;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CustomOAuth2UserService customOAuth2UserService) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                                   CustomOAuth2UserService customOAuth2UserService) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/", "/api/v1/users/login", "/api/v1/users/register",
-                                "/api/v1/users/register-admin", "/swagger-ui/**",
-                                "/v3/api-docs/**", "/swagger-ui.html", "/api/v1/users/logout",
-                                "/oauth2/**", "/login/oauth2/**", "/login", "/error",
-                                "/favicon.ico", "/robots.txt", "/sitemap.xml",
-                                "/css/**", "/js/**", "/images/**", "/static/**"
-                        ).permitAll()
-                        .requestMatchers("/api/v1/adm/**").hasRole("ADMIN")
-                        .anyRequest().authenticated()
+                .authorizeHttpRequests(auth ->
+                        auth.requestMatchers(
+                                        "/", "/api/v1/users/login", "/api/v1/users/register",
+                                        "/api/v1/users/register-admin", "/api/v1/users/logout",
+                                        "/swagger-ui/**", "/v3/api-docs/**", "/swagger-ui.html",
+                                        "/oauth2/**", "/login/oauth2/**", "/login", "/error",
+                                        "/favicon.ico", "/robots.txt", "/sitemap.xml",
+                                        "/css/**", "/js/**", "/images/**", "/static/**"
+                                ).permitAll()
+                                .requestMatchers("/api/v1/adm/**").hasRole("ADMIN")
+                                .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint((request, response, authException) -> {
                             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             response.setContentType("application/json");
-                            response.getWriter().write("{\"status\":\"fail\",\"code\":401,\"message\":\"인증이 필요합니다.\",\"result\":null}");
+                            response.getWriter().write(
+                                    "{\"status\":\"fail\",\"code\":401,\"message\":\"인증이 필요합니다.\",\"result\":null}"
+                            );
                         })
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .authorizationEndpoint(authz ->
-                                authz
-                                        .baseUri("/oauth2/authorize")
+                                authz.baseUri("/oauth2/authorize")
                                         .authorizationRequestRepository(cookieAuthorizationRequestRepository)
                         )
                         .redirectionEndpoint(redir ->
@@ -67,7 +69,6 @@ public class SecurityConfig {
                         .successHandler(oAuth2SuccessHandler)
                         .failureHandler((req, res, ex) -> {
                             ex.printStackTrace();
-
                             String errorMsg;
                             if (ex instanceof OAuth2AuthenticationException oae) {
                                 OAuth2Error err = oae.getError();
@@ -76,20 +77,23 @@ public class SecurityConfig {
                             } else {
                                 errorMsg = ex.getMessage();
                             }
-
                             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                             res.setContentType("application/json");
-                            try {
-                                res.getWriter().write(
-                                        String.format(
-                                                "{\"status\":\"fail\",\"code\":401,\"message\":\"%s\"}",
-                                                errorMsg.replace("\"", "\\\"")
-                                        )
-                                );
-                            } catch (Exception e) {
-                                System.out.println("OAuth2 실패 응답 작성 중 오류: " + e.getMessage());
-                            }
+                            res.getWriter().write(
+                                    String.format(
+                                            "{\"status\":\"fail\",\"code\":401,\"message\":\"%s\"}",
+                                            errorMsg.replace("\"", "\\\"")
+                                    )
+                            );
                         })
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/api/v1/users/logout")
+                        .deleteCookies("accessToken", "apiKey", "role")
+                        .logoutSuccessHandler((req, res, auth) -> {
+                            res.setStatus(HttpServletResponse.SC_OK);
+                        })
+                        .permitAll()
                 )
                 .addFilterBefore(customAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
