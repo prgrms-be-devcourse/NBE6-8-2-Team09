@@ -9,10 +9,10 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 //내부용 DTO
 public record TradeLogDto(
-        int id,
+        Long id,
         Long walletId,
         LocalDateTime createdAt,
-        int coinId,
+        Long coinId,
         String coinSymbol,
         TradeType tradeType,
         BigDecimal quantity,
@@ -20,10 +20,10 @@ public record TradeLogDto(
 ) {
     public TradeLogDto(TradeLog tradeLog) {
         this(
-                Math.toIntExact(tradeLog.getId()),
+                tradeLog.getId(),
                 tradeLog.getWallet().getId(),
                 tradeLog.getCreatedAt(),
-                tradeLog.getCoin().getId().intValue(),
+                tradeLog.getCoin().getId(),
                 tradeLog.getCoin().getSymbol(),
                 tradeLog.getType(),
                 tradeLog.getQuantity(),
@@ -36,10 +36,10 @@ public record TradeLogDto(
         String coinSymbol = tradeLog.getCoin() != null ? tradeLog.getCoin().getSymbol() : null;
 
         return new TradeLogDto(
-                Math.toIntExact(tradeLog.getId()),
+                tradeLog.getId(),
                 tradeLog.getWallet().getId(),
                 tradeLog.getCreatedAt(),
-                coinId != null ? coinId.intValue() : -1, // -1 또는 다른 기본값, 혹은 wrapper 타입으로 바꾸기
+                coinId != null ? coinId : -1, // -1 또는 다른 기본값, 혹은 wrapper 타입으로 바꾸기
                 coinSymbol,
                 tradeLog.getType(),
                 tradeLog.getQuantity(),

@@ -3,6 +3,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { ExchangeDTO } from "@/lib/types/exchange/type";
 import { exchangeApi } from "@/lib/api/exchange";
+import Link from "next/link";
+import {apiCall} from "@/lib/api/client";
+import { FiSettings } from "react-icons/fi";
 
 type SortKey = "name" | "trade_price" | "change_rate" | "candle_acc_trade_volume";
 type SortOrder = "asc" | "desc";
@@ -24,6 +27,22 @@ export const CoinList = ({ onSelect }: CoinListProps) => {
     const [selectedMarket, setSelectedMarket] = useState<string | null>(null);
     const [latestSelectedCoin, setLatestSelectedCoin] = useState<ExchangeDTO | null>(null);
     const socketRef = useRef<WebSocket | null>(null);
+
+    const [role, setRole] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const me = await apiCall<any>("/v1/users/me", { method: "GET" });
+                setRole(me.result.role);
+                console.log(me.result.role);
+            } catch (error) {
+                console.error("사용자 정보를 불러오는 데 실패했습니다.", error);
+            }
+        };
+
+        fetchUser();
+    }, []);
 
     useEffect(() => {
         const fetchCoins = async () => {
@@ -153,7 +172,7 @@ export const CoinList = ({ onSelect }: CoinListProps) => {
 
     return (
         <div className="w-full h-full border rounded bg-white shadow-sm text-sm flex flex-col overflow-x-hidden">
-            <div className="p-2 sticky top-0 bg-white z-10 border-b">
+            <div className="p-2 sticky top-0 bg-white z-10 border-b flex items-center justify-between">
                 <input
                     type="text"
                     placeholder="코인명/심볼 검색"
@@ -161,6 +180,17 @@ export const CoinList = ({ onSelect }: CoinListProps) => {
                     onChange={(e) => setSearch(e.target.value)}
                     className="w-full p-1 border rounded text-sm"
                 />
+                {role === "ADMIN" &&
+                    <Link href="/admin/coins/new">
+                        <button
+                            className="p-2 rounded w-10 h-10 bg-gray-100 hover:bg-gray-200 border border-gray-300 transition"
+                            title="코인 등록 페이지 이동"
+                        >
+                            <FiSettings className="w-5 h-5 text-gray-700" />
+                        </button>
+                    </Link>
+                }
+
             </div>
 
             {/* Header Row */}

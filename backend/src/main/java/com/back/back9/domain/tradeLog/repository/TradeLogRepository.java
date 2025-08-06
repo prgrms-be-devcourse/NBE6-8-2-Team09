@@ -14,8 +14,11 @@ import java.util.Optional;
 
 public interface TradeLogRepository extends JpaRepository<TradeLog, Long> {
     Optional<TradeLog> findFirstByOrderByIdDesc();
+
     List<TradeLog> findByWalletId(Long walletId);
+
     Page<TradeLog> findByWalletId(Long walletId, Pageable pageable);
+
     @Query(
             "SELECT t FROM TradeLog t " +
                     "WHERE t.wallet.id = :walletId " +

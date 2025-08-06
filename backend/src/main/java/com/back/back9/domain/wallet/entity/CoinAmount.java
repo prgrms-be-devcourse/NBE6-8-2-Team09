@@ -25,7 +25,7 @@ public class CoinAmount extends BaseEntity {
     private Wallet wallet;
 
     @NotNull
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coin_id")
     private Coin coin;
 

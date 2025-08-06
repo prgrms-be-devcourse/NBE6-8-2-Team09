@@ -4,7 +4,7 @@ import { PageShell } from "@/components/layout/page-shell";
 
 export default function PublicLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col w-full">
             <header className="w-full">
                 <PageShell maxW="max-w-[80vw]" padded>
                     {/* MainNav 내부 정렬이 왼쪽 고정이면 className으로 중앙 정렬 */}

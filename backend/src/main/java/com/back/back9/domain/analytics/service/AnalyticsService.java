@@ -62,9 +62,17 @@ public class AnalyticsService {
     public ProfitRateResponse calculateRealizedProfitRates(Long walletId) {
         // 지갑에 해당하는 모든 트레이드 로그 조회 (매수, 매도, 충전 포함)
         List<TradeLogDto> tradeLogs = tradeLogService.findByWalletId(walletId);
+        if (tradeLogs.isEmpty()) {
+            log.info("비어있음" + walletId);
+        } else {
+            for (TradeLogDto tradeLog : tradeLogs) {
+                log.info(String.valueOf(tradeLog.coinId()));
+            }
+        }
+
 
         // 코인별로 트레이드 로그 그룹핑
-        Map<Integer, List<TradeLogDto>> tradeLogsByCoin = tradeLogs.stream()
+        Map<Long, List<TradeLogDto>> tradeLogsByCoin = tradeLogs.stream()
                 .collect(Collectors.groupingBy(TradeLogDto::coinId));
 
         List<ProfitAnalysisDto> coinAnalytics = new ArrayList<>();
@@ -83,8 +91,8 @@ public class AnalyticsService {
         BigDecimal totalRealizedCostSum = BigDecimal.ZERO;
 
         // 코인별 수익률 계산
-        for (Map.Entry<Integer, List<TradeLogDto>> entry : tradeLogsByCoin.entrySet()) {
-            int coinId = entry.getKey();
+        for (Map.Entry<Long, List<TradeLogDto>> entry : tradeLogsByCoin.entrySet()) {
+            Long coinId = entry.getKey();
             String coinName= String.valueOf(coinId);
             List<TradeLogDto> logs = entry.getValue();
 

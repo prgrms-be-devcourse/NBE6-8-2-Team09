@@ -1,16 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { ExchangeDTO } from "@/lib/types/exchange/type";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
-} from "@/components/ui/select";
+import React, {useEffect, useState} from "react";
+import {ExchangeDTO} from "@/lib/types/exchange/type";
+import {Button} from "@/components/ui/button";
+import {Input} from "@/components/ui/input";
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue,} from "@/components/ui/select";
+import {apiCall} from "@/lib/api/client";
 
 interface TradeFormProps {
     selectedCoin: ExchangeDTO | null;
@@ -24,6 +19,7 @@ export const TradeForm: React.FC<TradeFormProps> = ({ selectedCoin }) => {
     const [volume, setVolume] = useState("");
     const [total, setTotal] = useState("");
     const [lastChanged, setLastChanged] = useState<"volume" | "total" | null>(null);
+    const [userId, setUserId] = useState<number | null>(null);
 
     useEffect(() => {
         if (selectedCoin) {
@@ -50,10 +46,44 @@ export const TradeForm: React.FC<TradeFormProps> = ({ selectedCoin }) => {
         }
     }, [price, volume, total, lastChanged, orderType]);
 
-    const handleSubmit = () => {
+
+    const handleSubmit = async () => {
         const typeText = tab === "buy" ? "매수" : "매도";
-        alert(`${selectedCoin?.market} ${typeText}요청, 수량${volume}개, 금액${total}원, 시세${price}`);
+        const tradeType = tab === "buy" ? "BUY" : "SELL";
+        const ordersMethod = orderType === "limit" ? "LIMIT" : "MARKET";
+
+        try {
+            const me = await apiCall<any>("/v1/users/me", { method: "GET" });
+            const walletId = me?.result?.id;
+
+            if (!walletId) {
+                alert("유저 ID를 가져올 수 없습니다.");
+                return;
+            }
+
+            const payload = {
+                coinSymbol: selectedCoin?.market || "",
+                tradeType,                     // BUY or SELL
+                ordersMethod,                 // LIMIT or MARKET
+                quantity: volume,
+                price: price,
+            };
+
+            const orderResponse = await apiCall("/orders/wallet/" + walletId, {
+                method: "POST",
+                body: JSON.stringify(payload),
+                headers: { "Content-Type": "application/json" },
+            });
+
+            alert(
+                `[주문 성공]\n유형: ${typeText}\n종목: ${selectedCoin?.market}\n수량: ${volume}개\n금액: ${total}원\n단가: ${price}`
+            );
+        } catch (error) {
+            console.error("주문 실패", error);
+            alert("주문 요청 중 오류가 발생했습니다.");
+        }
     };
+
 
     const handleQuickAdd = (amount: number) => {
         const currentTotal = parseFloat(total) || 0;

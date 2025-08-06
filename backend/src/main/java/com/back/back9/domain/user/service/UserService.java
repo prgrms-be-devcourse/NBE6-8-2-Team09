@@ -60,6 +60,7 @@ public class UserService {
 
     @Transactional
     public RsData<User> registerAdmin(UserRegisterDto dto) {
+
         return registerUser(dto, User.UserRole.ADMIN);
     }
 

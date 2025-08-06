@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRight, ArrowDownRight } from "lucide-react";
@@ -6,18 +7,18 @@ import { ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PageShell } from "@/components/layout/page-shell";
 import { Card, CardContent } from "@/components/ui/card";
-
 import { ProfitRateResponse, ProfitAnalysisDto } from "@/lib/types/analytics";
 import { analyticsApi } from "@/lib/api/analytics";
 import { DataTable } from "@/components/ui/data-table";
 import { ColumnDef } from "@tanstack/react-table";
+import { apiCall } from "@/lib/api/client";
 
 const columns: ColumnDef<ProfitAnalysisDto>[] = [
     { accessorKey: "coinName", header: "코인 이름" },
     {
         accessorKey: "totalQuantity",
         header: "보유 수량",
-        cell: ({ row }) => `${row.getValue("totalQuantity") as number} 주`
+        cell: ({ row }) => `${row.getValue("totalQuantity") as number} 주`,
     },
     {
         accessorKey: "averageBuyPrice",
@@ -44,51 +45,82 @@ export default function TransactionsPage() {
     const [tab, setTab] = useState<"realized" | "evaluated">("realized");
     const [isLoading, setIsLoading] = useState(true);
     const [analyticsData, setAnalyticsData] = useState<ProfitRateResponse | null>(null);
+    const [userId, setUserId] = useState<number | null>(null);
 
-    const userId = 1;
-
+    // 1. 사용자 ID 조회
     useEffect(() => {
-        fetchAnalyticsRealized();
+        const fetchUser = async () => {
+            const response = await apiCall<{
+                result: {
+                    id: number;
+                    userLoginId: string;
+                    username: string;
+                };
+                message?: string;
+            }>('/v1/users/me');
+
+            if (response?.result?.id) {
+                const currentUserId = response.result.id;
+                setUserId(currentUserId);
+                console.log('현재 사용자 ID:', currentUserId);
+            } else {
+                console.warn('사용자 정보를 가져오지 못했습니다:', response);
+            }
+        };
+
+        fetchUser();
     }, []);
 
-    const fetchAnalyticsRealized = async () => {
+    // 2. userId가 세팅되면 실현 수익률 불러오기
+    useEffect(() => {
+        if (userId !== null) {
+            fetchAnalyticsRealized(userId);
+        }
+    }, [userId]);
+
+    // 실현 수익률 API 호출
+    const fetchAnalyticsRealized = async (userId: number) => {
         try {
             setIsLoading(true);
             const response = await analyticsApi.getUserAnalyticsRealized(userId);
-            console.log("거래 내역 응답:", response);
+            console.log("실현 수익률 응답:", response);
             if (response) {
-                // @ts-ignore
-                setAnalyticsData(response);
+                // setAnalyticsData(response);
             }
         } catch (error) {
-            console.error("거래 내역 조회 실패:", error);
+            console.error("실현 수익률 조회 실패:", error);
         } finally {
             setIsLoading(false);
         }
     };
-    const handleTabClick = (selectedTab: "realized" | "evaluated") => {
-        setTab(selectedTab);
-        if (selectedTab === "realized") {
-            fetchAnalyticsRealized();
-        } else {
-            fetchAnalyticsEvaluated(); // 이 함수도 따로 구현 필요
-        }
-    };
+
+    // 평가 수익률 API 호출
     const fetchAnalyticsEvaluated = async () => {
+        if (userId === null) return;
+
         try {
             setIsLoading(true);
             const response = await analyticsApi.getUserAnalyticsUnrealized(userId);
-            console.log("거래 내역 응답:", response);
+            console.log("평가 수익률 응답:", response);
             if (response) {
-                // @ts-ignore
-                setAnalyticsData(response);
+                // setAnalyticsData(response);
             }
         } catch (error) {
-            console.error("거래 내역 조회 실패:", error);
+            console.error("평가 수익률 조회 실패:", error);
         } finally {
             setIsLoading(false);
         }
     };
+
+    const handleTabClick = (selectedTab: "realized" | "evaluated") => {
+        setTab(selectedTab);
+        if (selectedTab === "realized") {
+            if (userId !== null) fetchAnalyticsRealized(userId);
+        } else {
+            fetchAnalyticsEvaluated();
+        }
+    };
+
     return (
         <PageShell
             maxW="max-w-[80vw]"
@@ -112,7 +144,8 @@ export default function TransactionsPage() {
                     initial="hidden"
                     animate="show"
                     suppressHydrationWarning
-                >                    {/* 탭 메뉴 */}
+                >
+                    {/* 탭 메뉴 */}
                     <div className="flex gap-6 text-sm font-medium">
                         <button
                             className={`border-b-2 pb-1 ${
@@ -161,7 +194,6 @@ export default function TransactionsPage() {
                                 <div className="text-sm text-muted-foreground">투자금 대비 수익률</div>
                                 <div className="text-3xl font-bold mt-1">
                                     {analyticsData?.profitRateOnInvestment ?? "0"}
-
                                 </div>
                                 <div
                                     className={cn(

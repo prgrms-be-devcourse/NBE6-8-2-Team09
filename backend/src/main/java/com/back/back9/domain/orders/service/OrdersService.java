@@ -46,6 +46,7 @@ public class OrdersService {
 
     @Transactional
     public OrderResponse executeTrade(Long walletId, OrdersRequest ordersRequest) {
+        log.info(String.valueOf(ordersRequest));
         Wallet wallet = walletRepository.findById(walletId)
                 .orElseThrow(() -> new IllegalArgumentException("지갑을 찾을 수 없습니다."));
         User user = wallet.getUser();

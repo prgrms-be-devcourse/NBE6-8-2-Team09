@@ -9,6 +9,7 @@ import com.back.back9.domain.tradeLog.repository.TradeLogRepository;
 import com.back.back9.domain.wallet.entity.Wallet;
 import com.back.back9.domain.wallet.repository.WalletRepository;
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -22,6 +23,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 
+@Slf4j
 @Service
 public class TradeLogService {
     private final TradeLogRepository tradeLogRepository;
@@ -43,15 +45,28 @@ public class TradeLogService {
     @Transactional(readOnly = true)
     public Optional<TradeLog> findLatest() {
         return tradeLogRepository.findFirstByOrderByIdDesc();
-
     }
+
+
     @Transactional(readOnly = true)
-    public List<TradeLogDto> findByWalletId(Long walletId) {
-        return tradeLogRepository.findByWalletId(walletId)
+    public List<TradeLogDto> findByWalletId(Long userId) {
+        // 1. userId로 wallet 조회
+        Wallet wallet = walletRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자 ID " + userId + "의 지갑을 찾을 수 없습니다."));
+
+        if (wallet != null) {
+            log.info("wallet: {}", wallet.getId());
+            log.info(tradeLogRepository.findByWalletId(wallet.getId()).toString());
+        }
+
+        // 2. walletId로 TradeLog 조회
+        return tradeLogRepository.findByWalletId(wallet.getId())  // ✅ 여기를 수정
                 .stream()
                 .map(TradeLogDto::from)
                 .collect(Collectors.toList());
     }
+
+
     @Transactional(readOnly = true)
     public List<TradeLogDto> findByFilter(Long walletId, TradeType type, Integer coinId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         Page<TradeLog> logs = tradeLogRepository.findByWalletIdFilter(walletId, type, coinId, startDate, endDate, pageable);
@@ -68,6 +83,9 @@ public class TradeLogService {
         Wallet wallet = walletRepository.findByUserId(userId)
                 .orElseThrow(() -> new EntityNotFoundException("사용자 ID " + userId + "의 지갑을 찾을 수 없습니다."));
 
+
+        log.info("wallet: {}", wallet.getId());
+        log.info("userid: {}", userId);
         // 지갑 ID를 Long 타입으로 직접 사용
         Page<TradeLog> logs = tradeLogRepository.findByWalletIdFilter(wallet.getId(), type, coinId, startDate, endDate, pageable);
 

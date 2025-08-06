@@ -199,6 +199,7 @@ public class WalletService {
     // 범용 거래 처리 메서드 (구매/판매)
     @Transactional
     public ResponseEntity<WalletResponse> processTransaction(Long userId, BuyCoinRequest request, TransactionType transactionType) {
+        log.info(String.valueOf(request.coinId()));
         // ID로 코인과 지갑 조회
         Coin coin = coinRepository.findById(request.coinId())
                 .orElseThrow(() -> new ErrorException(ErrorCode.COIN_NOT_FOUND, request.coinId()));
