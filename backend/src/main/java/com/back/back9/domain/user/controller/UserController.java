@@ -111,26 +111,33 @@ public class UserController {
     @DeleteMapping("/logout")
     @Operation(summary = "통합 로그아웃 (OAuth + JWT/쿠키)")
     public RsData<Void> logout(HttpServletRequest request, HttpServletResponse response) {
-        // 1. OAuth 세션 사용자 처리 - SecurityContextLogoutHandler로 세션 무효화
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
-            // OAuth 사용자의 경우 SecurityContext 정리
-            new org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler()
-                    .logout(request, response, authentication);
+            new SecurityContextLogoutHandler().logout(request, response, authentication);
             log.info("OAuth 세션 사용자 로그아웃 처리 완료");
         }
-
-        // 2. JWT/쿠키 사용자 처리 - 발급했던 동일 속성으로 쿠키 삭제
+    
+        // 1) JSESSIONID 만료
+        ResponseCookie jsession = ResponseCookie.from("JSESSIONID", "")
+            .path("/")
+            .maxAge(0)
+            .domain(".peuronteuendeu.onrender.com") 
+            .sameSite("None")
+            .secure(true)
+            .httpOnly(true)
+            .build();
+        response.addHeader(HttpHeaders.SET_COOKIE, jsession.toString());
+    
+        // 2) JWT 쿠키들 삭제
         rq.deleteCookie("apiKey");
         rq.deleteCookie("accessToken");
         rq.deleteCookie("role");
-
-        // 3. SecurityContext 명시적 클리어 (추가 보안)
+    
         SecurityContextHolder.clearContext();
-
         log.info("통합 로그아웃 처리 완료");
         return new RsData<>("200-1", "로그아웃 되었습니다.");
     }
+
 
     @GetMapping("/me")
     @Operation(summary = "내 정보 조회")
