@@ -67,14 +67,14 @@ export default function RegisterPage() {
                 username: values.username,
             });
 
-            // 회원가입 성공 처리 - ApiResponse 구조 고려
-            if (data && data.result) {
+            // 회원가입 성공 처리 - ApiResponse 구조에 맞게 수정
+            if (data && data.data) {
                 alert('회원가입이 완료되었습니다!');
                 setTimeout(() => {
                     router.replace("/login?message=register_success");
                 }, 500);
-            } else {
-                // 성공했지만 result가 없는 경우도 성공으로 처리
+            } else if (data) {
+                // 성공했지만 data가 없는 경우도 성공으로 처리
                 alert('회원가입이 완료되었습니다!');
                 setTimeout(() => {
                     router.replace("/login?message=register_success");

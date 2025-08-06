@@ -20,7 +20,7 @@ export const authApi = {
     // 로그아웃
     logout: () =>
         apiCall<ApiResponse<void>>('/v1/users/logout', {
-            method: 'POST',
+            method: 'DELETE',
         }),
 
     // 회원 탈퇴
