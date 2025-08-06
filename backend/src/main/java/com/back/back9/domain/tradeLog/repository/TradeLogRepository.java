@@ -16,16 +16,20 @@ public interface TradeLogRepository extends JpaRepository<TradeLog, Long> {
     Optional<TradeLog> findFirstByOrderByIdDesc();
     List<TradeLog> findByWalletId(Long walletId);
     Page<TradeLog> findByWalletId(Long walletId, Pageable pageable);
-    @Query("SELECT t FROM TradeLog t " +
-            "WHERE t.wallet.id = :walletId " +
-            "AND (:type IS NULL OR t.type = :type) " +
-            "AND (:coinId IS NULL OR t.coin.id = :coinId) " +
-            "AND (:startDate IS NULL OR t.createdAt >= :startDate) " +
-            "AND (:endDate IS NULL OR t.createdAt <= :endDate)")
-    Page<TradeLog> findByWalletIdFilter(@Param("walletId") Long walletId,
-                                        @Param("type") TradeType type,
-                                        @Param("coinId") Integer coinId,
-                                        @Param("startDate") LocalDateTime startDate,
-                                        @Param("endDate") LocalDateTime endDate,
-                                        Pageable pageable);
+    @Query(
+            "SELECT t FROM TradeLog t " +
+                    "WHERE t.wallet.id = :walletId " +
+                    "  AND t.type = COALESCE(:type, t.type) " +
+                    "  AND (:coinId IS NULL OR t.coin.id = :coinId) " +
+                    "  AND t.createdAt >= COALESCE(:startDate, t.createdAt) " +
+                    "  AND t.createdAt <= COALESCE(:endDate, t.createdAt)"
+    )
+    Page<TradeLog> findByWalletIdFilter(
+            @Param("walletId") Long walletId,
+            @Param("type")       TradeType       type,
+            @Param("coinId")     Integer         coinId,
+            @Param("startDate")  LocalDateTime   startDate,
+            @Param("endDate")    LocalDateTime   endDate,
+            Pageable             pageable
+    );
 }

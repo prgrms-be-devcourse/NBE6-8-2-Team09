@@ -5,27 +5,27 @@ import type { userRegisterDto, userLoginReqBody, userLoginResBody } from '@/lib/
 export const authApi = {
     // 회원가입
     register: (userData: userRegisterDto) =>
-        apiCall<ApiResponse<userLoginResBody>>('/users', {
+        apiCall<ApiResponse<userLoginResBody>>('/v1/users/register', {
             method: 'POST',
             body: JSON.stringify(userData),
         }),
 
     // 로그인
     login: (credentials: userLoginReqBody) =>
-        apiCall<ApiResponse<userLoginResBody>>('/users/login', {
+        apiCall<ApiResponse<userLoginResBody>>('/v1/users/login', {
             method: 'POST',
             body: JSON.stringify(credentials),
         }),
 
     // 로그아웃
     logout: () =>
-        apiCall<ApiResponse<void>>('/users/logout', {
-            method: 'POST',
+        apiCall<ApiResponse<void>>('/v1/users/logout', {
+            method: 'DELETE',
         }),
 
     // 회원 탈퇴
     deleteUser: (userLoginId: string) =>
-        apiCall<ApiResponse<void>>(`/users?userLoginId=${userLoginId}`, {
+        apiCall<ApiResponse<void>>(`/v1/users?userLoginId=${userLoginId}`, {
             method: 'DELETE',
         }),
 }

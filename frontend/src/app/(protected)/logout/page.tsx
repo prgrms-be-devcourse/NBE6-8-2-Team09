@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { apiCall } from "@/lib/api/client"; // apiCall import 추가
+import { authApi } from "@/lib/api/auth"; // authApi import로 변경
 
 export default function LogoutPage() {
     const router = useRouter();
@@ -10,10 +10,9 @@ export default function LogoutPage() {
     useEffect(() => {
         const logout = async () => {
             try {
-                // fetch 대신 apiCall 사용
-                await apiCall("/v1/users/logout", {
-                    method: "DELETE",
-                });
+                // authApi.logout 사용 (일관성 있는 API 호출)
+                await authApi.logout();
+                console.log('백엔드 로그아웃 성공');
             } catch (error) {
                 console.warn('백엔드 로그아웃 실패:', error);
             } finally {

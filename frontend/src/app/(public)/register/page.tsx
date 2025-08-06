@@ -10,7 +10,8 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { fadeInUp } from "@/lib/motion";
-import { apiCall } from "@/lib/api/client";
+import { authApi } from "@/lib/api/auth";
+import type { userRegisterDto } from '@/lib/types/user';
 
 const schema = z.object({
     userLoginId: z.string().min(1, "아이디를 입력해주세요."),
@@ -58,52 +59,51 @@ export default function RegisterPage() {
         setError(null);
 
         try {
-            // apiCall에 적절한 타입 지정
-            const data = await apiCall<{
-                result?: any;
-                message?: string;
-                resultCode?: string;
-            }>("/v1/users/register", {
-                method: "POST",
-                body: JSON.stringify(values),
+            // authApi.register 호출 - 정확한 타입 매핑
+            const data = await authApi.register({
+                userLoginId: values.userLoginId,
+                password: values.password,
+                confirmPassword: values.confirmPassword,
+                username: values.username,
             });
 
-            if (data && data.result) {
+            // 회원가입 성공 처리 - ApiResponse 구조에 맞게 수정
+            if (data && data.data) {
                 alert('회원가입이 완료되었습니다!');
                 setTimeout(() => {
                     router.replace("/login?message=register_success");
                 }, 500);
             } else if (data) {
-                // 백엔드 에러 코드에 따라 특정 필드에 에러 설정 (data가 null이 아닐 때만)
-                if (data.resultCode === "400-1" || data.message?.includes('아이디')) {
-                    // 아이디 중복 에러
-                    form.setError("userLoginId", {
-                        type: "server",
-                        message: data.message || "이미 존재하는 아이디입니다."
-                    });
-                } else if (data.resultCode === "400-2" || data.message?.includes('유저이름')) {
-                    // 유저이름 중복 에러
-                    form.setError("username", {
-                        type: "server",
-                        message: data.message || "이미 존재하는 유저이름입니다."
-                    });
-                } else if (data.resultCode === "400" || data.message?.includes('비밀번호 확인')) {
-                    // 비밀번호 불일치 에러
-                    form.setError("confirmPassword", {
-                        type: "server",
-                        message: data.message || "비밀번호 확인이 일치하지 않습니다."
-                    });
-                } else {
-                    // 기타 에러는 전체 에러로 표시
-                    setError(data.message || "회원가입에 실패했습니다. 다시 시도해주세요.");
-                }
-            } else {
-                // data가 null인 경우
-                setError("서버 응답이 없습니다. 다시 시도해주세요.");
+                // 성공했지만 data가 없는 경우도 성공으로 처리
+                alert('회원가입이 완료되었습니다!');
+                setTimeout(() => {
+                    router.replace("/login?message=register_success");
+                }, 500);
             }
-        } catch (error) {
+
+        } catch (error: any) {
             console.error('회원가입 요청 에러:', error);
-            setError("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+
+            // 에러 메시지에 따라 특정 필드에 에러 설정
+            if (error.message?.includes('아이디') || error.message?.includes('ID')) {
+                form.setError("userLoginId", {
+                    type: "server",
+                    message: error.message || "이미 존재하는 아이디입니다."
+                });
+            } else if (error.message?.includes('유저이름') || error.message?.includes('이름')) {
+                form.setError("username", {
+                    type: "server",
+                    message: error.message || "이미 존재하는 유저이름입니다."
+                });
+            } else if (error.message?.includes('비밀번호')) {
+                form.setError("password", {
+                    type: "server",
+                    message: error.message || "비밀번호 오류입니다."
+                });
+            } else {
+                // 기타 에러는 전체 에러로 표시
+                setError(error.message || "회원가입에 실패했습니다. 다시 시도해주세요.");
+            }
         } finally {
             setIsLoading(false);
         }
