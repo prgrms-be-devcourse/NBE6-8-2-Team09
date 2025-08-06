@@ -15,11 +15,11 @@ type MainNavProps = React.ComponentPropsWithoutRef<"header"> & {
 };
 
 export function MainNav({
-    className,
-    innerClassName,
-    links,
-    ...props
-}: MainNavProps) {
+                            className,
+                            innerClassName,
+                            links,
+                            ...props
+                        }: MainNavProps) {
     const pathname = usePathname();
     const [isLoggedIn, setIsLoggedIn] = React.useState(false);
     const [mounted, setMounted] = React.useState(false);
@@ -27,7 +27,7 @@ export function MainNav({
     // 서버와 클라이언트에서 동일한 기본 링크 사용
     const defaultLinks: NavLink[] = [
         { href: "/", label: "Home" },
-        { href: "/dashboard", label: "Dashboard" },
+        { href: "/exchange", label: "Dashboard" },
         { href: "/wallet", label: "Wallet" },
         { href: "/transactions", label: "Transactions" },
         { href: "/analytics", label: "Analytics" },
@@ -52,7 +52,7 @@ export function MainNav({
 
         window.addEventListener('focus', checkLoginStatus);
         const interval = setInterval(checkLoginStatus, 30000);
-        
+
         return () => {
             window.removeEventListener('focus', checkLoginStatus);
             clearInterval(interval);
