@@ -49,6 +49,17 @@ spring:
     resources:
       add-mappings: true
 
+# 프로덕션용 OAuth2 쿠키 설정 (크로스 도메인)
+app:
+  oauth2:
+    cookie-domain: ${OAUTH2_COOKIE_DOMAIN:}
+    frontend-url: ${FRONTEND_URL:https://peuronteuendeu.onrender.com}
+  cookie:
+    same-site: None
+    secure: true
+    domain: ${COOKIE_DOMAIN:.onrender.com}
+    max-age-seconds: 31536000
+
 logging:
   level:
     org.hibernate.orm.jdbc.bind: WARN
@@ -57,18 +68,6 @@ logging:
     org.springframework.security.oauth2: DEBUG
     org.springframework.security.web: DEBUG
     root: INFO
-
-# 프로덕션용 OAuth2 쿠키 설정 (크로스 도메인 설정)
-app:
-  oauth2:
-    cookie-domain: ${OAUTH2_COOKIE_DOMAIN:}
-    frontend-url: ${FRONTEND_URL:https://peuronteuendeu.onrender.com}
-  cookie:
-    same-site: None
-    secure: true
-    domain: .onrender.com
-
-
 
 server:
   forward-headers-strategy: framework

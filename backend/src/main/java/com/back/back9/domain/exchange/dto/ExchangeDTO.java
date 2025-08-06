@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.ToString;
 
 import java.math.BigDecimal;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class ExchangeDTO {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private final LocalDateTime timestamp;
+    private final long timestamp;
     private final LocalDateTime time;
     private final String symbol;
     private final BigDecimal open;
@@ -23,10 +24,12 @@ public class ExchangeDTO {
     private final BigDecimal low;
     private final BigDecimal close;
     private final double volume;
+    @Setter
+    private String name;
 
     @JsonCreator
     public ExchangeDTO(
-            @JsonProperty("timestamp") LocalDateTime timestamp,
+            @JsonProperty("timestamp") long timestamp,
             @JsonProperty("candle_date_time_kst") LocalDateTime time,
             @JsonProperty("market") String symbol,
             @JsonProperty("opening_price") BigDecimal open,

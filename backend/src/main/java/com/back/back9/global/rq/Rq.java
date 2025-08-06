@@ -88,7 +88,7 @@ public class Rq {
         ResponseCookie.ResponseCookieBuilder b = ResponseCookie
                 .from(name, delete ? "" : value)
                 .httpOnly(httpOnly)
-                .secure(cookieSecure)
+                .secure(cookieSecure && isHttps())  // HTTPS일 때만 secure=true
                 .path((path == null || path.isBlank()) ? "/" : path)
                 .sameSite(cookieSameSite);
 
