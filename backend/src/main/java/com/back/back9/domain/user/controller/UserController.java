@@ -5,6 +5,7 @@ import com.back.back9.domain.user.entity.User;
 import com.back.back9.domain.user.service.UserService;
 import com.back.back9.global.rq.Rq;
 import com.back.back9.global.rsData.RsData;
+import com.back.back9.global.security.HttpCookieOAuth2AuthorizationRequestRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -114,13 +115,14 @@ public class UserController {
     @DeleteMapping("/logout")
     @Operation(summary = "통합 로그아웃 (OAuth + JWT/쿠키)")
     public RsData<Void> logout(HttpServletRequest request, HttpServletResponse response) {
+        // 1) OAuth 세션 무효화
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.isAuthenticated()) {
             new SecurityContextLogoutHandler().logout(request, response, authentication);
             log.info("OAuth 세션 사용자 로그아웃 처리 완료");
         }
 
-        // 1) JSESSIONID 만료
+        // 2) JSESSIONID 만료
         ResponseCookie jsession = ResponseCookie.from("JSESSIONID", "")
                 .path("/")
                 .maxAge(0)
@@ -131,13 +133,19 @@ public class UserController {
                 .build();
         response.addHeader(HttpHeaders.SET_COOKIE, jsession.toString());
 
-        // 2) JWT 쿠키들 삭제
+        // 3) JWT 쿠키들 삭제
         rq.deleteCookie("apiKey");
         rq.deleteCookie("accessToken");
         rq.deleteCookie("role");
 
+        // 4) OAuth2 요청용 쿠키들 삭제
+        rq.deleteCookie(HttpCookieOAuth2AuthorizationRequestRepository.OAUTH2_AUTH_REQUEST_COOKIE_NAME);  // "oauth2_auth_request"
+        rq.deleteCookie(HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME); // e.g. "redirect_uri"
+
+        // 5) SecurityContext 클리어
         SecurityContextHolder.clearContext();
         log.info("통합 로그아웃 처리 완료");
+
         return new RsData<>("200-1", "로그아웃 되었습니다.");
     }
 
