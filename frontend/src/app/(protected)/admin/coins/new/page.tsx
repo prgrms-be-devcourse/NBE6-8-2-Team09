@@ -73,8 +73,12 @@ export default function AdminCoinNewPage() {
         setLoading(true);
         setError(null);
         try {
-            const data = await coinApi.getCoins();
-            console.log("서버 응답:", data);
+            const response = await coinApi.getCoins();
+            console.log("서버 응답:", response);
+
+            // apiCall로 변경된 후 ApiResponse 구조 처리
+            const data = response?.data || response; // data 속성이 있으면 사용, 없으면 응답 자체 사용
+
             console.log("첫 번째 코인:", data[0]); // 확인용
             console.log("첫 번째 코인의 필드들:", Object.keys(data[0] || {}));
             console.log("생성일 필드 값:", data[0]?.createdAt);
