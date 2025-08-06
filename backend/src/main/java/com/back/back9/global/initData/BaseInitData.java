@@ -1,11 +1,9 @@
 package com.back.back9.global.initData;
 
-import com.back.back9.domain.user.repository.UserRepository;
-import com.back.back9.domain.wallet.repository.WalletRepository;
-import com.back.back9.domain.wallet.repository.CoinAmountRepository;
-
 import com.back.back9.domain.coin.repository.CoinRepository;
-
+import com.back.back9.domain.user.repository.UserRepository;
+import com.back.back9.domain.wallet.repository.CoinAmountRepository;
+import com.back.back9.domain.wallet.repository.WalletRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;

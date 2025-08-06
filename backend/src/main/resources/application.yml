@@ -29,3 +29,9 @@ custom:
 app:
   oauth2:
     cookie-domain: ${OAUTH2_COOKIE_DOMAIN:}
+  cookie:
+    same-site: Lax
+    secure: true
+    domain: ""
+    max-age-seconds: 31536000
+

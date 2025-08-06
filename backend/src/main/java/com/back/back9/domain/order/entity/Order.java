@@ -4,7 +4,10 @@ import com.back.back9.domain.coin.entity.Coin;
 import com.back.back9.domain.tradeLog.entity.TradeType;
 import com.back.back9.domain.user.entity.User;
 import com.back.back9.global.jpa.entity.BaseEntity;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.ManyToOne;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

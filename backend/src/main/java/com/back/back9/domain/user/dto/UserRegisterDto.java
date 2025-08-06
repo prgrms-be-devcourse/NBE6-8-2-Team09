@@ -1,7 +1,6 @@
 package com.back.back9.domain.user.dto;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 
 public record UserRegisterDto(
         @NotBlank

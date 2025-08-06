@@ -47,3 +47,7 @@ app:
   oauth2:
     cookie-domain: ${OAUTH2_COOKIE_DOMAIN:}
     frontend-url: ${FRONTEND_URL:http://localhost:8888}
+  cookie:
+    same-site: Lax
+    secure: false
+    domain: localhost  # 추가: 모든 localhost 포트에서 쿠키 공유

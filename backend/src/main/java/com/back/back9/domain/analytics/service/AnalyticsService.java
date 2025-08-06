@@ -2,7 +2,6 @@ package com.back.back9.domain.analytics.service;
 
 import com.back.back9.domain.analytics.dto.ProfitAnalysisDto;
 import com.back.back9.domain.analytics.dto.ProfitRateResponse;
-import com.back.back9.domain.coin.entity.Coin;
 import com.back.back9.domain.coin.service.CoinService;
 import com.back.back9.domain.exchange.dto.CoinPriceResponse;
 import com.back.back9.domain.exchange.service.ExchangeService;
@@ -60,7 +59,7 @@ public class AnalyticsService {
      *   5-5. 분석 결과 객체에 저장
      */
     @Transactional(readOnly = true)
-    public ProfitRateResponse calculateRealizedProfitRates(int walletId) {
+    public ProfitRateResponse calculateRealizedProfitRates(Long walletId) {
         // 지갑에 해당하는 모든 트레이드 로그 조회 (매수, 매도, 충전 포함)
         List<TradeLogDto> tradeLogs = tradeLogService.findByWalletId(walletId);
 
@@ -165,9 +164,9 @@ public class AnalyticsService {
      * 5. 전체 자산 기준 수익률 계산을 위해 총 투자금액, 총 평가금액 누적
      */
     @Transactional(readOnly = true)
-    public ProfitRateResponse calculateUnRealizedProfitRates(int walletId) {
+    public ProfitRateResponse calculateUnRealizedProfitRates(Long walletId) {
         // 사용자 지갑 내 보유 코인 정보 조회 (코인 ID, 수량, 평균 매수가 등 포함)
-        List<CoinHoldingInfo> coinHoldingInfos = walletService.getCoinHoldingsByUserId((long) walletId);
+        List<CoinHoldingInfo> coinHoldingInfos = walletService.getCoinHoldingsByUserId(walletId);
 
         List<ProfitAnalysisDto> coinAnalytics = new ArrayList<>();
 
