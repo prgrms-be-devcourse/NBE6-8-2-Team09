@@ -24,12 +24,16 @@ export default function MyPage() {
     useEffect(() => {
         const fetchMyInfo = async () => {
             try {
-                const data = await apiCall(`/v1/users/me`);
+                // 백엔드 API 응답 구조에 맞는 타입 정의
+                const data = await apiCall<{
+                    result: UserInfo;
+                    message?: string;
+                }>(`/v1/users/me`);
 
                 if (data && data.result) {
                     setUser(data.result);
                 } else {
-                    setError(data.message || "유저 정보를 불러올 수 없습니다.");
+                    setError(data?.message || "유저 정보를 불러올 수 없습니다.");
                 }
             } catch (error: any) {
                 console.error("유저 정보 조회 실패:", error);

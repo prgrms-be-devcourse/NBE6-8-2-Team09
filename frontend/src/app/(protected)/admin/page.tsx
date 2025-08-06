@@ -11,7 +11,15 @@ export default function AdminPage() {
         const checkAdminAccess = async () => {
             try {
                 // /me API 호출로 사용자 정보 확인
-                const response = await apiCall<any>("/v1/users/me");
+                const response = await apiCall<{
+                    result: {
+                        id: number;
+                        userLoginId: string;
+                        username: string;
+                        role?: string;
+                    };
+                    message?: string;
+                }>("/v1/users/me");
                 const user = response?.result;
 
                 // 관리자 권한 확인 (백엔드에서 role 확인)

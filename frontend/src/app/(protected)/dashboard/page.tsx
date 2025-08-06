@@ -36,7 +36,14 @@ export default function DashboardPage() {
                 console.log("=== 대시보드: /v1/users/me 호출 ===");
 
                 // fetch 대신 apiCall 사용
-                const response = await apiCall<MeResponse>("/v1/users/me");
+                const response = await apiCall<{
+                    result: {
+                        id: number;
+                        userLoginId: string;
+                        username: string;
+                    };
+                    message?: string;
+                }>("/v1/users/me");
                 console.log("API 응답:", response);
 
                 if (response && response.result) {

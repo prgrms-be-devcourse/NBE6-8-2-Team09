@@ -83,7 +83,14 @@ export default function TransactionsPage() {
         const checkAuthAndFetchData = async () => {
             try {
                 // API 클라이언트를 사용하여 일관된 URL과 설정으로 인증 확인
-                const response = await apiCall<any>('/v1/users/me');
+                const response = await apiCall<{
+                    result: {
+                        id: number;
+                        userLoginId: string;
+                        username: string;
+                    };
+                    message?: string;
+                }>('/v1/users/me');
                 if (response && (response as any).result?.id) {
                     const currentUserId = (response as any).result.id;
                     setIsAuthenticated(true);
