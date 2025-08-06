@@ -61,8 +61,9 @@ public class RedisInitializer {
             while (fetched < target) {
                 try {
                     int count = Math.min(FETCH_BATCH_SIZE, target - fetched);
-                    fetcher.fetchUntil(interval, count);
-                    fetched += count;
+                    int inserted = fetcher.fetchUntil(interval, count);
+
+                    fetched += inserted;
                     Thread.sleep(BETWEEN_CALL_DELAY_MS);
                 } catch (HttpClientErrorException.TooManyRequests e) {
                     log.warn("⏸️ 429 Too Many Requests 발생: 3분간 전체 수집 중단 후 재시도");
@@ -72,10 +73,9 @@ public class RedisInitializer {
                     return;
                 }
             }
-
             log.info("✅ {} 캔들 {}개 등록 완료 (목표: {})", interval.name(), fetched, target);
         }
-
+        redisService.sortAndRewrite();
         log.info("🎉 전체 캔들 초기화 완료");
     }
 
