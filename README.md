@@ -53,10 +53,41 @@
 <br>ex) ``
 git clone project-url .``
 
-2. ngrok을 사용해 로컬을 외부와 연결
-3. 받은 프로젝트를 인텔리제이로 열어 gradle 빌드 실행
-4. docker 실행 후 src/resources/docker-compose.yml 실행  
-5. 프론트엔드 서버를 vercel을 통해 열어 접속한다
+2. 빌드 실행 <br> 
+### Unix / macOS
+```bash
+cd project_dir/backend
+
+# 1. Clean & Build
+./gradlew clean build
+
+# 2. Run the JAR
+java -jar build/libs/your-app-name-<version>.jar
+
+# 3. (선택) 개발 모드로 바로 실행
+./gradlew bootRun
+
+```
+
+### Window
+```
+cd project_dir\backend
+
+# 1. Clean & Build
+gradlew.bat clean build
+
+# 2. Run the JAR
+java -jar build\libs\your-app-name-<version>.jar
+
+# 3. (선택) 개발 모드로 바로 실행
+gradlew.bat bootRun
+
+```
+3. docker 실행 후 src/resources/docker-compose.yml 실행  
+4. nginx를 다음 명령어를 실행
+```
+docker run -d --name nginx-local -p 8888:8888 -v "project-dir-url\frontend\docker\nginx-local.conf:/etc/nginx/nginx.conf" nginx:alpine
+```
 
 #### 주의사항
 - 백엔드 설정파일에 환경변수가 들어가야 함  
@@ -70,12 +101,6 @@ REDIS_HOST=localhost
 REDIS_PORT=6379
 ```
 
-- 프론트 엔드 설정파일에 백엔드 서버의 도메인이 들어가 있어야 함<br>
-  'frontend/.env'
-
-```env
-NEXT_PUBLIC_API_URL=http://localhost:8080
-```
 
 ## 문의
 - 이정무(거래소 정보 API 연동, 팀장)

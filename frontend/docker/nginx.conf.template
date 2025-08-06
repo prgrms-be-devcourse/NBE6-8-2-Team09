@@ -33,19 +33,52 @@ server {
     }
 
     location /api/ {
-        proxy_pass             https://back9-backend-latest.onrender.com;
-        proxy_http_version     1.1;
-        proxy_set_header       Host back9-backend-latest.onrender.com;
-        proxy_set_header       X-Real-IP $remote_addr;
-        proxy_set_header       X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header       X-Forwarded-Proto $scheme;
-        proxy_ssl_server_name  on;
-        proxy_ssl_protocols    TLSv1.2 TLSv1.3;
-        proxy_ssl_ciphers      HIGH:!aNULL:!MD5;
-        proxy_read_timeout     60s;       
-        proxy_connect_timeout  5s;             
-        proxy_redirect         off;           
-    }
+           # 1) 백엔드가 뱉는 중복 CORS 헤더 삭제
+           proxy_hide_header    Access-Control-Allow-Origin;
+           proxy_hide_header    Access-Control-Allow-Credentials;
+
+           # 2) 원본 Set-Cookie 헤더 그대로 전달
+           proxy_pass_header    Set-Cookie;
+
+           # 3) 쿠키 도메인 재작성
+           proxy_cookie_domain  back9-backend-latest.onrender.com    .peuronteuendeu.onrender.com;
+           proxy_cookie_domain  .back9-backend-latest.onrender.com   .peuronteuendeu.onrender.com;
+
+           # 4) Secure 및 SameSite=None 플래그 강제
+           #    (Nginx 1.19.3+ 에서만 동작)
+           proxy_cookie_flags   ~ Secure;
+           proxy_cookie_flags   ~ samesite=None;
+
+           # 5) Nginx 레이어에서 단일값 CORS 헤더 설정
+           add_header           Access-Control-Allow-Origin   $http_origin                 always;
+           add_header           Access-Control-Allow-Credentials  true                      always;
+           add_header           Access-Control-Allow-Methods     "GET, POST, PUT, DELETE, OPTIONS" always;
+           add_header           Access-Control-Allow-Headers     "Authorization,Content-Type"      always;
+
+           # 6) Preflight 요청 바로 응답
+           if ($request_method = OPTIONS) {
+               return 204;
+           }
+
+           # 7) 실제 백엔드로 프록시
+           proxy_pass            https://back9-backend-latest.onrender.com;
+           proxy_http_version    1.1;
+
+           # 8) 백엔드로 전달할 헤더
+           proxy_set_header      Host              back9-backend-latest.onrender.com;
+           proxy_set_header      X-Real-IP         $remote_addr;
+           proxy_set_header      X-Forwarded-For   $proxy_add_x_forwarded_for;
+           proxy_set_header      X-Forwarded-Proto $scheme;
+
+           # 9) SSL & 타임아웃 설정
+           proxy_ssl_server_name  on;
+           proxy_ssl_protocols    TLSv1.2 TLSv1.3;
+           proxy_ssl_ciphers      HIGH:!aNULL:!MD5;
+           proxy_read_timeout     60s;
+           proxy_connect_timeout  5s;
+
+           proxy_redirect         off;
+       }
 
     location / {
         proxy_pass         http://app;

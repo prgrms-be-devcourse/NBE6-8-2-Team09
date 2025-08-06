@@ -34,7 +34,7 @@ export default function LoginPage() {
                 if (response) {
                     // 이미 로그인되어 있으면 대시보드로 리다이렉트
                     console.log('이미 로그인됨 - 대시보드로 이동');
-                    router.replace("/dashboard");
+                    router.replace("/exchange");
                     return;
                 }
 

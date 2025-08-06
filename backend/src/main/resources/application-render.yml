@@ -57,8 +57,8 @@ app:
   cookie:
     same-site: None
     secure: true
-    domain: ${COOKIE_DOMAIN:.onrender.com}
-    max-age-seconds: 31536000
+    domain: ${COOKIE_DOMAIN:.peuronteuendeu.onrender.com}
+    max-age-seconds: 3600
 
 logging:
   level:
