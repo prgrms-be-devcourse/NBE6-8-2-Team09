@@ -103,7 +103,7 @@ export default function TransactionsPage() {
             const response = await analyticsApi.getUserAnalyticsUnrealized(userId);
             console.log("평가 수익률 응답:", response);
             if (response) {
-                setAnalyticsData(response);
+                setAnalyticsData(response as any);
             }
         } catch (error) {
             console.error("평가 수익률 조회 실패:", error);
