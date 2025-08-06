@@ -1,6 +1,6 @@
-package com.back.back9.domain.order.entity;
+package com.back.back9.domain.orders.entity;
 
-public enum OrderStatus {
+public enum OrdersStatus {
     PENDING,  // 주문 대기 중
     FILLED,   // 주문 체결 완료
     CANCELLED, // 주문 취소됨, 사용자가 실제 취소
