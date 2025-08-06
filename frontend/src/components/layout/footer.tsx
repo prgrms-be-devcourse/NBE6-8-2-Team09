@@ -12,7 +12,7 @@ type FooterProps = React.ComponentPropsWithoutRef<"footer"> & {
 export function Footer({ className, innerClassName, ...props }: FooterProps) {
     return (
         <footer
-            className={cn("bg-blue-600 text-white mt-16", className)}
+            className={cn("bg-blue-600 text-white mt-8", className)}
             {...props}
         >
             {/* PageShell에서 이미 max-width를 관리하므로 여기서는 제거 */}

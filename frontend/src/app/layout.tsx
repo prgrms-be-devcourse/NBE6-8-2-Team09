@@ -1,7 +1,8 @@
 // src/app/layout.tsx
 import "./globals.css";
+import React from "react";
 
-export const metadata = {
+export const metadata: { title: string; description: string } = {
     title: "Back9 Coin",
     description: "투자의 기준을 바꾸다.",
 };

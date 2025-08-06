@@ -32,7 +32,7 @@ const stagger = (delay = 0.08) => ({
 export function Hero({
                          title = "Back9 Coin",
                          subtitle = "투자의 기준을 바꾸다. 실시간 지갑, 거래 내역, 관리자 전용 코인 등록까지.",
-                         primaryCta = { href: "/dashboard", label: "대시보드 보러가기" },
+                         primaryCta = { href: "/exchange", label: "거래소 보러가기" },
                          secondaryCta = { href: "/register", label: "회원가입" },
                          className,
                          innerClassName,

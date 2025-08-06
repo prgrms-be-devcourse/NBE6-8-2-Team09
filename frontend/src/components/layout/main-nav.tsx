@@ -10,7 +10,7 @@ type NavLink = { href: string; label: string };
 
 const defaultLinks: NavLink[] = [
     { href: "/", label: "Home" },
-    { href: "/dashboard", label: "Dashboard" },
+    { href: "/exchange", label: "Dashboard" },
     { href: "/wallet", label: "Wallet" },
     { href: "/transactions", label: "Transactions" },
     { href: "/admin/coins/new", label: "Admin" },

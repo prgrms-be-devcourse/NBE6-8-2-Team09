@@ -22,8 +22,9 @@ public class UpbitRestCandleFetcher {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final int MAX_PER_REQUEST = 200;
 
-    public void fetchInterval(CandleInterval interval, int count) {
+    public int fetchInterval(CandleInterval interval, int count) {
         List<String> markets = coinListProvider.getMarketCodes();
+        int totalSaved = 0;
 
         for (String market : markets) {
             int i = 0;
@@ -34,9 +35,11 @@ public class UpbitRestCandleFetcher {
                     String url = String.format("https://api.upbit.com/v1/candles/%s?market=%s&count=%d",
                             interval.getSuffix(), market, size);
 
-                    String json = rest.getForObject(url, String.class); // REST 요청
-                    JsonNode array = mapper.readTree(json);             // 파싱
-                    redisService.saveCandleArray(interval, market, array);
+                    String json = rest.getForObject(url, String.class);
+                    JsonNode array = mapper.readTree(json);
+
+                    int saved = redisService.saveCandleArray(interval, market, array);
+                    totalSaved += saved;
 
                     if (interval == CandleInterval.SEC && i == 0 && !array.isEmpty()) {
                         redisService.saveLatestCandle(market, array.get(0));
@@ -51,28 +54,32 @@ public class UpbitRestCandleFetcher {
                     if (message.contains("429") || message.toLowerCase().contains("too many request")) {
                         System.err.println("🕒 429 Too Many Requests - 1분간 대기 후 재시도");
                         try {
-                            Thread.sleep(60_000); // 1분 대기
+                            Thread.sleep(60_000);
                         } catch (InterruptedException ie) {
                             Thread.currentThread().interrupt();
-                            return; // 인터럽트 시 종료
+                            return totalSaved;
                         }
                     } else {
-                        // 다른 오류는 그냥 스킵하고 다음 요청 진행
                         i += MAX_PER_REQUEST;
                     }
                 }
             }
         }
+
+        return totalSaved;
     }
 
-    public void fetchUntil(CandleInterval interval, int requiredSize) {
+    public int fetchUntil(CandleInterval interval, int requiredSize) {
+        int total = 0;
         for (String market : coinListProvider.getMarketCodes()) {
             int current = redisService.countCandles(interval, market);
             if (current >= requiredSize) continue;
 
             int toFetch = requiredSize - current;
-            fetchInterval(interval, toFetch);
+            int saved = fetchInterval(interval, toFetch);
+            total += saved;
         }
+        return total;
     }
 
     private void delay() {

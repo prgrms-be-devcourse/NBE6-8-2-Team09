@@ -28,10 +28,12 @@
     "lucide-react": "^0.525.0",
     "next": "15.4.3",
     "react": "19.1.0",
+    "react-apexcharts": "^1.7.0",
     "react-day-picker": "^9.8.0",
     "react-dom": "19.1.0",
     "react-hook-form": "^7.61.1",
     "recharts": "^3.1.0",
+    "resize-observer-polyfill": "^1.5.1",
     "tailwind-merge": "^3.3.1",
     "zod": "^4.0.10"
   },
