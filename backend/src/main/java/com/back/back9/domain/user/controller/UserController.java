@@ -16,11 +16,12 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.function.BiConsumer;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -122,25 +123,35 @@ public class UserController {
             log.info("OAuth 세션 사용자 로그아웃 처리 완료");
         }
 
+        // --- 공통 삭제용 헤더 생성 헬퍼 람다 ---
+        BiConsumer<String, String> deleteCookieBoth = (name, path) -> {
+            // 1) 호스트-온리 삭제
+            String base = String.format("%s=; Path=%s; Max-Age=0; SameSite=None; Secure; HttpOnly", name, path);
+            response.addHeader(HttpHeaders.SET_COOKIE, base);
+            // 2) 도메인 지정 삭제
+            response.addHeader(
+                    HttpHeaders.SET_COOKIE,
+                    base + "; Domain=.peuronteuendeu.onrender.com"
+            );
+        };
+
         // 2) JSESSIONID 만료
-        ResponseCookie jsession = ResponseCookie.from("JSESSIONID", "")
-                .path("/")
-                .maxAge(0)
-                .domain(".peuronteuendeu.onrender.com")
-                .sameSite("None")
-                .secure(true)
-                .httpOnly(true)
-                .build();
-        response.addHeader(HttpHeaders.SET_COOKIE, jsession.toString());
+        deleteCookieBoth.accept("JSESSIONID", "/");
 
         // 3) JWT 쿠키들 삭제
-        rq.deleteCookie("apiKey");
-        rq.deleteCookie("accessToken");
-        rq.deleteCookie("role");
+        deleteCookieBoth.accept("apiKey", "/");
+        deleteCookieBoth.accept("accessToken", "/");
+        deleteCookieBoth.accept("role", "/");
 
         // 4) OAuth2 요청용 쿠키들 삭제
-        rq.deleteCookie(HttpCookieOAuth2AuthorizationRequestRepository.OAUTH2_AUTH_REQUEST_COOKIE_NAME);  // "oauth2_auth_request"
-        rq.deleteCookie(HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME); // e.g. "redirect_uri"
+        deleteCookieBoth.accept(
+                HttpCookieOAuth2AuthorizationRequestRepository.OAUTH2_AUTH_REQUEST_COOKIE_NAME,
+                "/"
+        );
+        deleteCookieBoth.accept(
+                HttpCookieOAuth2AuthorizationRequestRepository.REDIRECT_URI_PARAM_COOKIE_NAME,
+                "/"
+        );
 
         // 5) SecurityContext 클리어
         SecurityContextHolder.clearContext();
@@ -148,6 +159,7 @@ public class UserController {
 
         return new RsData<>("200-1", "로그아웃 되었습니다.");
     }
+
 
 
     @GetMapping("/me")
