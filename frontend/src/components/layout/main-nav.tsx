@@ -9,15 +9,6 @@ import * as React from "react";
 
 type NavLink = { href: string; label: string };
 
-const defaultLinks: NavLink[] = [
-    { href: "/", label: "Home" },
-    { href: "/dashboard", label: "Dashboard" },
-    { href: "/wallet", label: "Wallet" },
-    { href: "/transactions", label: "Transactions" },
-    { href: "/analytics", label: "Analytics" },
-    { href: "/admin/coins/new", label: "Admin" },
-];
-
 type MainNavProps = React.ComponentPropsWithoutRef<"header"> & {
     innerClassName?: string;
     links?: NavLink[];
@@ -26,33 +17,40 @@ type MainNavProps = React.ComponentPropsWithoutRef<"header"> & {
 export function MainNav({
     className,
     innerClassName,
-    links = defaultLinks,
+    links,
     ...props
 }: MainNavProps) {
     const pathname = usePathname();
     const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+    const [mounted, setMounted] = React.useState(false);
+
+    // 서버와 클라이언트에서 동일한 기본 링크 사용
+    const defaultLinks: NavLink[] = [
+        { href: "/", label: "Home" },
+        { href: "/dashboard", label: "Dashboard" },
+        { href: "/wallet", label: "Wallet" },
+        { href: "/transactions", label: "Transactions" },
+        { href: "/analytics", label: "Analytics" },
+        { href: "/admin/coins/new", label: "Admin" },
+    ];
+
+    const navigationLinks = links || defaultLinks;
 
     React.useEffect(() => {
+        setMounted(true);
+
         const checkLoginStatus = async () => {
             try {
-                // API 클라이언트를 사용하여 일관된 URL과 설정으로 로그인 상태 확인
                 const response = await apiCall('/v1/users/me');
-
                 setIsLoggedIn(!!response);
-                console.log('🔐 로그인 상태:', !!response);
             } catch (error) {
-                console.error('로그인 상태 확인 실패:', error);
                 setIsLoggedIn(false);
             }
         };
-        
-        // 초기 체크
+
         checkLoginStatus();
-        
-        // 페이지 포커스 시에도 체크
+
         window.addEventListener('focus', checkLoginStatus);
-        
-        // 주기적 체크 (30초마다)
         const interval = setInterval(checkLoginStatus, 30000);
         
         return () => {
@@ -70,18 +68,17 @@ export function MainNav({
                     innerClassName
                 )}
             >
-
                 <Link href="/" className="flex items-center gap-2 font-bold text-amber-600">
-                    <img 
-                        src="/images/back9-coin-logo.PNG" 
-                        alt="BACK9 Coin Logo" 
+                    <img
+                        src="/images/back9-coin-logo.PNG"
+                        alt="BACK9 Coin Logo"
                         className="w-8 h-8 object-contain"
                     />
                     Back9 Coin
                 </Link>
 
-                <nav className="hidden md:flex gap-6">
-                    {links.map((l) => {
+                <nav className="hidden md:flex gap-6" suppressHydrationWarning>
+                    {navigationLinks.map((l) => {
                         const active = pathname === l.href;
                         return (
                             <Link
@@ -93,6 +90,7 @@ export function MainNav({
                                 )}
                                 aria-current={active ? "page" : undefined}
                                 prefetch
+                                suppressHydrationWarning
                             >
                                 {l.label}
                             </Link>
@@ -100,9 +98,9 @@ export function MainNav({
                     })}
                 </nav>
 
-                <Button asChild variant="outline" size="sm">
-                    <Link href={isLoggedIn ? "/user" : "/login"}>
-                        {isLoggedIn ? "MyPage" : "Login"}
+                <Button asChild variant="outline" size="sm" suppressHydrationWarning>
+                    <Link href={mounted ? (isLoggedIn ? "/user" : "/login") : "/login"} suppressHydrationWarning>
+                        {mounted ? (isLoggedIn ? "MyPage" : "Login") : "Login"}
                     </Link>
                 </Button>
             </div>

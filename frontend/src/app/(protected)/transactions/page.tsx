@@ -75,15 +75,17 @@ export default function TransactionsPage() {
     const [dateError, setDateError] = useState("");
     const [isStartOpen, setIsStartOpen] = useState(false);
     const [isEndOpen, setIsEndOpen] = useState(false);
-    const userId = 1;
+    const [userId, setUserId] = useState<number | null>(null);
 
     useEffect(() => {
         const checkAuth = async () => {
             try {
                 // API 클라이언트를 사용하여 일관된 URL과 설정으로 인증 확인
-                const response = await apiCall('/v1/users/me');
-                if (response) {
+                const response = await apiCall<any>('/v1/users/me');
+                if (response && (response as any).result?.id) {
                     setIsAuthenticated(true);
+                    setUserId((response as any).result.id);
+                    console.log('현재 사용자 ID:', (response as any).result.id);
                 } else {
                     router.replace("/login");
                     return;
@@ -100,12 +102,14 @@ export default function TransactionsPage() {
     }, [router]);
 
     useEffect(() => {
-        if (isAuthenticated) {
+        if (isAuthenticated && userId) {
            fetchTradeLog();
         }
-    }, [isAuthenticated]);
+    }, [isAuthenticated, userId]);
 
     const fetchTradeLog = async () => {
+        if (!userId) return;
+        
         try {
             setIsLoading(true);
             const response = await tradeLogApi.getUserTradeLogs(userId);
@@ -147,6 +151,8 @@ export default function TransactionsPage() {
     };
 
     const handleFilter = async () => {
+        if (!userId) return;
+        
         const params: Record<string, any> = {};
 
         if (filters.startDate) {
@@ -193,13 +199,13 @@ export default function TransactionsPage() {
             padded
             innerClassName={cn("min-h-[60vh] flex flex-col items-center justify-center text-center space-y-6")}
         >
-            <motion.div className="container py-8 space-y-6" variants={stagger(0.1)} initial="hidden" animate="show">
-                <motion.h1 variants={fadeInUp} className="text-2xl font-bold w-full text-left">
+            <motion.div className="container py-8 space-y-6" variants={stagger(0.1)} initial="hidden" animate="show" suppressHydrationWarning>
+                <motion.h1 variants={fadeInUp} className="text-2xl font-bold w-full text-left" suppressHydrationWarning>
                     가상화폐 주문 내역 페이지
                 </motion.h1>
 
                 {/* 필터 */}
-                <motion.div variants={fadeInUp}>
+                <motion.div variants={fadeInUp} suppressHydrationWarning>
                     <div className="bg-white p-4 rounded-lg border shadow-sm mb-6">
                         <div className="flex flex-wrap items-center justify-around gap-4">
                             {/* 날짜 선택 */}
