@@ -40,7 +40,7 @@ export async function GET(request: NextRequest) {
     try {
         console.log('=== 쿠키 설정 시작 ===');
 
-        const res = NextResponse.redirect(`${baseUrl}/dashboard`);
+        const res = NextResponse.redirect(`${baseUrl}/exchange`);
 
         // 환경별 쿠키 설정
         const isProduction = process.env.NODE_ENV === 'production';
