@@ -293,6 +293,21 @@ public class WalletService {
             }
         }
 
+        // 거래 로그 저장 (구매/판매)
+        TradeLog tradeLog = TradeLog.builder()
+                .wallet(wallet)
+                .coin(coin)
+                .type(transactionType == TransactionType.BUY ? TradeType.BUY : TradeType.SELL)
+                .quantity(request.quantity())
+                .price(request.amount())
+                .build();
+
+        tradeLogRepository.save(tradeLog);
+
+        log.info("거래 로그 저장 완료 - 타입: {}, 코인: {}, 수량: {}, 금액: {}",
+                transactionType == TransactionType.BUY ? "구매" : "판매",
+                coin.getSymbol(), request.quantity(), request.amount());
+
         WalletResponse response = WalletResponse.fromWithValidCoinAmounts(wallet,
                 wallet.getCoinAmounts().stream().filter(this::isValidCoinAmount).toList());
         return ResponseEntity.ok(response);
