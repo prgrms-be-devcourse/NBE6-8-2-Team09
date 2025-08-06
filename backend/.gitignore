@@ -44,3 +44,5 @@ db_dev.trace.db
 .env
 
 log.txt
+
+../.idea

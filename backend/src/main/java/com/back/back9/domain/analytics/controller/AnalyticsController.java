@@ -18,13 +18,13 @@ public class AnalyticsController {
     private final AnalyticsService analyticsService;
 
     @GetMapping("/wallet/{walletId}/realized")
-    public ResponseEntity<ProfitRateResponse> calculateRealizedProfitRates(@PathVariable int walletId) {
+    public ResponseEntity<ProfitRateResponse> calculateRealizedProfitRates(@PathVariable Long walletId) {
         ProfitRateResponse response = analyticsService.calculateRealizedProfitRates(walletId);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/wallet/{walletId}/unrealized")
-    public ResponseEntity<ProfitRateResponse> calculateUnRealizedProfitRates(@PathVariable int walletId) {
+    public ResponseEntity<ProfitRateResponse> calculateUnRealizedProfitRates(@PathVariable Long walletId) {
         ProfitRateResponse response = analyticsService.calculateUnRealizedProfitRates(walletId);
         return ResponseEntity.ok(response);
     }

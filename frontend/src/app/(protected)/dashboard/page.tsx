@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiCall } from "@/lib/api/client"; // apiCall import 추가
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 16 },
@@ -33,22 +34,15 @@ export default function DashboardPage() {
         const loadMe = async () => {
             try {
                 console.log("=== 대시보드: /v1/users/me 호출 ===");
-                const res = await fetch("/api/v1/users/me", {
-                    method: "GET",
-                    credentials: "include",
-                    headers: { "Content-Type": "application/json" },
-                    signal: ctrl.signal,
-                });
 
-                console.log("응답 상태:", res.status);
+                // fetch 대신 apiCall 사용
+                const response = await apiCall<MeResponse>("/v1/users/me");
+                console.log("API 응답:", response);
 
-                if (res.ok) {
-                    const data: MeResponse = await res.json();
-                    setUserInfo(data.result);
-                } else if (res.status === 401 || res.status === 403) {
-                    router.replace("/login");
+                if (response && response.result) {
+                    setUserInfo(response.result);
                 } else {
-                    // 기타 에러는 사용자에게 알리고 로그인으로
+                    console.error("잘못된 응답 형태:", response);
                     router.replace("/login");
                 }
             } catch (e) {

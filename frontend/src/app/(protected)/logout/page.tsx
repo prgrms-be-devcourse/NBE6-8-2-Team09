@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { apiCall } from "@/lib/api/client"; // apiCall import 추가
 
 export default function LogoutPage() {
     const router = useRouter();
@@ -9,14 +10,10 @@ export default function LogoutPage() {
     useEffect(() => {
         const logout = async () => {
             try {
-                // 백엔드 로그아웃 API 호출 (HttpOnly 쿠키 삭제는 백엔드에서 처리)
-                await fetch(
-                    `/api/v1/users/logout`,
-                    {
-                        method: "DELETE",
-                        credentials: "include", // HttpOnly 쿠키 자동 전송
-                    }
-                );
+                // fetch 대신 apiCall 사용
+                await apiCall("/v1/users/logout", {
+                    method: "DELETE",
+                });
             } catch (error) {
                 console.warn('백엔드 로그아웃 실패:', error);
             } finally {

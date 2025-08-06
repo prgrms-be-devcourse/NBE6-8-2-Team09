@@ -10,8 +10,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { fadeInUp } from "@/lib/motion";
-import { createUser } from '@/lib/api/user';
-import type { CreateUserRequest } from '@/types/user';
+import { apiCall } from "@/lib/api/client";
 
 const schema = z.object({
     userLoginId: z.string().min(1, "아이디를 입력해주세요."),
@@ -59,15 +58,13 @@ export default function RegisterPage() {
         setError(null);
 
         try {
-            const res = await fetch(`/api/v1/users/register`, {
+            // apiCall 사용 (fetch 제거)
+            const data = await apiCall("/v1/users/register", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(values),
             });
 
-            const data = await res.json();
-
-            if (res.ok && data.result) {
+            if (data && data.result) {
                 alert('회원가입이 완료되었습니다!');
                 setTimeout(() => {
                     router.replace("/login?message=register_success");

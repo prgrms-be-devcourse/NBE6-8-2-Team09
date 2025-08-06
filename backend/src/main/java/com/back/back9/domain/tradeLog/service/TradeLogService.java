@@ -46,14 +46,14 @@ public class TradeLogService {
 
     }
     @Transactional(readOnly = true)
-    public List<TradeLogDto> findByWalletId(int walletId) {
+    public List<TradeLogDto> findByWalletId(Long walletId) {
         return tradeLogRepository.findByWalletId(walletId)
                 .stream()
                 .map(TradeLogDto::from)
                 .collect(Collectors.toList());
     }
     @Transactional(readOnly = true)
-    public List<TradeLogDto> findByFilter(int walletId, TradeType type, Integer coinId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+    public List<TradeLogDto> findByFilter(Long walletId, TradeType type, Integer coinId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
         Page<TradeLog> logs = tradeLogRepository.findByWalletIdFilter(walletId, type, coinId, startDate, endDate, pageable);
 
         return logs.stream()
@@ -61,8 +61,23 @@ public class TradeLogService {
                 .collect(Collectors.toList());
     }
 
+    // 새로운 메서드: userId로 거래 내역 조회
     @Transactional(readOnly = true)
-    public List<TradeLogDto> findByWalletIdAndTypeCharge(int walletId) {
+    public List<TradeLogDto> findByUserIdAndFilter(Long userId, TradeType type, Integer coinId, LocalDateTime startDate, LocalDateTime endDate, Pageable pageable) {
+        // userId로 지갑 찾기
+        Wallet wallet = walletRepository.findByUserId(userId)
+                .orElseThrow(() -> new EntityNotFoundException("사용자 ID " + userId + "의 지갑을 찾을 수 없습니다."));
+
+        // 지갑 ID를 Long 타입으로 직접 사용
+        Page<TradeLog> logs = tradeLogRepository.findByWalletIdFilter(wallet.getId(), type, coinId, startDate, endDate, pageable);
+
+        return logs.stream()
+                .map(TradeLogDto::from)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<TradeLogDto> findByWalletIdAndTypeCharge(Long walletId) {
         return findByWalletId(walletId).stream()
                 .filter(log -> log.tradeType() == com.back.back9.domain.tradeLog.entity.TradeType.CHARGE)
                 .collect(Collectors.toList());

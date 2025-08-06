@@ -14,19 +14,18 @@ import java.util.Optional;
 
 public interface TradeLogRepository extends JpaRepository<TradeLog, Long> {
     Optional<TradeLog> findFirstByOrderByIdDesc();
-    List<TradeLog> findByWalletId(int walletId);
-    Page<TradeLog> findByWalletId(int walletId, Pageable pageable);
+    List<TradeLog> findByWalletId(Long walletId);
+    Page<TradeLog> findByWalletId(Long walletId, Pageable pageable);
     @Query("SELECT t FROM TradeLog t " +
             "WHERE t.wallet.id = :walletId " +
             "AND (:type IS NULL OR t.type = :type) " +
             "AND (:coinId IS NULL OR t.coin.id = :coinId) " +
             "AND (:startDate IS NULL OR t.createdAt >= :startDate) " +
             "AND (:endDate IS NULL OR t.createdAt <= :endDate)")
-    Page<TradeLog> findByWalletIdFilter(@Param("walletId") int walletId,
-                                        @Param("type") TradeType type, // ← enum으로 변경
-                                        @Param("coinId") Integer  coinId,
+    Page<TradeLog> findByWalletIdFilter(@Param("walletId") Long walletId,
+                                        @Param("type") TradeType type,
+                                        @Param("coinId") Integer coinId,
                                         @Param("startDate") LocalDateTime startDate,
                                         @Param("endDate") LocalDateTime endDate,
                                         Pageable pageable);
-
 }
